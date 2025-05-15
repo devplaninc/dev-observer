@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package devplan.observer.types.common;
+
+message Location {
+  oneof type {
+    S3Bucket s3_bucket = 100;
+    LocalFile file = 101;
+  }
+}
+
+// S3-compatible bucket
+message S3Bucket {
+  string region = 1;
+  string bucket = 2;
+  string path = 3;
+}
+
+message LocalFile {
+  string path = 1;
+}

@@ -1,0 +1,39 @@
+[project]
+name = "dev-observer"
+version = "0.1.0"
+description = ""
+authors = [
+    { name = "Anton Safonov", email = "anton@devplan.com" }
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "langgraph (>=0.4,<0.5.0)",
+    "langgraph-checkpoint-postgres (>=2.0.21,<3.0.0)",
+    "grpcio (>=1.71.0,<2.0.0)",
+    "pydantic (>=2.11.4,<3.0.0)",
+    "structlog>=25.3.0,<26.0.0",
+    "langchain-google-vertexai (>=2.0.23,<3.0.0)",
+    "langfuse (>=2.60.4,<3.0.0)",
+    "fastapi (>=0.115.12,<1)",
+    "load-dotenv >=0.1.0",
+    "langchain-community (>=0.3.23,<0.4.0)",
+    "openai (>=1.78.0,<2.0.0)",
+    "langchain-core (>=0.3.59,<0.4.0)",
+    "langchain-openai (>=0.3.16,<0.4.0)",
+    "pygithub >=2.6.1",
+    "tiktoken >=0.7.0",
+    "dotenv>=0.9.9",
+    "colorama>=0.4.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "grpcio-tools>=1.71.0",
+    "pytest>=8.3.5",
+    "pytest-mock>=3.14.0",
+]
