@@ -1,11 +1,15 @@
-import os
+import logging
 from typing import Optional
 
 from github import Auth
 from github import Github
 
-from dev_observer.analysis.repository.parser import parse_github_url
-from dev_observer.analysis.repository.provider import GitRepositoryProvider, RepositoryInfo
+from dev_observer.repository.parser import parse_github_url
+from dev_observer.repository.provider import GitRepositoryProvider, RepositoryInfo
+from dev_observer.log import s_
+from dev_observer.settings import settings
+
+_log = logging.getLogger(__name__)
 
 
 class GithubProvider(GitRepositoryProvider):
@@ -33,19 +37,19 @@ class GithubProvider(GitRepositoryProvider):
         return repo.clone_url.replace("https://", f"https://{token}@")
 
 
-def github_provider_from_env() -> Optional[GithubProvider]:
-    auth = github_auth_from_env()
+def detect_github_provider() -> Optional[GithubProvider]:
+    auth = detect_github_auth()
     if auth is None:
         return None
     return GithubProvider(auth)
 
 
-def github_auth_from_env() -> Optional[Auth]:
-    auth_type = os.environ.get("GITHUB_AUTH_TYPE", None)
-    print(f"auth_type: {auth_type}")
-    if auth_type is None:
+def detect_github_auth() -> Optional[Auth]:
+    gh = settings.github
+    if gh is None:
         return None
-    match auth_type:
+    _log.debug(s_("Detected github auth type.", auth_type=gh.auth_type))
+    match gh.auth_type:
         case "token":
-            return Auth.Token(os.environ["GITHUB_PERSONAL_TOKEN"])
-    raise ValueError(f"Unsupported auth type: {auth_type}")
+            return Auth.Token(gh.personal_token)
+    raise ValueError(f"Unsupported auth type: {gh.auth_type}")

@@ -1,4 +1,5 @@
 import dataclasses
+import logging
 import os
 import random
 import shutil
@@ -8,12 +9,11 @@ from typing import List
 
 import tiktoken
 
-from dev_observer.analysis.repository.cloner import clone_repository
-from dev_observer.analysis.repository.provider import GitRepositoryProvider
-from dev_observer.common.log import dynamic_logger
+from dev_observer.repository.cloner import clone_repository
+from dev_observer.repository.provider import GitRepositoryProvider
+from dev_observer.log import s_
 
-_log = dynamic_logger("summarizer")
-
+_log = logging.getLogger(__name__)
 _ignore = "**/*.o,**/*.obj,**/*.exe,**/*.dll,**/*.so,**/*.dylib,**/*.a,**/*.class,**/*.jar,**/*.pyc,**/*.pyo,**/*.pyd,**/*.wasm,**/*.bin,**/*.lock,**/*.zip,**/*.tar,**/*.gz,**/*.rar,**/*.7z,**/*.egg,**/*.whl,**/*.deb,**/*.rpm,**/*.png,**/*.jpg,**/*.jpeg,**/*.gif,**/*.svg,**/*.ico,**/*.mp3,**/*.mp4,**/*.mov,**/*.webm,**/*.wav,**/*.ttf,**/*.woff,**/*.woff2,**/*.eot,**/*.otf,**/*.pdf,**/*.ai,**/*.psd,**/*.sketch,**/*.csv,**/*.tsv,**/*.json,**/*.xml,**/*.log,**/*.db,**/*.sqlite,**/*.h5,**/*.parquet,**/*.min.js,**/*.map,**/*.min.css,**/*.bundle.js,**/.DS_Store,**/*.swp,**/*.swo,**/*.iml,**/*.pb.go,**/*_pb2.py*"
 
 
@@ -26,7 +26,7 @@ class CombineResult:
 
 
 @dataclasses.dataclass
-class TokenizedFileResult:
+class FlattenResult:
     """Result of breaking down a file into smaller files based on token count."""
     file_paths: List[str]
     total_tokens: int
@@ -37,9 +37,7 @@ def combine_repository(repo_path: str) -> CombineResult:
     folder_path = os.path.join(repo_path, f"devplan_tmp_repomix_{suffix}")
     os.makedirs(folder_path)
     output_file = os.path.join(folder_path, "full.md")
-    log = _log.bind(output_file=output_file)
-
-    log.debug("Executing repomix...")
+    _log.debug(s_("Executing repomix...", output_file=output_file))
     # Run repomix to combine the repository into a single file
     result = subprocess.run(
         ["repomix",
@@ -53,10 +51,10 @@ def combine_repository(repo_path: str) -> CombineResult:
     )
 
     if result.returncode != 0:
-        log.error("Failed to repomix repository.", out=result.stderr, code=result.returncode)
+        _log.error(s_("Failed to repomix repository.", out=result.stderr, code=result.returncode))
         raise RuntimeError(f"Failed to combine repository: {result.stderr}")
 
-    log.debug("Done.", out=result.stdout)
+    _log.debug(s_("Done.", out=result.stdout))
 
     # Get the size of the combined file
     size_bytes = os.path.getsize(output_file)
@@ -64,11 +62,11 @@ def combine_repository(repo_path: str) -> CombineResult:
     return CombineResult(file_path=output_file, size_bytes=size_bytes, output_dir=folder_path)
 
 
-def tokenize_file(
+def _tokenize_file(
         file_path: str,
         out_dir: str,
         max_tokens_per_file: int = 100_000,
-) -> TokenizedFileResult:
+) -> FlattenResult:
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
 
@@ -103,16 +101,16 @@ def tokenize_file(
 
         output_files.append(out_file)
 
-    return TokenizedFileResult(file_paths=output_files, total_tokens=total_tokens)
+    return FlattenResult(file_paths=output_files, total_tokens=total_tokens)
 
 
-def process_repository(
+def flatten_repository(
         url: str,
         provider: GitRepositoryProvider,
         max_size_kb: int = 100_000,
         max_tokens_per_file: int = 100_000,
         cleanup: bool = True,
-) -> TokenizedFileResult:
+) -> FlattenResult:
     clone_result = clone_repository(url, provider, max_size_kb)
     repo_path = clone_result.path
 
@@ -121,7 +119,7 @@ def process_repository(
         combined_file_path = combine_result.file_path
         out_dir = combine_result.output_dir
         try:
-            tokenize_result = tokenize_file(combined_file_path, out_dir, max_tokens_per_file)
+            tokenize_result = _tokenize_file(combined_file_path, out_dir, max_tokens_per_file)
             return tokenize_result
         finally:
             # Clean up the combined file if requested

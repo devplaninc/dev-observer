@@ -1,4 +1,4 @@
-from dev_observer.analysis.repository.parser import parse_github_url
+from dev_observer.repository.parser import parse_github_url
 import pytest
 
 

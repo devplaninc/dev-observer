@@ -1,15 +1,16 @@
 import argparse
+import logging
 
-from dotenv import load_dotenv
+import dev_observer.log
+from dev_observer.flatten.flatten import flatten_repository
+from dev_observer.log import s_
+from dev_observer.settings import settings
 
-load_dotenv()
+dev_observer.log.encoder = dev_observer.log.PlainTextEncoder()
+logging.basicConfig(level=logging.DEBUG)
+_log = logging.getLogger(__name__)
 
-from dev_observer.analysis.repository.summarizer import process_repository
-from dev_observer.common.log import setup_log
-
-setup_log()
-
-from dev_observer.analysis.repository.github_provider import github_provider_from_env
+from dev_observer.repository.github_provider import detect_github_provider
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Clones and processes a repo")
@@ -17,9 +18,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Access the arguments
-    print(f"Repo url: {args.repo}")
-    gh = github_provider_from_env()
+    _log.debug(s_("Processing repo", repo=args.repo))
+    _log.debug(s_("Loaded settings", gh_auth_type=settings.github.auth_type))
+    gh = detect_github_provider()
     if gh is None:
         raise ValueError("No github provider found")
 
-    result = process_repository(args.repo, gh, cleanup=False)
+    result = flatten_repository(args.repo, gh, cleanup=False)

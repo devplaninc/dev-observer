@@ -2,7 +2,7 @@
 
 Create file [.env.local](.env.local) and add following there:
 ```
-GITHUB_PERSONAL_TOKEN=<Github personal token, use `gh auth token` to get>
+DEV_OBSERVER_GITHUB_PERSONAL_TOKEN=<Github personal token, use `gh auth token` to get>
 ```
 
 ## Testing

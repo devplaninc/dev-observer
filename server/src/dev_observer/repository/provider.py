@@ -1,4 +1,6 @@
 import dataclasses
+from abc import abstractmethod
+from typing import Protocol
 
 
 @dataclasses.dataclass
@@ -9,9 +11,11 @@ class RepositoryInfo:
     size_kb: int
 
 
-class GitRepositoryProvider:
+class GitRepositoryProvider(Protocol):
+    @abstractmethod
     def get_repo(self, url: str) -> RepositoryInfo:
         ...
 
+    @abstractmethod
     def get_private_clone_url(self, repo: RepositoryInfo) -> str:
         ...
