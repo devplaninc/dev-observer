@@ -2,4 +2,7 @@
 **/.venv/
 **/.env.*
 **/.secrets.*
+**/node_modules
 
+**/devplan_current_feature.md*
+!.windsurf/rules/devplan_*.md
