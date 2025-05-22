@@ -23,10 +23,13 @@ class Processor:
 
     async def process(self, prompts_prefix: str, repo_url: str) -> str:
         flatten_result = flatten_repository(repo_url, self.repository)
-        if len(flatten_result.file_paths) > 0:
-            return await self._analyze_tokenized(prompts_prefix, flatten_result.file_paths)
-        else:
-            return await self._analyze_file(flatten_result.full_file_path, f"{prompts_prefix}_analyze_full")
+        try:
+            if len(flatten_result.file_paths) > 0:
+                return await self._analyze_tokenized(prompts_prefix, flatten_result.file_paths)
+            else:
+                return await self._analyze_file(flatten_result.full_file_path, f"{prompts_prefix}_analyze_full")
+        finally:
+            flatten_result.clean_up()
 
     async def _analyze_tokenized(self, prompts_prefix: str, paths: List[str]) -> str:
         summaries: List[str] = []

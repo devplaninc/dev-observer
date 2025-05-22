@@ -57,11 +57,6 @@ Follow these steps to generate repository description
    - Important insights or peculiarities observed in the codebase.
    - If repository is using multiple programming languages, mention how each of them is used.
 
-7. **User experience flows**: in case of a web app, extract the flows you can detect from the codebase.
-   - List the screens/pages that exist in the application
-   - List all of the elements users can interact on each screen/page
-   - List the step-by-step user flows within the application.
-
 # Output Format
 
 The summary should be organized with clear headings and bullet points to ensure readability and coherence. Present a comprehensive overview, prioritizing actionable insights.
