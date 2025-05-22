@@ -1,0 +1,8 @@
+[github]
+auth_type = "token"
+
+[analysis]
+provider = "langgraph"
+
+[prompts]
+provider = "local"

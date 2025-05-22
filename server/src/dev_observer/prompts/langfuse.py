@@ -1,30 +1,33 @@
 import logging
-import os
 from typing import Optional, Dict
 
-from dev_observer.ai import PromptsProvider, FormattedPrompt
+from google.protobuf import json_format
+from langfuse import Langfuse
+from langfuse.model import ChatPromptClient
+
+from dev_observer.api.devplan.observer.types.ai_pb2 import PromptConfig
 from dev_observer.log import s_
+from dev_observer.prompts.provider import PromptsProvider, FormattedPrompt
 
 _log = logging.getLogger(__name__)
 
 
 class LangfusePromptsProvider(PromptsProvider):
+    _langfuse: Langfuse
+    _default_label: Optional[str] = None
 
+    def __init__(self, secret_key: str, public_key: str, host: str, default_label: Optional[str] = None):
+        self._default_label = default_label
+        self._langfuse = Langfuse(secret_key=secret_key, public_key=public_key, host=host)
 
-    def get_formatted(self, name: str, params: Optional[Dict[str, str]] = None) -> FormattedPrompt:
-        label = os.environ.get("LANGFUSE_PROMPT_LABEL")
+    async def get_formatted(self, name: str, params: Optional[Dict[str, str]] = None) -> FormattedPrompt:
+        label = self._default_label
         _log.debug(s_("Retrieving Langfuse prompt template", template=name, label=label))
-        prompt = _fetch_prompt(name)
-        model_config: Optional[ModelConfig] = None
-        try:
-            if prompt.config is not None:
-                parsed_config = json_format.ParseDict(prompt.config, ModelConfig())
-                if parsed_config.type > 0:
-                    model_config = parsed_config
-                    _log.debug("Loaded custom model config", model_config=prompt.config)
-        except Exception as e:
-            _log.warning("Failed to parse model config", exc_info=e, model_config=prompt.config)
-        chat_prompt = prompt.compile(**kwargs)
+        prompt = self._fetch_prompt(name)
+        if prompt.config is None:
+            raise ValueError("Langfuse prompt template must have a config")
+        config: PromptConfig = json_format.ParseDict(prompt.config, PromptConfig())
+        chat_prompt = prompt.compile(**params)
         system: Optional[str] = None
         user: Optional[str] = None
         for p in chat_prompt:
@@ -32,4 +35,15 @@ class LangfusePromptsProvider(PromptsProvider):
                 system = p.get("content")
             if p.get("role") == "user":
                 user = p.get("content")
-        return FormattedPrompt(system=system, user=user, model_config=model_config, langfuse_prompt=prompt)
+        return FormattedPrompt(system=system, user=user, config=config, langfuse_prompt=prompt)
+
+    def _fetch_prompt(self, name: str) -> ChatPromptClient:
+        label = self._default_label
+        _log.debug(s_("Retrieving Langfuse prompt template", template=name, label=label))
+        if label is not None:
+            try:
+                return self._langfuse.get_prompt(name=name, type="chat", label=label)
+            except Exception as e:
+                _log.debug(s_(
+                    "Failed to get labeled prompt. Falling back to unlabeled", template=name, label=label, exc=e))
+        return self._langfuse.get_prompt(name=name, type="chat")

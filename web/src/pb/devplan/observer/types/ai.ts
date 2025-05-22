@@ -9,6 +9,10 @@ import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 
 export const protobufPackage = "devplan.observer.types.ai";
 
+export interface PromptConfig {
+  model: ModelConfig | undefined;
+}
+
 export interface ModelConfig {
   provider: string;
   modelName: string;
@@ -27,8 +31,68 @@ export interface UserMessage {
 export interface PromptTemplate {
   system?: SystemMessage | undefined;
   user?: UserMessage | undefined;
-  model: ModelConfig | undefined;
+  config: PromptConfig | undefined;
 }
+
+function createBasePromptConfig(): PromptConfig {
+  return { model: undefined };
+}
+
+export const PromptConfig: MessageFns<PromptConfig> = {
+  encode(message: PromptConfig, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.model !== undefined) {
+      ModelConfig.encode(message.model, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): PromptConfig {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePromptConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.model = ModelConfig.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PromptConfig {
+    return { model: isSet(object.model) ? ModelConfig.fromJSON(object.model) : undefined };
+  },
+
+  toJSON(message: PromptConfig): unknown {
+    const obj: any = {};
+    if (message.model !== undefined) {
+      obj.model = ModelConfig.toJSON(message.model);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<PromptConfig>): PromptConfig {
+    return PromptConfig.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<PromptConfig>): PromptConfig {
+    const message = createBasePromptConfig();
+    message.model = (object.model !== undefined && object.model !== null)
+      ? ModelConfig.fromPartial(object.model)
+      : undefined;
+    return message;
+  },
+};
 
 function createBaseModelConfig(): ModelConfig {
   return { provider: "", modelName: "", temperature: 0 };
@@ -257,7 +321,7 @@ export const UserMessage: MessageFns<UserMessage> = {
 };
 
 function createBasePromptTemplate(): PromptTemplate {
-  return { system: undefined, user: undefined, model: undefined };
+  return { system: undefined, user: undefined, config: undefined };
 }
 
 export const PromptTemplate: MessageFns<PromptTemplate> = {
@@ -268,8 +332,8 @@ export const PromptTemplate: MessageFns<PromptTemplate> = {
     if (message.user !== undefined) {
       UserMessage.encode(message.user, writer.uint32(18).fork()).join();
     }
-    if (message.model !== undefined) {
-      ModelConfig.encode(message.model, writer.uint32(26).fork()).join();
+    if (message.config !== undefined) {
+      PromptConfig.encode(message.config, writer.uint32(26).fork()).join();
     }
     return writer;
   },
@@ -302,7 +366,7 @@ export const PromptTemplate: MessageFns<PromptTemplate> = {
             break;
           }
 
-          message.model = ModelConfig.decode(reader, reader.uint32());
+          message.config = PromptConfig.decode(reader, reader.uint32());
           continue;
         }
       }
@@ -318,7 +382,7 @@ export const PromptTemplate: MessageFns<PromptTemplate> = {
     return {
       system: isSet(object.system) ? SystemMessage.fromJSON(object.system) : undefined,
       user: isSet(object.user) ? UserMessage.fromJSON(object.user) : undefined,
-      model: isSet(object.model) ? ModelConfig.fromJSON(object.model) : undefined,
+      config: isSet(object.config) ? PromptConfig.fromJSON(object.config) : undefined,
     };
   },
 
@@ -330,8 +394,8 @@ export const PromptTemplate: MessageFns<PromptTemplate> = {
     if (message.user !== undefined) {
       obj.user = UserMessage.toJSON(message.user);
     }
-    if (message.model !== undefined) {
-      obj.model = ModelConfig.toJSON(message.model);
+    if (message.config !== undefined) {
+      obj.config = PromptConfig.toJSON(message.config);
     }
     return obj;
   },
@@ -347,8 +411,8 @@ export const PromptTemplate: MessageFns<PromptTemplate> = {
     message.user = (object.user !== undefined && object.user !== null)
       ? UserMessage.fromPartial(object.user)
       : undefined;
-    message.model = (object.model !== undefined && object.model !== null)
-      ? ModelConfig.fromPartial(object.model)
+    message.config = (object.config !== undefined && object.config !== null)
+      ? PromptConfig.fromPartial(object.config)
       : undefined;
     return message;
   },

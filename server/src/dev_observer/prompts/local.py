@@ -1,8 +1,11 @@
-from typing import Optional, Dict, Protocol
 import os
+import tomllib
+from typing import Optional, Dict, Protocol
 
-from dev_observer.ai import PromptsProvider, FormattedPrompt
+from google.protobuf import json_format
+
 from dev_observer.api.devplan.observer.types.ai_pb2 import PromptTemplate
+from dev_observer.prompts.provider import PromptsProvider, FormattedPrompt
 
 
 class PromptTemplateParser(Protocol):
@@ -15,6 +18,12 @@ class JSONPromptTemplateParser(PromptTemplateParser):
         return PromptTemplate.FromString(template_body)
 
 
+class TomlPromptTemplateParser(PromptTemplateParser):
+    def parse(self, template_body: bytes) -> PromptTemplate:
+        toml_dict = tomllib.loads(template_body.decode('utf-8'))
+        return json_format.ParseDict(toml_dict, PromptTemplate())
+
+
 class LocalPromptsProvider(PromptsProvider):
     prompts_path: str
     extension: str
@@ -25,7 +34,7 @@ class LocalPromptsProvider(PromptsProvider):
         self.extension = extension
         self.parser = parser
 
-    def get_formatted(self, name: str, params: Optional[Dict[str, str]] = None) -> FormattedPrompt:
+    async def get_formatted(self, name: str, params: Optional[Dict[str, str]] = None) -> FormattedPrompt:
         file_path = os.path.join(self.prompts_path, f"{name}{self.extension}")
         with open(file_path, 'rb') as f:
             content = f.read()
@@ -39,4 +48,4 @@ class LocalPromptsProvider(PromptsProvider):
             if template.user and template.user.text:
                 template.user.text = template.user.text.format(**params)
 
-        return FormattedPrompt(system=template.system, user=template.user, model_config=template.model)
+        return FormattedPrompt(system=template.system, user=template.user, config=template.config)

@@ -309,7 +309,9 @@ dependencies = [
     { name = "grpcio" },
     { name = "langchain-community" },
     { name = "langchain-core" },
+    { name = "langchain-google-genai" },
     { name = "langchain-google-vertexai" },
+    { name = "langchain-groq" },
     { name = "langchain-openai" },
     { name = "langfuse" },
     { name = "langgraph" },
@@ -319,6 +321,7 @@ dependencies = [
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "pygithub" },
+    { name = "python-dotenv" },
     { name = "tiktoken" },
 ]
 
@@ -337,7 +340,9 @@ requires-dist = [
     { name = "grpcio", specifier = ">=1.71.0,<2.0.0" },
     { name = "langchain-community", specifier = ">=0.3.23,<0.4.0" },
     { name = "langchain-core", specifier = ">=0.3.59,<0.4.0" },
+    { name = "langchain-google-genai", specifier = ">=2.1.4" },
     { name = "langchain-google-vertexai", specifier = ">=2.0.23,<3.0.0" },
+    { name = "langchain-groq", specifier = ">=0.3.2" },
     { name = "langchain-openai", specifier = ">=0.3.16,<0.4.0" },
     { name = "langfuse", specifier = ">=2.60.4,<3.0.0" },
     { name = "langgraph", specifier = ">=0.4,<0.5.0" },
@@ -347,6 +352,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.11.4,<3.0.0" },
     { name = "pydantic-settings", specifier = ">=2.9.1" },
     { name = "pygithub", specifier = ">=2.6.1" },
+    { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "tiktoken", specifier = ">=0.7.0" },
 ]
 
@@ -398,6 +404,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f4/55/ae499352d82338331ca1e28c7f4a63bfd09479b16395dce38cf50a39e2c2/fastapi-0.115.12.tar.gz", hash = "sha256:1e2c2a2646905f9e83d32f04a3f86aff4a286669c6c950ca95b5fd68c2602681", size = 295236, upload-time = "2025-03-23T22:55:43.822Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/50/b3/b51f09c2ba432a576fe63758bddc81f78f0c6309d9e5c10d194313bf021e/fastapi-0.115.12-py3-none-any.whl", hash = "sha256:e94613d6c05e27be7ffebdd6ea5f388112e5e430c8f7d6494a9d1d88d43e814d", size = 95164, upload-time = "2025-03-23T22:55:42.101Z" },
+]
+
+[[package]]
+name = "filetype"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bb/29/745f7d30d47fe0f251d3ad3dc2978a23141917661998763bebb6da007eb1/filetype-1.2.0.tar.gz", hash = "sha256:66b56cd6474bf41d8c54660347d37afcc3f7d1970648de365c102ef77548aadb", size = 998020, upload-time = "2022-11-02T17:34:04.141Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/18/79/1b8fa1bb3568781e84c9200f951c735f3f157429f44be0495da55894d620/filetype-1.2.0-py2.py3-none-any.whl", hash = "sha256:7ce71b6880181241cf7ac8697a2f1eb6a8bd9b429f7ad6d27b8db9ba5f1c2d25", size = 19970, upload-time = "2022-11-02T17:34:01.425Z" },
 ]
 
 [[package]]
@@ -458,6 +473,21 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/d3/c3/0fc2c97dea550df9afd072a37c1e95421652e3206bbeaa02378b24c2b480/frozenlist-1.6.0-cp313-cp313t-win32.whl", hash = "sha256:a4d96dc5bcdbd834ec6b0f91027817214216b5b30316494d2b1aebffb87c534f", size = 128797, upload-time = "2025-04-17T22:38:14.013Z" },
     { url = "https://files.pythonhosted.org/packages/ae/f5/79c9320c5656b1965634fe4be9c82b12a3305bdbc58ad9cb941131107b20/frozenlist-1.6.0-cp313-cp313t-win_amd64.whl", hash = "sha256:e18036cb4caa17ea151fd5f3d70be9d354c99eb8cf817a3ccde8a7873b074348", size = 134709, upload-time = "2025-04-17T22:38:15.551Z" },
     { url = "https://files.pythonhosted.org/packages/71/3e/b04a0adda73bd52b390d730071c0d577073d3d26740ee1bad25c3ad0f37b/frozenlist-1.6.0-py3-none-any.whl", hash = "sha256:535eec9987adb04701266b92745d6cdcef2e77669299359c3009c3404dd5d191", size = 12404, upload-time = "2025-04-17T22:38:51.668Z" },
+]
+
+[[package]]
+name = "google-ai-generativelanguage"
+version = "0.6.18"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "google-api-core", extra = ["grpc"] },
+    { name = "google-auth" },
+    { name = "proto-plus" },
+    { name = "protobuf" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/eb/77/3e89a4c4200135eac74eca2f6c9153127e3719a825681ad55f5a4a58b422/google_ai_generativelanguage-0.6.18.tar.gz", hash = "sha256:274ba9fcf69466ff64e971d565884434388e523300afd468fc8e3033cd8e606e", size = 1444757, upload-time = "2025-04-29T15:45:45.527Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e5/77/ca2889903a2d93b3072a49056d48b3f55410219743e338a1d7f94dc6455e/google_ai_generativelanguage-0.6.18-py3-none-any.whl", hash = "sha256:13d8174fea90b633f520789d32df7b422058fd5883b022989c349f1017db7fcf", size = 1372256, upload-time = "2025-04-29T15:45:43.601Z" },
 ]
 
 [[package]]
@@ -683,6 +713,23 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/cd/41/96ba2bf948f67b245784cd294b84e3d17933597dffd3acdb367a210d1949/greenlet-3.2.2-cp313-cp313t-musllinux_1_1_aarch64.whl", hash = "sha256:b50a8c5c162469c3209e5ec92ee4f95c8231b11db6a04db09bbe338176723bb8", size = 1105752, upload-time = "2025-05-09T15:27:08.217Z" },
     { url = "https://files.pythonhosted.org/packages/68/3b/3b97f9d33c1f2eb081759da62bd6162159db260f602f048bc2f36b4c453e/greenlet-3.2.2-cp313-cp313t-musllinux_1_1_x86_64.whl", hash = "sha256:45f9f4853fb4cc46783085261c9ec4706628f3b57de3e68bae03e8f8b3c0de51", size = 1125170, upload-time = "2025-05-09T14:54:04.082Z" },
     { url = "https://files.pythonhosted.org/packages/31/df/b7d17d66c8d0f578d2885a3d8f565e9e4725eacc9d3fdc946d0031c055c4/greenlet-3.2.2-cp314-cp314-macosx_11_0_universal2.whl", hash = "sha256:9ea5231428af34226c05f927e16fc7f6fa5e39e3ad3cd24ffa48ba53a47f4240", size = 269899, upload-time = "2025-05-09T14:54:01.581Z" },
+]
+
+[[package]]
+name = "groq"
+version = "0.25.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a4/fc/29e9c24ab59602747027f41b9d761d24cf9e5771014c9a731137f51e9cce/groq-0.25.0.tar.gz", hash = "sha256:6e1c7466b0da0130498187b825bd239f86fb77bf7551eacfbfa561d75048746a", size = 128199, upload-time = "2025-05-16T19:57:43.381Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4d/11/1019a6cfdb2e520cb461cf70d859216be8ca122ddf5ad301fc3b0ee45fd4/groq-0.25.0-py3-none-any.whl", hash = "sha256:aadc78b40b1809cdb196b1aa8c7f7293108767df1508cafa3e0d5045d9328e7a", size = 129371, upload-time = "2025-05-16T19:57:41.786Z" },
 ]
 
 [[package]]
@@ -954,6 +1001,21 @@ wheels = [
 ]
 
 [[package]]
+name = "langchain-google-genai"
+version = "2.1.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "filetype" },
+    { name = "google-ai-generativelanguage" },
+    { name = "langchain-core" },
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/81/48/73cb0a186f028a3597a825c930957a032895960381af505fa93805fe1736/langchain_google_genai-2.1.4.tar.gz", hash = "sha256:b52e10ea3daf1a65f70b73c78b78235466593de2aa9f4119fa887b804605efb7", size = 40368, upload-time = "2025-04-30T08:29:45.879Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/07/12/2be71bebbc23e4a499c50df567017110e4d382a045422647c8e6b1040541/langchain_google_genai-2.1.4-py3-none-any.whl", hash = "sha256:a3fa3cf7fe9c1de77280f42fbdd22cfcc5fbeb0d60cd5be7a0e6c50a74f5ce73", size = 44313, upload-time = "2025-04-30T08:29:44.864Z" },
+]
+
+[[package]]
 name = "langchain-google-vertexai"
 version = "2.0.23"
 source = { registry = "https://pypi.org/simple" }
@@ -972,6 +1034,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e1/86/10f5f1564704f64d629135f16b0569d39598078c53e5c4ecc21781704164/langchain_google_vertexai-2.0.23.tar.gz", hash = "sha256:1e08eb57a4a7ed03bd807a06d1a57f3cad490774162f41ff9ab3bfae982528ef", size = 84154, upload-time = "2025-05-08T16:39:28.889Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/bb/48/58579b25234ad6d077a43aef9fe0a61b070cd5d7d32110b2b0f603a5ecf8/langchain_google_vertexai-2.0.23-py3-none-any.whl", hash = "sha256:cd621345aee1e1b045f30245c914c679fe66f9a62ebf274e629c080e006a32fa", size = 99974, upload-time = "2025-05-08T16:39:27.833Z" },
+]
+
+[[package]]
+name = "langchain-groq"
+version = "0.3.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "groq" },
+    { name = "langchain-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e0/4c/973faadcc54fc74352c6758208f48b08dd072025ab33beea52e6c31d4cd1/langchain_groq-0.3.2.tar.gz", hash = "sha256:033f459d4c0515e22a6e64f5a402e366933a6c827fd5915547419cb62fd7b34a", size = 22074, upload-time = "2025-03-31T13:42:29.024Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c0/58/0d5a19168119c1bd7758ab28d9e6b5c12ba1091bb283f4dc13ca5df7651b/langchain_groq-0.3.2-py3-none-any.whl", hash = "sha256:bc111dea17a3510498c4697c42bf97e629bcf8f00b97fa25e51ea7947fc0b540", size = 15253, upload-time = "2025-03-31T13:42:28.163Z" },
 ]
 
 [[package]]

@@ -12,7 +12,7 @@ dependencies = [
     "langgraph-checkpoint-postgres (>=2.0.21,<3.0.0)",
     "grpcio (>=1.71.0,<2.0.0)",
     "pydantic>=2.11.4,<3.0.0",
-    "langchain-google-vertexai (>=2.0.23,<3.0.0)",
+    "langchain-google-vertexai>=2.0.23,<3.0.0",
     "langfuse (>=2.60.4,<3.0.0)",
     "fastapi (>=0.115.12,<1)",
     "load-dotenv >=0.1.0",
@@ -25,6 +25,9 @@ dependencies = [
     "dotenv>=0.9.9",
     "colorama>=0.4.6",
     "pydantic-settings>=2.9.1",
+    "langchain-groq>=0.3.2",
+    "langchain-google-genai>=2.1.4",
+    "python-dotenv>=1.1.0",
 ]
 
 [build-system]

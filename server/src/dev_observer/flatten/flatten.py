@@ -5,13 +5,13 @@ import random
 import shutil
 import string
 import subprocess
-from typing import List
+from typing import List, Callable, Optional
 
 import tiktoken
 
+from dev_observer.log import s_
 from dev_observer.repository.cloner import clone_repository
 from dev_observer.repository.provider import GitRepositoryProvider
-from dev_observer.log import s_
 
 _log = logging.getLogger(__name__)
 _ignore = "**/*.o,**/*.obj,**/*.exe,**/*.dll,**/*.so,**/*.dylib,**/*.a,**/*.class,**/*.jar,**/*.pyc,**/*.pyo,**/*.pyd,**/*.wasm,**/*.bin,**/*.lock,**/*.zip,**/*.tar,**/*.gz,**/*.rar,**/*.7z,**/*.egg,**/*.whl,**/*.deb,**/*.rpm,**/*.png,**/*.jpg,**/*.jpeg,**/*.gif,**/*.svg,**/*.ico,**/*.mp3,**/*.mp4,**/*.mov,**/*.webm,**/*.wav,**/*.ttf,**/*.woff,**/*.woff2,**/*.eot,**/*.otf,**/*.pdf,**/*.ai,**/*.psd,**/*.sketch,**/*.csv,**/*.tsv,**/*.json,**/*.xml,**/*.log,**/*.db,**/*.sqlite,**/*.h5,**/*.parquet,**/*.min.js,**/*.map,**/*.min.css,**/*.bundle.js,**/.DS_Store,**/*.swp,**/*.swo,**/*.iml,**/*.pb.go,**/*_pb2.py*"
@@ -27,9 +27,11 @@ class CombineResult:
 
 @dataclasses.dataclass
 class FlattenResult:
+    full_file_path: str
     """Result of breaking down a file into smaller files based on token count."""
     file_paths: List[str]
     total_tokens: int
+    clean_up: Callable[[], bool]
 
 
 def combine_repository(repo_path: str) -> CombineResult:
@@ -62,11 +64,18 @@ def combine_repository(repo_path: str) -> CombineResult:
     return CombineResult(file_path=output_file, size_bytes=size_bytes, output_dir=folder_path)
 
 
+@dataclasses.dataclass
+class TokenizeResult:
+    """Result of breaking down a file into smaller files based on token count."""
+    file_paths: List[str]
+    total_tokens: int
+
+
 def _tokenize_file(
         file_path: str,
         out_dir: str,
         max_tokens_per_file: int = 100_000,
-) -> FlattenResult:
+) -> TokenizeResult:
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
 
@@ -83,25 +92,21 @@ def _tokenize_file(
     # Tokenize the content
     tokens = enc.encode(content)
     total_tokens = len(tokens)
+    if total_tokens <= max_tokens_per_file:
+        return TokenizeResult(file_paths=[], total_tokens=total_tokens)
 
     # Create output files
     output_files = []
     for i in range(0, total_tokens, max_tokens_per_file):
-        # Get a chunk of tokens
         chunk_tokens = tokens[i:i + max_tokens_per_file]
-
-        # Decode the tokens back to text
         chunk_text = enc.decode(chunk_tokens)
-
-        # Create a temporary file for this chunk
         out_file = os.path.join(out_dir, f"chunk_{i}.md")
-        # Write the chunk to the file
         with open(out_file, 'w', encoding='utf-8') as f:
             f.write(chunk_text)
 
         output_files.append(out_file)
 
-    return FlattenResult(file_paths=output_files, total_tokens=total_tokens)
+    return TokenizeResult(file_paths=output_files, total_tokens=total_tokens)
 
 
 def flatten_repository(
@@ -109,23 +114,28 @@ def flatten_repository(
         provider: GitRepositoryProvider,
         max_size_kb: int = 100_000,
         max_tokens_per_file: int = 100_000,
-        cleanup: bool = True,
 ) -> FlattenResult:
     clone_result = clone_repository(url, provider, max_size_kb)
     repo_path = clone_result.path
+    combined_file_path: Optional[str] = None
 
-    try:
-        combine_result = combine_repository(repo_path)
-        combined_file_path = combine_result.file_path
-        out_dir = combine_result.output_dir
-        try:
-            tokenize_result = _tokenize_file(combined_file_path, out_dir, max_tokens_per_file)
-            return tokenize_result
-        finally:
-            # Clean up the combined file if requested
-            if cleanup and os.path.exists(combined_file_path):
-                os.remove(combined_file_path)
-    finally:
-        # Clean up the cloned repository if requested
-        if cleanup and os.path.exists(repo_path):
+    def clean_up():
+        cleaned = False
+        if os.path.exists(repo_path):
             shutil.rmtree(repo_path)
+            cleaned = True
+        if clean_up is not None and os.path.exists(combined_file_path):
+            os.remove(combined_file_path)
+            cleaned = True
+        return cleaned
+
+    combine_result = combine_repository(repo_path)
+    combined_file_path = combine_result.file_path
+    out_dir = combine_result.output_dir
+    tokenize_result = _tokenize_file(combined_file_path, out_dir, max_tokens_per_file)
+    return FlattenResult(
+        full_file_path=combined_file_path,
+        file_paths=tokenize_result.file_paths,
+        total_tokens=tokenize_result.total_tokens,
+        clean_up=clean_up,
+    )

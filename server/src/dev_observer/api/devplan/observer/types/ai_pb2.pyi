@@ -4,6 +4,12 @@ from typing import ClassVar as _ClassVar, Mapping as _Mapping, Optional as _Opti
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
+class PromptConfig(_message.Message):
+    __slots__ = ("model",)
+    MODEL_FIELD_NUMBER: _ClassVar[int]
+    model: ModelConfig
+    def __init__(self, model: _Optional[_Union[ModelConfig, _Mapping]] = ...) -> None: ...
+
 class ModelConfig(_message.Message):
     __slots__ = ("provider", "model_name", "temperature")
     PROVIDER_FIELD_NUMBER: _ClassVar[int]
@@ -29,11 +35,11 @@ class UserMessage(_message.Message):
     def __init__(self, text: _Optional[str] = ..., image_url: _Optional[str] = ...) -> None: ...
 
 class PromptTemplate(_message.Message):
-    __slots__ = ("system", "user", "model")
+    __slots__ = ("system", "user", "config")
     SYSTEM_FIELD_NUMBER: _ClassVar[int]
     USER_FIELD_NUMBER: _ClassVar[int]
-    MODEL_FIELD_NUMBER: _ClassVar[int]
+    CONFIG_FIELD_NUMBER: _ClassVar[int]
     system: SystemMessage
     user: UserMessage
-    model: ModelConfig
-    def __init__(self, system: _Optional[_Union[SystemMessage, _Mapping]] = ..., user: _Optional[_Union[UserMessage, _Mapping]] = ..., model: _Optional[_Union[ModelConfig, _Mapping]] = ...) -> None: ...
+    config: PromptConfig
+    def __init__(self, system: _Optional[_Union[SystemMessage, _Mapping]] = ..., user: _Optional[_Union[UserMessage, _Mapping]] = ..., config: _Optional[_Union[PromptConfig, _Mapping]] = ...) -> None: ...
