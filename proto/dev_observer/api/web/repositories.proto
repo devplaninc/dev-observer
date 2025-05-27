@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package dev_observer.api.web.repositories;
+
+import "dev_observer/api/types/repo.proto";
+
+message ListGithubRepositoriesResponse {
+  repeated dev_observer.api.types.repo.GitHubRepository repos = 1;
+}
+
+message AddGithubRepositoryRequest {
+  dev_observer.api.types.repo.GitHubRepository repo = 1;
+}
+
+message AddGithubRepositoryResponse {
+}
+
+message RescanRepositoryResponse{}

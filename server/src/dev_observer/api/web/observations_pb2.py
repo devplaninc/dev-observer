@@ -23,22 +23,17 @@ _sym_db = _symbol_database.Default()
 
 
 from dev_observer.api.types import observations_pb2 as dev__observer_dot_api_dot_types_dot_observations__pb2
-from dev_observer.api.types import repo_pb2 as dev__observer_dot_api_dot_types_dot_repo__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\'dev_observer/api/web/observations.proto\x12!dev_observer.api.web.observations\x1a)dev_observer/api/types/observations.proto\x1a!dev_observer/api/types/repo.proto\"\\\n\x17GetObservationsResponse\x12\x41\n\x04keys\x18\x01 \x03(\x0b\x32\x33.dev_observer.api.types.observations.ObservationKey\"_\n\x16GetObservationResponse\x12\x45\n\x0bobservation\x18\x01 \x01(\x0b\x32\x30.dev_observer.api.types.observations.Observation\"Y\n\x1a\x41\x64\x64GithubRepositoryRequest\x12;\n\x04repo\x18\x01 \x01(\x0b\x32-.dev_observer.api.types.repo.GitHubRepository\"\x1d\n\x1b\x41\x64\x64GithubRepositoryResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\'dev_observer/api/web/observations.proto\x12!dev_observer.api.web.observations\x1a)dev_observer/api/types/observations.proto\"\\\n\x17GetObservationsResponse\x12\x41\n\x04keys\x18\x01 \x03(\x0b\x32\x33.dev_observer.api.types.observations.ObservationKey\"_\n\x16GetObservationResponse\x12\x45\n\x0bobservation\x18\x01 \x01(\x0b\x32\x30.dev_observer.api.types.observations.Observationb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'dev_observer.api.web.observations_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_GETOBSERVATIONSRESPONSE']._serialized_start=156
-  _globals['_GETOBSERVATIONSRESPONSE']._serialized_end=248
-  _globals['_GETOBSERVATIONRESPONSE']._serialized_start=250
-  _globals['_GETOBSERVATIONRESPONSE']._serialized_end=345
-  _globals['_ADDGITHUBREPOSITORYREQUEST']._serialized_start=347
-  _globals['_ADDGITHUBREPOSITORYREQUEST']._serialized_end=436
-  _globals['_ADDGITHUBREPOSITORYRESPONSE']._serialized_start=438
-  _globals['_ADDGITHUBREPOSITORYRESPONSE']._serialized_end=467
+  _globals['_GETOBSERVATIONSRESPONSE']._serialized_start=121
+  _globals['_GETOBSERVATIONSRESPONSE']._serialized_end=213
+  _globals['_GETOBSERVATIONRESPONSE']._serialized_start=215
+  _globals['_GETOBSERVATIONRESPONSE']._serialized_end=310
 # @@protoc_insertion_point(module_scope)

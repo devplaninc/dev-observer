@@ -10,30 +10,103 @@ import { Timestamp } from "../../../google/protobuf/timestamp";
 
 export const protobufPackage = "dev_observer.api.types.processing";
 
+export interface ProcessingItemKey {
+  entity?: { $case: "githubRepoId"; value: string } | undefined;
+}
+
 export interface ProcessingItem {
-  id: string;
+  key: ProcessingItemKey | undefined;
   nextProcessing?: Date | undefined;
   lastProcessed?: Date | undefined;
   lastError?: string | undefined;
   noProcessing: boolean;
-  entity?: { $case: "githubRepoId"; value: string } | undefined;
 }
+
+function createBaseProcessingItemKey(): ProcessingItemKey {
+  return { entity: undefined };
+}
+
+export const ProcessingItemKey: MessageFns<ProcessingItemKey> = {
+  encode(message: ProcessingItemKey, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    switch (message.entity?.$case) {
+      case "githubRepoId":
+        writer.uint32(802).string(message.entity.value);
+        break;
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ProcessingItemKey {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseProcessingItemKey();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 100: {
+          if (tag !== 802) {
+            break;
+          }
+
+          message.entity = { $case: "githubRepoId", value: reader.string() };
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ProcessingItemKey {
+    return {
+      entity: isSet(object.githubRepoId)
+        ? { $case: "githubRepoId", value: globalThis.String(object.githubRepoId) }
+        : undefined,
+    };
+  },
+
+  toJSON(message: ProcessingItemKey): unknown {
+    const obj: any = {};
+    if (message.entity?.$case === "githubRepoId") {
+      obj.githubRepoId = message.entity.value;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<ProcessingItemKey>): ProcessingItemKey {
+    return ProcessingItemKey.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<ProcessingItemKey>): ProcessingItemKey {
+    const message = createBaseProcessingItemKey();
+    switch (object.entity?.$case) {
+      case "githubRepoId": {
+        if (object.entity?.value !== undefined && object.entity?.value !== null) {
+          message.entity = { $case: "githubRepoId", value: object.entity.value };
+        }
+        break;
+      }
+    }
+    return message;
+  },
+};
 
 function createBaseProcessingItem(): ProcessingItem {
   return {
-    id: "",
+    key: undefined,
     nextProcessing: undefined,
     lastProcessed: undefined,
     lastError: undefined,
     noProcessing: false,
-    entity: undefined,
   };
 }
 
 export const ProcessingItem: MessageFns<ProcessingItem> = {
   encode(message: ProcessingItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
+    if (message.key !== undefined) {
+      ProcessingItemKey.encode(message.key, writer.uint32(10).fork()).join();
     }
     if (message.nextProcessing !== undefined) {
       Timestamp.encode(toTimestamp(message.nextProcessing), writer.uint32(18).fork()).join();
@@ -46,11 +119,6 @@ export const ProcessingItem: MessageFns<ProcessingItem> = {
     }
     if (message.noProcessing !== false) {
       writer.uint32(40).bool(message.noProcessing);
-    }
-    switch (message.entity?.$case) {
-      case "githubRepoId":
-        writer.uint32(802).string(message.entity.value);
-        break;
     }
     return writer;
   },
@@ -67,7 +135,7 @@ export const ProcessingItem: MessageFns<ProcessingItem> = {
             break;
           }
 
-          message.id = reader.string();
+          message.key = ProcessingItemKey.decode(reader, reader.uint32());
           continue;
         }
         case 2: {
@@ -102,14 +170,6 @@ export const ProcessingItem: MessageFns<ProcessingItem> = {
           message.noProcessing = reader.bool();
           continue;
         }
-        case 100: {
-          if (tag !== 802) {
-            break;
-          }
-
-          message.entity = { $case: "githubRepoId", value: reader.string() };
-          continue;
-        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -121,21 +181,18 @@ export const ProcessingItem: MessageFns<ProcessingItem> = {
 
   fromJSON(object: any): ProcessingItem {
     return {
-      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      key: isSet(object.key) ? ProcessingItemKey.fromJSON(object.key) : undefined,
       nextProcessing: isSet(object.nextProcessing) ? fromJsonTimestamp(object.nextProcessing) : undefined,
       lastProcessed: isSet(object.lastProcessed) ? fromJsonTimestamp(object.lastProcessed) : undefined,
       lastError: isSet(object.lastError) ? globalThis.String(object.lastError) : undefined,
       noProcessing: isSet(object.noProcessing) ? globalThis.Boolean(object.noProcessing) : false,
-      entity: isSet(object.githubRepoId)
-        ? { $case: "githubRepoId", value: globalThis.String(object.githubRepoId) }
-        : undefined,
     };
   },
 
   toJSON(message: ProcessingItem): unknown {
     const obj: any = {};
-    if (message.id !== "") {
-      obj.id = message.id;
+    if (message.key !== undefined) {
+      obj.key = ProcessingItemKey.toJSON(message.key);
     }
     if (message.nextProcessing !== undefined) {
       obj.nextProcessing = message.nextProcessing.toISOString();
@@ -149,9 +206,6 @@ export const ProcessingItem: MessageFns<ProcessingItem> = {
     if (message.noProcessing !== false) {
       obj.noProcessing = message.noProcessing;
     }
-    if (message.entity?.$case === "githubRepoId") {
-      obj.githubRepoId = message.entity.value;
-    }
     return obj;
   },
 
@@ -160,19 +214,13 @@ export const ProcessingItem: MessageFns<ProcessingItem> = {
   },
   fromPartial(object: DeepPartial<ProcessingItem>): ProcessingItem {
     const message = createBaseProcessingItem();
-    message.id = object.id ?? "";
+    message.key = (object.key !== undefined && object.key !== null)
+      ? ProcessingItemKey.fromPartial(object.key)
+      : undefined;
     message.nextProcessing = object.nextProcessing ?? undefined;
     message.lastProcessed = object.lastProcessed ?? undefined;
     message.lastError = object.lastError ?? undefined;
     message.noProcessing = object.noProcessing ?? false;
-    switch (object.entity?.$case) {
-      case "githubRepoId": {
-        if (object.entity?.value !== undefined && object.entity?.value !== null) {
-          message.entity = { $case: "githubRepoId", value: object.entity.value };
-        }
-        break;
-      }
-    }
     return message;
   },
 };

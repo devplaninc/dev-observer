@@ -4,7 +4,6 @@ from datetime import timedelta
 from dev_observer.analysis.stub import StubAnalysisProvider
 from dev_observer.api.types.config_pb2 import GlobalConfig, AnalysisConfig
 from dev_observer.api.types.observations_pb2 import Analyzer, ObservationKey
-from dev_observer.api.types.processing_pb2 import ProcessingItem
 from dev_observer.api.types.repo_pb2 import GitHubRepository
 from dev_observer.observations.memory import MemoryObservationsProvider
 from dev_observer.processors.periodic import PeriodicProcessor
@@ -13,7 +12,7 @@ from dev_observer.prompts.stub import StubPromptsProvider
 from dev_observer.repository.copying import CopyingGitRepositoryProvider
 from dev_observer.storage.memory import MemoryStorageProvider
 from dev_observer.tokenizer.stub import StubTokenizerProvider
-from dev_observer.util import MockClock, pb_to_json
+from dev_observer.util import MockClock
 
 
 class TestPeriodicProcessor(unittest.IsolatedAsyncioTestCase):
@@ -41,8 +40,8 @@ class TestPeriodicProcessor(unittest.IsolatedAsyncioTestCase):
         ))
         items = await storage.get_processing_items()
         self.assertEqual(1, len(items))
-        item1_id = items[0].id
-        self.assertEqual("r1", items[0].github_repo_id)
+        item1_key = items[0].key
+        self.assertEqual("r1", items[0].key.github_repo_id)
         await storage.add_github_repo(GitHubRepository(
             name="test2", id="r2", full_name="devplan/test2", url="https://github.com/devplan/test2",
         ))
@@ -51,8 +50,8 @@ class TestPeriodicProcessor(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(items[0].HasField("next_processing"))
         self.assertTrue(items[1].HasField("next_processing"))
 
-        await storage.set_next_processing_time(items[0].id, None)
-        await storage.set_next_processing_time(items[1].id, None)
+        await storage.set_next_processing_time(items[0].key, None)
+        await storage.set_next_processing_time(items[1].key, None)
 
         items = await storage.get_processing_items()
         self.assertEqual(2, len(items))
@@ -60,12 +59,12 @@ class TestPeriodicProcessor(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(items[1].HasField("next_processing"))
 
         self.assertIsNone(await p.process_next())
-        await storage.set_next_processing_time(item1_id, clock.now() + timedelta(seconds=1))
+        await storage.set_next_processing_time(item1_key, clock.now() + timedelta(seconds=1))
         self.assertIsNone(await p.process_next())
         clock.bump(timedelta(minutes=5))
         item = await p.process_next()
         self.assertIsNotNone(item)
-        self.assertEqual("r1", item.github_repo_id)
+        self.assertEqual("r1", item.key.github_repo_id)
 
         self.assertIsNone(await p.process_next())
 

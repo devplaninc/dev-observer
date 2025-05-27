@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from datetime import timedelta
-from time import sleep
 from typing import List, Optional
 
 from dev_observer.api.types.observations_pb2 import ObservationKey
@@ -42,17 +41,17 @@ class PeriodicProcessor:
         _log.info(s_("Processing item", item=item))
         retry_time = self._clock.now() + timedelta(minutes=30)
         # prevent from running again right away.
-        await self._storage.set_next_processing_time(item.id, retry_time)
+        await self._storage.set_next_processing_time(item.key, retry_time)
         await self._process_item(item)
         return item
 
     async def _process_item(self, item: ProcessingItem):
-        ent_type = item.WhichOneof("entity")
+        ent_type = item.key.WhichOneof("entity")
         if ent_type == "github_repo_id":
-            await self._process_github_repo(item.github_repo_id)
+            await self._process_github_repo(item.key.github_repo_id)
         else:
             raise ValueError(f"[{ent_type}] is not supported")
-        await self._storage.set_next_processing_time(item.id, None)
+        await self._storage.set_next_processing_time(item.key, None)
 
     async def _process_github_repo(self, repo_id: str):
         repo = await self._storage.get_github_repo(repo_id)

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package dev_observer.api.web.config;
+
+import "dev_observer/api/types/config.proto";
+
+message GetGlobalConfigResponse {
+  dev_observer.api.types.config.GlobalConfig config = 1;
+}
+
+message UpdateGlobalConfigRequest {
+  dev_observer.api.types.config.GlobalConfig config = 1;
+}
+
+message UpdateGlobalConfigResponse {
+  dev_observer.api.types.config.GlobalConfig config = 1;
+}

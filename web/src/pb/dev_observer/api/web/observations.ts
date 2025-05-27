@@ -7,7 +7,6 @@
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import { Observation, ObservationKey } from "../types/observations";
-import { GitHubRepository } from "../types/repo";
 
 export const protobufPackage = "dev_observer.api.web.observations";
 
@@ -17,13 +16,6 @@ export interface GetObservationsResponse {
 
 export interface GetObservationResponse {
   observation: Observation | undefined;
-}
-
-export interface AddGithubRepositoryRequest {
-  repo: GitHubRepository | undefined;
-}
-
-export interface AddGithubRepositoryResponse {
 }
 
 function createBaseGetObservationsResponse(): GetObservationsResponse {
@@ -142,109 +134,6 @@ export const GetObservationResponse: MessageFns<GetObservationResponse> = {
     message.observation = (object.observation !== undefined && object.observation !== null)
       ? Observation.fromPartial(object.observation)
       : undefined;
-    return message;
-  },
-};
-
-function createBaseAddGithubRepositoryRequest(): AddGithubRepositoryRequest {
-  return { repo: undefined };
-}
-
-export const AddGithubRepositoryRequest: MessageFns<AddGithubRepositoryRequest> = {
-  encode(message: AddGithubRepositoryRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.repo !== undefined) {
-      GitHubRepository.encode(message.repo, writer.uint32(10).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): AddGithubRepositoryRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseAddGithubRepositoryRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.repo = GitHubRepository.decode(reader, reader.uint32());
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): AddGithubRepositoryRequest {
-    return { repo: isSet(object.repo) ? GitHubRepository.fromJSON(object.repo) : undefined };
-  },
-
-  toJSON(message: AddGithubRepositoryRequest): unknown {
-    const obj: any = {};
-    if (message.repo !== undefined) {
-      obj.repo = GitHubRepository.toJSON(message.repo);
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<AddGithubRepositoryRequest>): AddGithubRepositoryRequest {
-    return AddGithubRepositoryRequest.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<AddGithubRepositoryRequest>): AddGithubRepositoryRequest {
-    const message = createBaseAddGithubRepositoryRequest();
-    message.repo = (object.repo !== undefined && object.repo !== null)
-      ? GitHubRepository.fromPartial(object.repo)
-      : undefined;
-    return message;
-  },
-};
-
-function createBaseAddGithubRepositoryResponse(): AddGithubRepositoryResponse {
-  return {};
-}
-
-export const AddGithubRepositoryResponse: MessageFns<AddGithubRepositoryResponse> = {
-  encode(_: AddGithubRepositoryResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): AddGithubRepositoryResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseAddGithubRepositoryResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(_: any): AddGithubRepositoryResponse {
-    return {};
-  },
-
-  toJSON(_: AddGithubRepositoryResponse): unknown {
-    const obj: any = {};
-    return obj;
-  },
-
-  create(base?: DeepPartial<AddGithubRepositoryResponse>): AddGithubRepositoryResponse {
-    return AddGithubRepositoryResponse.fromPartial(base ?? {});
-  },
-  fromPartial(_: DeepPartial<AddGithubRepositoryResponse>): AddGithubRepositoryResponse {
-    const message = createBaseAddGithubRepositoryResponse();
     return message;
   },
 };
