@@ -6,7 +6,7 @@ from dev_observer.util import Clock, RealClock
 class MemoryStorageProvider(SingleBlobStorageProvider):
     _data: LocalStorageData = LocalStorageData()
 
-    def __init__(self, clock: Clock = RealClock):
+    def __init__(self, clock: Clock = RealClock()):
         super().__init__(clock)
 
     def _get(self) -> LocalStorageData:

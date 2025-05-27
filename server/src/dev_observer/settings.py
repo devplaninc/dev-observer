@@ -69,6 +69,15 @@ class Tokenizer(BaseModel):
     tiktoken: Optional[Tiktoken] = None
 
 
+class LocalStorage(BaseModel):
+    dir: str
+
+class Storage(BaseModel):
+    provider: Literal["local", "memory"] = "local"
+
+    local: Optional[LocalStorage] = None
+
+
 class Settings(BaseSettings):
     props: ClassVar[SettingsProps] = SettingsProps()
 
@@ -77,6 +86,7 @@ class Settings(BaseSettings):
     analysis: Optional[Analysis] = None
     observations: Optional[Observations] = None
     tokenizer: Optional[Tokenizer] = None
+    storage: Optional[Storage] = None
 
     def __init__(self) -> None:
         toml_file = Settings.model_config.get("toml_file", None)

@@ -19,6 +19,9 @@ from dev_observer.repository.github import GithubProvider
 from dev_observer.repository.provider import GitRepositoryProvider
 from dev_observer.server.env import ServerEnv
 from dev_observer.settings import Settings, LocalPrompts, Github
+from dev_observer.storage.local import LocalStorageProvider
+from dev_observer.storage.memory import MemoryStorageProvider
+from dev_observer.storage.provider import StorageProvider
 from dev_observer.tokenizer.provider import TokenizerProvider
 from dev_observer.tokenizer.stub import StubTokenizerProvider
 from dev_observer.tokenizer.tiktoken import TiktokenTokenizerProvider
@@ -94,6 +97,7 @@ def detect_observer(settings: Settings) -> ObservationsProvider:
             return LocalObservationsProvider(root_dir=o.local.dir)
     raise ValueError(f"Unsupported observations provider: {o.provider}")
 
+
 def detect_tokenizer(settings: Settings) -> TokenizerProvider:
     tok = settings.tokenizer
     match tok.provider:
@@ -104,14 +108,28 @@ def detect_tokenizer(settings: Settings) -> TokenizerProvider:
     raise ValueError(f"Unsupported tokenizer provider: {tok.provider}")
 
 
+def detect_storage_provider(settings: Settings) -> StorageProvider:
+    s = settings.storage
+    if s is None:
+        raise ValueError("Storage settings are not defined")
+    match s.provider:
+        case "memory":
+            return MemoryStorageProvider()
+        case "local":
+            return LocalStorageProvider(s.local.dir)
+    raise ValueError(f"Unsupported storage provider: {s.provider}")
+
+
 def detect_server_env(settings: Settings) -> ServerEnv:
     analysis = detect_analysis_provider(settings)
     repository = detect_git_provider(settings)
     prompts = detect_prompts_provider(settings)
     observations = detect_observer(settings)
     tokenizer = detect_tokenizer(settings)
+    storage = detect_storage_provider(settings)
     env = ServerEnv(
         observations=observations,
+        storage=storage,
         repos_processor=ReposProcessor(analysis, repository, prompts, observations, tokenizer),
     )
     _log.debug(s_("Detected environment",

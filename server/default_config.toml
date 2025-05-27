@@ -1,0 +1,25 @@
+[git]
+provider="copying"
+
+[prompts]
+provider = "local"
+
+[prompts.local]
+dir="default_prompts"
+
+[analysis]
+provider="stub"
+
+[tokenizer]
+provider="stub"
+
+[observations]
+provider="local"
+
+[observations.local]
+dir="_local_data_"
+
+[storage]
+provider="local"
+[storage.local]
+dir="_local_data_/__storage"

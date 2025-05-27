@@ -4,6 +4,7 @@ from abc import abstractmethod
 from typing import Optional, Callable, MutableSequence
 
 from google.protobuf import timestamp
+from google.protobuf.internal.well_known_types import Timestamp
 
 from dev_observer.api.storage.local_pb2 import LocalStorageData
 from dev_observer.api.types.config_pb2 import GlobalConfig
@@ -16,7 +17,7 @@ from dev_observer.util import Clock, RealClock
 class SingleBlobStorageProvider(abc.ABC, StorageProvider):
     _clock: Clock
 
-    def __init__(self, clock: Clock = RealClock):
+    def __init__(self, clock: Clock = RealClock()):
         self._clock = clock
 
     async def get_github_repos(self) -> MutableSequence[GitHubRepository]:
@@ -30,7 +31,13 @@ class SingleBlobStorageProvider(abc.ABC, StorageProvider):
 
     async def add_github_repo(self, repo: GitHubRepository) -> MutableSequence[GitHubRepository]:
         def up(d: LocalStorageData):
+            if repo.id in [r.id for r in self._get().github_repos]:
+                return
             d.github_repos.append(repo)
+            d.processing_items.append(ProcessingItem(
+                github_repo_id=repo.id,
+                next_processing=self._clock.now(),
+            ))
 
         return self._update(up).github_repos
 
