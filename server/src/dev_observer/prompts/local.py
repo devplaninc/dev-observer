@@ -4,7 +4,7 @@ from typing import Optional, Dict, Protocol
 
 from google.protobuf import json_format
 
-from dev_observer.api.devplan.observer.types.ai_pb2 import PromptTemplate
+from dev_observer.api.types.ai_pb2 import PromptTemplate
 from dev_observer.prompts.provider import PromptsProvider, FormattedPrompt
 
 

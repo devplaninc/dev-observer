@@ -17,5 +17,5 @@ class GitRepositoryProvider(Protocol):
         ...
 
     @abstractmethod
-    def get_private_clone_url(self, repo: RepositoryInfo) -> str:
+    def clone(self, repo: RepositoryInfo, dest: str):
         ...

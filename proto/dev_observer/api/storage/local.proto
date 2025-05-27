@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package dev_observer.api.storage.local;
+
+import "dev_observer/api/types/processing.proto";
+import "dev_observer/api/types/repo.proto";
+import "dev_observer/api/types/config.proto";
+
+message LocalStorageData {
+  repeated dev_observer.api.types.repo.GitHubRepository github_repos = 1;
+  repeated dev_observer.api.types.processing.ProcessingItem processing_items = 2;
+  dev_observer.api.types.config.GlobalConfig global_config = 3;
+}

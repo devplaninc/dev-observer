@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package dev_observer.api.types.ai;
+
+message PromptConfig {
+  ModelConfig model = 1;
+}
+
+message ModelConfig {
+  string provider = 1;
+  string model_name = 2;
+  float temperature = 3;
+}
+
+message SystemMessage {
+  string text = 1;
+}
+
+message UserMessage {
+  optional string text = 1;
+  optional string image_url = 2;
+}
+
+message PromptTemplate {
+  optional SystemMessage system = 1;
+  optional UserMessage user = 2;
+  PromptConfig config = 3;
+}

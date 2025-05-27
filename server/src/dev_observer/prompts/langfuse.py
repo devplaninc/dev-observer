@@ -5,7 +5,7 @@ from google.protobuf import json_format
 from langfuse import Langfuse
 from langfuse.model import ChatPromptClient
 
-from dev_observer.api.devplan.observer.types.ai_pb2 import PromptConfig
+from dev_observer.api.types.ai_pb2 import PromptConfig
 from dev_observer.log import s_
 from dev_observer.prompts.provider import PromptsProvider, FormattedPrompt
 

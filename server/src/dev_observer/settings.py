@@ -14,6 +14,12 @@ class Github(BaseModel):
     personal_token: Optional[str] = None
 
 
+class Git(BaseModel):
+    provider: Literal["github", "copying"] = "github"
+
+    github: Optional[Github] = None
+
+
 class LangfuseAuth(BaseModel):
     secret_key: str
     public_key: str
@@ -37,19 +43,50 @@ class Prompts(BaseModel):
 
 
 class Analysis(BaseModel):
-    provider: Literal["langgraph"]
+    provider: Literal["langgraph", "stub"] = "langgraph"
+
+
+class LocalObservations(BaseModel):
+    dir: str
+
+
+class Observations(BaseModel):
+    provider: Literal["local"] = "local"
+
+    local: Optional[LocalObservations] = None
 
 
 class SettingsProps(BaseModel):
     toml_file: Optional[str] = None
 
 
+class Tiktoken(BaseModel):
+    encoding: str = "cl100k_base"
+
+class Tokenizer(BaseModel):
+    provider: Literal["tiktoken", "stub"] = "tiktoken"
+
+    tiktoken: Optional[Tiktoken] = None
+
+
+class LocalStorage(BaseModel):
+    dir: str
+
+class Storage(BaseModel):
+    provider: Literal["local", "memory"] = "local"
+
+    local: Optional[LocalStorage] = None
+
+
 class Settings(BaseSettings):
     props: ClassVar[SettingsProps] = SettingsProps()
 
-    github: Optional[Github] = None
+    git: Optional[Git] = None
     prompts: Optional[Prompts] = None
     analysis: Optional[Analysis] = None
+    observations: Optional[Observations] = None
+    tokenizer: Optional[Tokenizer] = None
+    storage: Optional[Storage] = None
 
     def __init__(self) -> None:
         toml_file = Settings.model_config.get("toml_file", None)

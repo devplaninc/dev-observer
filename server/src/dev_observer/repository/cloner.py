@@ -1,10 +1,9 @@
 import dataclasses
 import logging
-import subprocess
 import tempfile
 
-from dev_observer.repository.provider import GitRepositoryProvider, RepositoryInfo
 from dev_observer.log import s_
+from dev_observer.repository.provider import GitRepositoryProvider, RepositoryInfo
 
 _log = logging.getLogger(__name__)
 
@@ -30,15 +29,6 @@ def clone_repository(
     temp_dir = tempfile.mkdtemp(prefix=f"git_repo_{repo.name}")
     extra = {"repo": repo, "url": url, "dest": temp_dir}
     _log.debug(s_("Cloning...", **extra))
-    clone_url = provider.get_private_clone_url(repo)
-    result = subprocess.run(
-        ["git", "clone", "--depth=1", clone_url, temp_dir],
-        capture_output=True,
-        text=True,
-        check=False
-    )
-
-    if result.returncode != 0:
-        raise RuntimeError(f"Failed to clone repository: {result.stderr}")
+    provider.clone(repo, temp_dir)
     _log.debug(s_("Cloned.", **extra))
     return CloneResult(path=temp_dir, repo=repo)

@@ -7,11 +7,10 @@ import string
 import subprocess
 from typing import List, Callable, Optional
 
-import tiktoken
-
 from dev_observer.log import s_
 from dev_observer.repository.cloner import clone_repository
-from dev_observer.repository.provider import GitRepositoryProvider
+from dev_observer.repository.provider import GitRepositoryProvider, RepositoryInfo
+from dev_observer.tokenizer.provider import TokenizerProvider
 
 _log = logging.getLogger(__name__)
 _ignore = "**/*.o,**/*.obj,**/*.exe,**/*.dll,**/*.so,**/*.dylib,**/*.a,**/*.class,**/*.jar,**/*.pyc,**/*.pyo,**/*.pyd,**/*.wasm,**/*.bin,**/*.lock,**/*.zip,**/*.tar,**/*.gz,**/*.rar,**/*.7z,**/*.egg,**/*.whl,**/*.deb,**/*.rpm,**/*.png,**/*.jpg,**/*.jpeg,**/*.gif,**/*.svg,**/*.ico,**/*.mp3,**/*.mp4,**/*.mov,**/*.webm,**/*.wav,**/*.ttf,**/*.woff,**/*.woff2,**/*.eot,**/*.otf,**/*.pdf,**/*.ai,**/*.psd,**/*.sketch,**/*.csv,**/*.tsv,**/*.json,**/*.xml,**/*.log,**/*.db,**/*.sqlite,**/*.h5,**/*.parquet,**/*.min.js,**/*.map,**/*.min.css,**/*.bundle.js,**/.DS_Store,**/*.swp,**/*.swo,**/*.iml,**/*.pb.go,**/*_pb2.py*"
@@ -74,6 +73,7 @@ class TokenizeResult:
 def _tokenize_file(
         file_path: str,
         out_dir: str,
+        tokenizer: TokenizerProvider,
         max_tokens_per_file: int = 100_000,
 ) -> TokenizeResult:
     if not os.path.exists(file_path):
@@ -86,11 +86,8 @@ def _tokenize_file(
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Initialize the tokenizer (using cl100k_base, which is used by GPT-4)
-    enc = tiktoken.get_encoding("cl100k_base")
-
     # Tokenize the content
-    tokens = enc.encode(content)
+    tokens = tokenizer.encode(content)
     total_tokens = len(tokens)
     if total_tokens <= max_tokens_per_file:
         return TokenizeResult(file_paths=[], total_tokens=total_tokens)
@@ -99,7 +96,7 @@ def _tokenize_file(
     output_files = []
     for i in range(0, total_tokens, max_tokens_per_file):
         chunk_tokens = tokens[i:i + max_tokens_per_file]
-        chunk_text = enc.decode(chunk_tokens)
+        chunk_text = tokenizer.decode(chunk_tokens)
         out_file = os.path.join(out_dir, f"chunk_{i}.md")
         with open(out_file, 'w', encoding='utf-8') as f:
             f.write(chunk_text)
@@ -109,12 +106,18 @@ def _tokenize_file(
     return TokenizeResult(file_paths=output_files, total_tokens=total_tokens)
 
 
+@dataclasses.dataclass
+class FlattenRepoResult:
+    flatten_result: FlattenResult
+    repo: RepositoryInfo
+
 def flatten_repository(
         url: str,
         provider: GitRepositoryProvider,
+        tokenizer: TokenizerProvider,
         max_size_kb: int = 100_000,
         max_tokens_per_file: int = 100_000,
-) -> FlattenResult:
+) -> FlattenRepoResult:
     clone_result = clone_repository(url, provider, max_size_kb)
     repo_path = clone_result.path
     combined_file_path: Optional[str] = None
@@ -132,10 +135,16 @@ def flatten_repository(
     combine_result = combine_repository(repo_path)
     combined_file_path = combine_result.file_path
     out_dir = combine_result.output_dir
-    tokenize_result = _tokenize_file(combined_file_path, out_dir, max_tokens_per_file)
-    return FlattenResult(
+    _log.debug(s_("Tokenizing..."))
+    tokenize_result = _tokenize_file(combined_file_path, out_dir, tokenizer, max_tokens_per_file)
+    _log.debug(s_("File tokenized"))
+    flatten_result = FlattenResult(
         full_file_path=combined_file_path,
         file_paths=tokenize_result.file_paths,
         total_tokens=tokenize_result.total_tokens,
         clean_up=clean_up,
+    )
+    return FlattenRepoResult(
+        flatten_result=flatten_result,
+        repo=clone_result.repo,
     )

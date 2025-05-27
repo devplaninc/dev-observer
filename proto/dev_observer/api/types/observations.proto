@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package dev_observer.api.types.observations;
+
+message ObservationKey {
+  string kind = 1;
+  string name = 2;
+  string key = 3;
+}
+
+message Observation {
+  ObservationKey key = 1;
+  bytes content = 2;
+}
+
+message Analyzer {
+  string name = 1;
+  string prompt_prefix = 2;
+  string file_name = 3;
+}
