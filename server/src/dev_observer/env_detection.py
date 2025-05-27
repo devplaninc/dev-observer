@@ -5,24 +5,40 @@ from github import Auth
 
 from dev_observer.analysis.langgraph_provider import LanggraphAnalysisProvider
 from dev_observer.analysis.provider import AnalysisProvider
+from dev_observer.analysis.stub import StubAnalysisProvider
 from dev_observer.log import s_
-from dev_observer.processor.processor import Processor
+from dev_observer.observations.local import LocalObservationsProvider
+from dev_observer.observations.provider import ObservationsProvider
+from dev_observer.processors.repos import ReposProcessor
 from dev_observer.prompts.langfuse import LangfusePromptsProvider
 from dev_observer.prompts.local import LocalPromptsProvider, PromptTemplateParser, TomlPromptTemplateParser, \
     JSONPromptTemplateParser
 from dev_observer.prompts.provider import PromptsProvider
+from dev_observer.repository.copying import CopyingGitRepositoryProvider
 from dev_observer.repository.github import GithubProvider
-from dev_observer.settings import Settings, LocalPrompts
+from dev_observer.repository.provider import GitRepositoryProvider
+from dev_observer.server.env import ServerEnv
+from dev_observer.settings import Settings, LocalPrompts, Github
+from dev_observer.tokenizer.provider import TokenizerProvider
+from dev_observer.tokenizer.stub import StubTokenizerProvider
+from dev_observer.tokenizer.tiktoken import TiktokenTokenizerProvider
 
 _log = logging.getLogger(__name__)
 
 
-def detect_github_provider(settings: Settings) -> GithubProvider:
-    return GithubProvider(detect_github_auth(settings))
+def detect_git_provider(settings: Settings) -> GitRepositoryProvider:
+    git_sett = settings.git
+    if git_sett is None:
+        raise ValueError("Git settings are not provided")
+    match git_sett.provider:
+        case "github":
+            return GithubProvider(detect_github_auth(git_sett.github))
+        case "copying":
+            return CopyingGitRepositoryProvider()
+    raise ValueError(f"Unsupported git provider: {git_sett.provider}")
 
 
-def detect_github_auth(settings: Settings) -> Auth:
-    gh = settings.github
+def detect_github_auth(gh: Optional[Github]) -> Auth:
     if gh is None:
         raise ValueError(f"Github settings are not defined")
     _log.debug(s_("Detected github auth type.", auth_type=gh.auth_type))
@@ -39,6 +55,8 @@ def detect_analysis_provider(settings: Settings) -> AnalysisProvider:
     match a.provider:
         case "langgraph":
             return LanggraphAnalysisProvider()
+        case "stub":
+            return StubAnalysisProvider()
     raise ValueError(f"Unsupported analysis provider: {a.provider}")
 
 
@@ -66,9 +84,36 @@ def detect_prompts_parser(loc: LocalPrompts) -> Tuple[PromptTemplateParser, str]
             return JSONPromptTemplateParser(), ".json"
     raise ValueError(f"Unsupported parser type: {loc.parser}")
 
-def detect_processor(settings: Settings) -> Processor:
-    return Processor(
-        analysis=detect_analysis_provider(settings),
-        repository=detect_github_provider(settings),
-        prompts=detect_prompts_provider(settings),
+
+def detect_observer(settings: Settings) -> ObservationsProvider:
+    o = settings.observations
+    if o is None:
+        raise ValueError("Observations settings are not defined")
+    match o.provider:
+        case "local":
+            return LocalObservationsProvider(root_dir=o.local.dir)
+    raise ValueError(f"Unsupported observations provider: {o.provider}")
+
+def detect_tokenizer(settings: Settings) -> TokenizerProvider:
+    tok = settings.tokenizer
+    match tok.provider:
+        case "tiktoken":
+            return TiktokenTokenizerProvider(encoding=tok.tiktoken.encoding)
+        case "stub":
+            return StubTokenizerProvider()
+    raise ValueError(f"Unsupported tokenizer provider: {tok.provider}")
+
+
+def detect_server_env(settings: Settings) -> ServerEnv:
+    analysis = detect_analysis_provider(settings)
+    repository = detect_git_provider(settings)
+    prompts = detect_prompts_provider(settings)
+    observations = detect_observer(settings)
+    tokenizer = detect_tokenizer(settings)
+    env = ServerEnv(
+        observations=observations,
+        repos_processor=ReposProcessor(analysis, repository, prompts, observations, tokenizer),
     )
+    _log.debug(s_("Detected environment",
+                  repository=repository, analysis=analysis, prompts=prompts, observations=observations, env=env))
+    return env

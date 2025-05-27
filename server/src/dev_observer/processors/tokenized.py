@@ -1,44 +1,42 @@
 from typing import List
 
 from dev_observer.analysis.provider import AnalysisProvider
-from dev_observer.flatten.flatten import flatten_repository
+from dev_observer.flatten.flatten import FlattenResult
 from dev_observer.prompts.provider import PromptsProvider
-from dev_observer.repository.provider import GitRepositoryProvider
 
 
-class Processor:
+class TokenizedAnalyzer:
+    prompts_prefix: str
     analysis: AnalysisProvider
-    repository: GitRepositoryProvider
     prompts: PromptsProvider
 
     def __init__(
             self,
+            prompts_prefix: str,
             analysis: AnalysisProvider,
-            repository: GitRepositoryProvider,
             prompts: PromptsProvider,
     ):
+        self.prompts_prefix = prompts_prefix
         self.analysis = analysis
-        self.repository = repository
         self.prompts = prompts
 
-    async def process(self, prompts_prefix: str, repo_url: str) -> str:
-        flatten_result = flatten_repository(repo_url, self.repository)
+    async def analyze_flatten(self, flatten_result: FlattenResult) -> str:
         try:
             if len(flatten_result.file_paths) > 0:
-                return await self._analyze_tokenized(prompts_prefix, flatten_result.file_paths)
+                return await self._analyze_tokenized(flatten_result.file_paths)
             else:
-                return await self._analyze_file(flatten_result.full_file_path, f"{prompts_prefix}_analyze_full")
+                return await self._analyze_file(flatten_result.full_file_path, f"{self.prompts_prefix}_analyze_full")
         finally:
             flatten_result.clean_up()
 
-    async def _analyze_tokenized(self, prompts_prefix: str, paths: List[str]) -> str:
+    async def _analyze_tokenized(self, paths: List[str]) -> str:
         summaries: List[str] = []
         for p in paths:
-            s = await self._analyze_file(p, f"{prompts_prefix}_analyze_chunk")
+            s = await self._analyze_file(p, f"{self.prompts_prefix}_analyze_chunk")
             summaries.append(s)
 
         summary = "\n\n".join(summaries)
-        prompt = await self.prompts.get_formatted(f"{prompts_prefix}_analyze_combined_chunks", {
+        prompt = await self.prompts.get_formatted(f"{self.prompts_prefix}_analyze_combined_chunks", {
             "content": summary,
         })
         result = await self.analysis.analyze(prompt)

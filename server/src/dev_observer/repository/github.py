@@ -1,4 +1,5 @@
 import logging
+import subprocess
 
 from github import Auth
 from github import Github
@@ -29,6 +30,15 @@ class GithubProvider(GitRepositoryProvider):
             size_kb=repo.size,
         )
 
-    def get_private_clone_url(self, repo: RepositoryInfo) -> str:
+    def clone(self, repo: RepositoryInfo, dest: str):
         token = self._auth.token
-        return repo.clone_url.replace("https://", f"https://{token}@")
+        clone_url = repo.clone_url.replace("https://", f"https://{token}@")
+        result = subprocess.run(
+            ["git", "clone", "--depth=1", clone_url, dest],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+
+        if result.returncode != 0:
+            raise RuntimeError(f"Failed to clone repository: {result.stderr}")
