@@ -30,5 +30,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "src/types/declarations"]
+  "include": ["src", "src/types/declarations"],
+  "exclude": [
+    "src/pb"  // exclude generated code here
+  ]
 }
