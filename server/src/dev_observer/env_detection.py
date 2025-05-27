@@ -9,6 +9,7 @@ from dev_observer.analysis.stub import StubAnalysisProvider
 from dev_observer.log import s_
 from dev_observer.observations.local import LocalObservationsProvider
 from dev_observer.observations.provider import ObservationsProvider
+from dev_observer.processors.periodic import PeriodicProcessor
 from dev_observer.processors.repos import ReposProcessor
 from dev_observer.prompts.langfuse import LangfusePromptsProvider
 from dev_observer.prompts.local import LocalPromptsProvider, PromptTemplateParser, TomlPromptTemplateParser, \
@@ -127,10 +128,12 @@ def detect_server_env(settings: Settings) -> ServerEnv:
     observations = detect_observer(settings)
     tokenizer = detect_tokenizer(settings)
     storage = detect_storage_provider(settings)
+    repos_processor = ReposProcessor(analysis, repository, prompts, observations, tokenizer)
     env = ServerEnv(
         observations=observations,
         storage=storage,
-        repos_processor=ReposProcessor(analysis, repository, prompts, observations, tokenizer),
+        repos_processor=repos_processor,
+        periodic_processor=PeriodicProcessor(storage, repos_processor),
     )
     _log.debug(s_("Detected environment",
                   repository=repository, analysis=analysis, prompts=prompts, observations=observations, env=env))

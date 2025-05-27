@@ -48,7 +48,13 @@ async def start_fastapi_server():
 
 
 if __name__ == "__main__":
-    asyncio.run(start_fastapi_server())
+    async def start():
+        await asyncio.gather(
+            env.periodic_processor.run(),
+            start_fastapi_server(),
+        )
+
+    asyncio.run(start())
 
 
 def _get_git_root() -> str:

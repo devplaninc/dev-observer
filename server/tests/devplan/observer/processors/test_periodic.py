@@ -13,7 +13,7 @@ from dev_observer.prompts.stub import StubPromptsProvider
 from dev_observer.repository.copying import CopyingGitRepositoryProvider
 from dev_observer.storage.memory import MemoryStorageProvider
 from dev_observer.tokenizer.stub import StubTokenizerProvider
-from dev_observer.util import MockClock
+from dev_observer.util import MockClock, pb_to_json
 
 
 class TestPeriodicProcessor(unittest.IsolatedAsyncioTestCase):
@@ -39,22 +39,33 @@ class TestPeriodicProcessor(unittest.IsolatedAsyncioTestCase):
         await storage.add_github_repo(GitHubRepository(
             name="test1", id="r1", full_name="devplan/test1", url="https://github.com/devplan/test1",
         ))
+        items = await storage.get_processing_items()
+        self.assertEqual(1, len(items))
+        item1_id = items[0].id
+        self.assertEqual("r1", items[0].github_repo_id)
         await storage.add_github_repo(GitHubRepository(
             name="test2", id="r2", full_name="devplan/test2", url="https://github.com/devplan/test2",
         ))
-        await storage.upsert_processing_item(ProcessingItem(
-            id="1", github_repo_id="r1", next_processing=None,
-        ))
-        await storage.upsert_processing_item(ProcessingItem(
-            id="2", github_repo_id="r2", next_processing=None,
-        ))
+        items = await storage.get_processing_items()
+        self.assertEqual(2, len(items))
+        self.assertTrue(items[0].HasField("next_processing"))
+        self.assertTrue(items[1].HasField("next_processing"))
+
+        await storage.set_next_processing_time(items[0].id, None)
+        await storage.set_next_processing_time(items[1].id, None)
+
+        items = await storage.get_processing_items()
+        self.assertEqual(2, len(items))
+        self.assertFalse(items[0].HasField("next_processing"))
+        self.assertFalse(items[1].HasField("next_processing"))
+
         self.assertIsNone(await p.process_next())
-        await storage.set_next_processing_time("1", clock.now() + timedelta(seconds=1))
+        await storage.set_next_processing_time(item1_id, clock.now() + timedelta(seconds=1))
         self.assertIsNone(await p.process_next())
         clock.bump(timedelta(minutes=5))
         item = await p.process_next()
         self.assertIsNotNone(item)
-        self.assertEqual("1", item.id)
+        self.assertEqual("r1", item.github_repo_id)
 
         self.assertIsNone(await p.process_next())
 
