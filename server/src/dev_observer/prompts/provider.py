@@ -4,7 +4,7 @@ from typing import Protocol, Optional, Dict
 
 from langfuse.model import ChatPromptClient
 
-from dev_observer.api.devplan.observer.types.ai_pb2 import SystemMessage, UserMessage, PromptConfig
+from dev_observer.api.types.ai_pb2 import PromptConfig, SystemMessage, UserMessage
 
 
 @dataclasses.dataclass

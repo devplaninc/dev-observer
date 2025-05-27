@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-from dev_observer.api.devplan.observer.types.observations_pb2 import ObservationKey, Observation
+from dev_observer.api.types.observations_pb2 import Observation, ObservationKey
 from dev_observer.observations.provider import ObservationsProvider
 
 

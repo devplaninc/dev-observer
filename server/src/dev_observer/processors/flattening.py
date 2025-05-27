@@ -4,7 +4,7 @@ from abc import abstractmethod
 from typing import TypeVar, Generic, List
 
 from dev_observer.analysis.provider import AnalysisProvider
-from dev_observer.api.devplan.observer.types.observations_pb2 import Observation, ObservationKey
+from dev_observer.api.types.observations_pb2 import ObservationKey, Observation
 from dev_observer.flatten.flatten import FlattenResult
 from dev_observer.observations.provider import ObservationsProvider
 from dev_observer.processors.tokenized import TokenizedAnalyzer

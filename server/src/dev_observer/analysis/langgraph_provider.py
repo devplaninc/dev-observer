@@ -14,7 +14,7 @@ from langgraph.utils.config import ensure_config
 from pydantic import BaseModel
 
 from dev_observer.analysis.provider import AnalysisProvider, AnalysisResult
-from dev_observer.api.devplan.observer.types.ai_pb2 import ModelConfig
+from dev_observer.api.types.ai_pb2 import ModelConfig
 from dev_observer.log import s_
 from dev_observer.prompts.provider import FormattedPrompt
 

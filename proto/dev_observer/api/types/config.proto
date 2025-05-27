@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package dev_observer.api.types.config;
+
+import "dev_observer/api/types/observations.proto";
+
+message GlobalConfig {
+  AnalysisConfig analysis = 1;
+}
+
+message AnalysisConfig {
+  repeated dev_observer.api.types.observations.Analyzer repo_analyzers = 1;
+}

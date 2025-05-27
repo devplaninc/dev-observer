@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Protocol, List
 
-from dev_observer.api.devplan.observer.types.observations_pb2 import Observation, ObservationKey
+from dev_observer.api.types.observations_pb2 import Observation, ObservationKey
 
 
 class ObservationsProvider(Protocol):

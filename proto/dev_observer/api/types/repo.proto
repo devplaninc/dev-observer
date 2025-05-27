@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package dev_observer.api.types.repo;
+
+message GitHubRepository {
+  string id = 1;
+  string name = 2;
+  string full_name = 3;
+  string url = 4;
+  string description = 5;
+}

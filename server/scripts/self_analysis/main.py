@@ -6,7 +6,7 @@ import subprocess
 from dotenv import load_dotenv
 
 import dev_observer.log
-from dev_observer.api.devplan.observer.types.observations_pb2 import ObservationKey
+from dev_observer.api.types.observations_pb2 import ObservationKey
 from dev_observer.env_detection import detect_server_env
 from dev_observer.processors.flattening import ObservationRequest
 from dev_observer.processors.repos import ObservedRepo

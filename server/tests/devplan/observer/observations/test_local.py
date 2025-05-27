@@ -2,9 +2,7 @@ import os
 import unittest
 from typing import List
 
-from unicodedata import numeric
-
-from dev_observer.api.devplan.observer.types.observations_pb2 import ObservationKey, Observation
+from dev_observer.api.types.observations_pb2 import ObservationKey, Observation
 from dev_observer.observations.local import LocalObservationsProvider
 
 
@@ -38,4 +36,3 @@ class TestLocalObservationsProvider(unittest.IsolatedAsyncioTestCase):
         tb.reverse()
         st_b = bytes(tb)
         self.assertEqual("Tbbb", st_b.decode("utf-8"))
-

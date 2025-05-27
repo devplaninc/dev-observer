@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package devplan.observer.types.ai;
+package dev_observer.api.types.ai;
 
 message PromptConfig {
   ModelConfig model = 1;
