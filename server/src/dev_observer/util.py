@@ -33,6 +33,9 @@ M = TypeVar("M", bound=Message)
 def pb_to_json(pb: M, indent=0) -> str:
     return json_format.MessageToJson(pb, indent=indent, sort_keys=True)
 
+def pb_to_dict(pb: M) -> dict:
+    return json_format.MessageToDict(pb)
+
 
 def parse_dict_pb(msg: dict, m: M) -> M:
     return json_format.ParseDict(msg, m, ignore_unknown_fields=True)

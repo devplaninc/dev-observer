@@ -1,15 +1,10 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import type {RepositoryState} from '@/store/useRepositoryStore';
-import {useRepositoryStore} from '@/store/useRepositoryStore';
+import type {RepositoryState} from '@/store/repositoryStore.tsx';
 import {useCallback} from "react";
 import {useShallow} from "zustand/react/shallow";
 import type {Repository} from "@/types/repository.ts";
-
-export interface QueryResultCommon {
-  error: Error | null
-  loading: boolean,
-  reload: () => Promise<void>
-}
+import {useBoundStore} from "@/store/use-bound-store.tsx";
+import type {QueryResultCommon} from "@/hooks/queries.tsx";
 
 // Query keys for caching and invalidation
 export const repositoryKeys = {
@@ -18,14 +13,14 @@ export const repositoryKeys = {
   detail: (id: string) => [...repositoryKeys.all, 'detail', id] as const,
 };
 
-export function useRepositoriesQuery(): { repositories: Repository[] | undefined } & QueryResultCommon {
-  const {fetchRepositories} = useRepositoryStore();
+export function useRepositories(): { repositories: Repository[] | undefined } & QueryResultCommon {
+  const {fetchRepositories} = useBoundStore();
   const queryFn = useCallback(async () => {
     await fetchRepositories();
     return true
   }, [fetchRepositories])
   const {isFetching, error, refetch} = useQuery({queryKey: repositoryKeys.lists(), queryFn});
-  const repositories = useRepositoryStore(useShallow(s => Object.values(s.repositories)));
+  const repositories = useBoundStore(useShallow(s => Object.values(s.repositories)));
   return {
     repositories, loading: isFetching, error: error,
     reload: async () => {
@@ -36,13 +31,13 @@ export function useRepositoriesQuery(): { repositories: Repository[] | undefined
 
 // Hook for fetching a single repository by ID
 export function useRepositoryQuery(id: string): { repository: Repository | undefined } & QueryResultCommon {
-  const fetchRepositoryById = useRepositoryStore((state: RepositoryState) => state.fetchRepositoryById);
+  const fetchRepositoryById = useBoundStore((state: RepositoryState) => state.fetchRepositoryById);
   const queryFn = useCallback(async () => {
     await fetchRepositoryById(id);
     return true
   }, [fetchRepositoryById, id])
   const {error, isFetching, refetch} = useQuery({queryKey: repositoryKeys.detail(id), queryFn, enabled: !!id});
-  const repository = useRepositoryStore(useShallow(s => s.repositories[id]));
+  const repository = useBoundStore(useShallow(s => s.repositories[id]));
   return {
     repository, loading: isFetching, error: error,
     reload: async () => {
@@ -54,7 +49,7 @@ export function useRepositoryQuery(id: string): { repository: Repository | undef
 // Hook for adding a repository
 export const useAddRepositoryMutation = () => {
   const queryClient = useQueryClient();
-  const addRepository = useRepositoryStore((state: RepositoryState) => state.addRepository);
+  const addRepository = useBoundStore((state: RepositoryState) => state.addRepository);
 
   return useMutation({
     mutationFn: (url: string) => addRepository(url),

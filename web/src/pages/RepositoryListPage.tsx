@@ -3,13 +3,13 @@ import {Link} from "react-router";
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import AddRepositoryForm from "@/components/AddRepositoryForm";
-import {useRepositoriesQuery} from "@/hooks/useRepositoryQueries";
+import {useRepositories} from "@/hooks/useRepositoryQueries";
 import type {Repository} from "@/types/repository";
 import {ErrorAlert} from "@/components/ErrorAlert.tsx";
 import {Loader} from "@/components/Loader.tsx";
 
 const RepositoryListPage: React.FC = () => {
-  const {repositories, error, reload} = useRepositoriesQuery();
+  const {repositories, error, reload} = useRepositories();
 
   if (repositories === undefined) {
     if (error) {

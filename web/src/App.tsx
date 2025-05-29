@@ -1,30 +1,39 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {BrowserRouter, Navigate, Route, Routes} from 'react-router';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import RepositoryListPage from './pages/RepositoryListPage';
 import RepositoryDetailsPage from './pages/RepositoryDetailsPage';
-import { ThemeToggle } from './components/ui/theme-toggle';
+import GlobalConfigEditorPage from "@/pages/config/GlobalConfigEditorPage.tsx";
+import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar.tsx";
+import {SiteHeader} from "@/components/layout/SiteHeader.tsx";
+import {AppSidebar} from "@/components/layout/AppSidebar.tsx";
 
 // Create a client
 const queryClient = new QueryClient();
 
 function App() {
-  return (
+  return <div className="[--header-height:calc(theme(spacing.14))]">
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <SidebarProvider className="flex flex-col">
         <div className="min-h-screen bg-background text-foreground">
-          <div className="fixed top-4 right-4 z-50">
-            <ThemeToggle />
+          <SiteHeader />
+          <div className="flex flex-1">
+            <AppSidebar />
+            <SidebarInset>
+              <Routes>
+                <Route path="/repositories" element={<RepositoryListPage />} />
+                <Route path="/repositories/:id" element={<RepositoryDetailsPage />} />
+                <Route path="/admin/config-editor" element={<GlobalConfigEditorPage />} />
+                <Route path="/" element={<Navigate to="/repositories" replace />} />
+                <Route path="*" element={<Navigate to="/repositories" replace />} />
+              </Routes>
+            </SidebarInset>
           </div>
-          <Routes>
-            <Route path="/repositories" element={<RepositoryListPage />} />
-            <Route path="/repositories/:id" element={<RepositoryDetailsPage />} />
-            <Route path="/" element={<Navigate to="/repositories" replace />} />
-            <Route path="*" element={<Navigate to="/repositories" replace />} />
-          </Routes>
         </div>
+        </SidebarProvider>
       </BrowserRouter>
     </QueryClientProvider>
-  );
+  </div>;
 }
 
 export default App;

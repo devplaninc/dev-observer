@@ -1,6 +1,6 @@
-import {create} from 'zustand';
 import {delay, extractRepoName, validateGitHubUrl} from '@/utils/repositoryUtils';
 import type {ApiError, Repository} from '@/types/repository';
+import type {StateCreator} from "zustand";
 
 export interface RepositoryState {
   repositories: Record<string, Repository>;
@@ -26,7 +26,12 @@ const initialRepositories: Record<string, Repository> = {
   },
 };
 
-export const useRepositoryStore = create<RepositoryState>((set: (state: Partial<RepositoryState> | ((state: RepositoryState) => Partial<RepositoryState>)) => void, get: () => RepositoryState) => ({
+export const createRepositoriesSlice:  StateCreator<
+  RepositoryState,
+  [],
+  [],
+  RepositoryState
+> = ((set, get) => ({
   repositories: initialRepositories,
 
   fetchRepositories: async () => {

@@ -3,6 +3,7 @@ import logging
 import subprocess
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 import dev_observer.log
 from dev_observer.api.web.observations_pb2 import GetObservationsResponse
@@ -26,6 +27,19 @@ config_service = ConfigService(env.storage)
 repos_service = RepositoriesService(env.storage)
 app.include_router(config_service.router, prefix="/api/v1")
 app.include_router(repos_service.router, prefix="/api/v1")
+
+origins = [
+    "http://localhost:5173",
+    "http://localhost",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # or ["*"] for all origins (not recommended for prod)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/api/v1/observations/{kind}")

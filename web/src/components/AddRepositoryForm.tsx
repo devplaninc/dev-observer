@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAddRepositoryMutation } from "@/hooks/useRepositoryQueries";
-import {useRepositoryStore} from "@/store/useRepositoryStore.ts";
+import {useBoundStore} from "@/store/use-bound-store.tsx";
 
 const AddRepositoryForm: React.FC = () => {
   const [url, setUrl] = useState("");
   const [validationError, setValidationError] = useState<ValidationError | null>(
     null
   );
-  const {repositories} = useRepositoryStore()
+  const {repositories} = useBoundStore()
 
   const validateInput = (value: string): boolean => {
     const error = validateGitHubUrl(value, repositories);
