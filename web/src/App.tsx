@@ -6,30 +6,34 @@ import GlobalConfigEditorPage from "@/pages/config/GlobalConfigEditorPage.tsx";
 import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar.tsx";
 import {SiteHeader} from "@/components/layout/SiteHeader.tsx";
 import {AppSidebar} from "@/components/layout/AppSidebar.tsx";
+import {Toaster} from "@/components/ui/sonner"
 
 // Create a client
 const queryClient = new QueryClient();
 
 function App() {
   return <div className="[--header-height:calc(theme(spacing.14))]">
+    <Toaster/>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <SidebarProvider className="flex flex-col">
-        <div className="min-h-screen bg-background text-foreground">
-          <SiteHeader />
-          <div className="flex flex-1">
-            <AppSidebar />
-            <SidebarInset>
-              <Routes>
-                <Route path="/repositories" element={<RepositoryListPage />} />
-                <Route path="/repositories/:id" element={<RepositoryDetailsPage />} />
-                <Route path="/admin/config-editor" element={<GlobalConfigEditorPage />} />
-                <Route path="/" element={<Navigate to="/repositories" replace />} />
-                <Route path="*" element={<Navigate to="/repositories" replace />} />
-              </Routes>
-            </SidebarInset>
+          <div className="min-h-screen bg-background text-foreground">
+            <SiteHeader/>
+            <div className="flex flex-1">
+              <AppSidebar/>
+              <SidebarInset>
+                <div className="p-4">
+                  <Routes>
+                    <Route path="/repositories" element={<RepositoryListPage/>}/>
+                    <Route path="/repositories/:id" element={<RepositoryDetailsPage/>}/>
+                    <Route path="/admin/config-editor" element={<GlobalConfigEditorPage/>}/>
+                    <Route path="/" element={<Navigate to="/repositories" replace/>}/>
+                    <Route path="*" element={<Navigate to="/repositories" replace/>}/>
+                  </Routes>
+                </div>
+              </SidebarInset>
+            </div>
           </div>
-        </div>
         </SidebarProvider>
       </BrowserRouter>
     </QueryClientProvider>

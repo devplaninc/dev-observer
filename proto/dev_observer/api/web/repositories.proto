@@ -9,10 +9,19 @@ message ListGithubRepositoriesResponse {
 }
 
 message AddGithubRepositoryRequest {
-  dev_observer.api.types.repo.GitHubRepository repo = 1;
+  string url = 1;
 }
 
 message AddGithubRepositoryResponse {
+  dev_observer.api.types.repo.GitHubRepository repo = 1;
 }
 
 message RescanRepositoryResponse{}
+
+message GetRepositoryResponse{
+  dev_observer.api.types.repo.GitHubRepository repo = 1;
+}
+
+message DeleteRepositoryResponse{
+  repeated dev_observer.api.types.repo.GitHubRepository repos = 1;
+}

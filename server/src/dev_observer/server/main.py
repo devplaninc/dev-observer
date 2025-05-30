@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import subprocess
+import threading
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,7 +24,21 @@ _log = logging.getLogger(__name__)
 Settings.model_config["toml_file"] = "default_config.toml"
 env: ServerEnv = detect_server_env(Settings())
 
-app = FastAPI()
+
+def start_bg_processing():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(env.periodic_processor.run())
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    thread = threading.Thread(target=start_bg_processing, daemon=True)
+    thread.start()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 config_service = ConfigService(env.storage)
 repos_service = RepositoriesService(env.storage)
 app.include_router(config_service.router, prefix="/api/v1")
@@ -59,10 +75,7 @@ async def start_fastapi_server():
 
 if __name__ == "__main__":
     async def start():
-        await asyncio.gather(
-            env.periodic_processor.run(),
-            start_fastapi_server(),
-        )
+        await start_fastapi_server()
 
 
     asyncio.run(start())

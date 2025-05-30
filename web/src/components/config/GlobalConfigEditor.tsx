@@ -12,6 +12,7 @@ import {Analyzer} from "@/pb/dev_observer/api/types/observations.ts";
 import {useGlobalConfig} from "@/hooks/use-config.tsx";
 import {ErrorAlert} from "@/components/ErrorAlert.tsx";
 import {Loader} from "@/components/Loader.tsx";
+import {Separator} from "@/components/ui/separator.tsx";
 
 const analyzerSchema = z.object({
   name: z.string().min(2),
@@ -48,9 +49,9 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
   });
   const onSubmit = useCallback((values: globalConfigType) => {
       updateGlobalConfig(values)
-        .then(() => toast.success("Profile updated"))
+        .then(() => toast.success("Config updated"))
         .catch(e => {
-          toast.error(`Failed to update profile: ${e}`)
+          toast.error(`Failed to update config: ${e}`)
           throw e
         })
     }
@@ -59,10 +60,10 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
   return <Form {...form}>
     {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-      <div>
+      <div className="space-y-4">
         <h2 className="font-semibold text-lg">Analyzers:</h2>
         {analyzers.map((f, i) => (
-          <div key={f.id} className="border rounded-md p-4 w-11/12 space-y-4">
+          <div key={f.id} className="border rounded-md p-4 space-y-4">
             <FormField
               control={form.control}
               name={`analysis.repoAnalyzers.${i}.name`}
@@ -114,6 +115,7 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
           Add Analyzer
         </Button>
       </div>
+      <Separator />
 
       <Button role="submit">
         Submit

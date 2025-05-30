@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from dev_observer.api.types import repo_pb2 as dev__observer_dot_api_dot_types_dot_repo__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\'dev_observer/api/web/repositories.proto\x12!dev_observer.api.web.repositories\x1a!dev_observer/api/types/repo.proto\"^\n\x1eListGithubRepositoriesResponse\x12<\n\x05repos\x18\x01 \x03(\x0b\x32-.dev_observer.api.types.repo.GitHubRepository\"Y\n\x1a\x41\x64\x64GithubRepositoryRequest\x12;\n\x04repo\x18\x01 \x01(\x0b\x32-.dev_observer.api.types.repo.GitHubRepository\"\x1d\n\x1b\x41\x64\x64GithubRepositoryResponse\"\x1a\n\x18RescanRepositoryResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\'dev_observer/api/web/repositories.proto\x12!dev_observer.api.web.repositories\x1a!dev_observer/api/types/repo.proto\"^\n\x1eListGithubRepositoriesResponse\x12<\n\x05repos\x18\x01 \x03(\x0b\x32-.dev_observer.api.types.repo.GitHubRepository\")\n\x1a\x41\x64\x64GithubRepositoryRequest\x12\x0b\n\x03url\x18\x01 \x01(\t\"Z\n\x1b\x41\x64\x64GithubRepositoryResponse\x12;\n\x04repo\x18\x01 \x01(\x0b\x32-.dev_observer.api.types.repo.GitHubRepository\"\x1a\n\x18RescanRepositoryResponse\"T\n\x15GetRepositoryResponse\x12;\n\x04repo\x18\x01 \x01(\x0b\x32-.dev_observer.api.types.repo.GitHubRepository\"X\n\x18\x44\x65leteRepositoryResponse\x12<\n\x05repos\x18\x01 \x03(\x0b\x32-.dev_observer.api.types.repo.GitHubRepositoryb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,9 +35,13 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_LISTGITHUBREPOSITORIESRESPONSE']._serialized_start=113
   _globals['_LISTGITHUBREPOSITORIESRESPONSE']._serialized_end=207
   _globals['_ADDGITHUBREPOSITORYREQUEST']._serialized_start=209
-  _globals['_ADDGITHUBREPOSITORYREQUEST']._serialized_end=298
-  _globals['_ADDGITHUBREPOSITORYRESPONSE']._serialized_start=300
-  _globals['_ADDGITHUBREPOSITORYRESPONSE']._serialized_end=329
-  _globals['_RESCANREPOSITORYRESPONSE']._serialized_start=331
-  _globals['_RESCANREPOSITORYRESPONSE']._serialized_end=357
+  _globals['_ADDGITHUBREPOSITORYREQUEST']._serialized_end=250
+  _globals['_ADDGITHUBREPOSITORYRESPONSE']._serialized_start=252
+  _globals['_ADDGITHUBREPOSITORYRESPONSE']._serialized_end=342
+  _globals['_RESCANREPOSITORYRESPONSE']._serialized_start=344
+  _globals['_RESCANREPOSITORYRESPONSE']._serialized_end=370
+  _globals['_GETREPOSITORYRESPONSE']._serialized_start=372
+  _globals['_GETREPOSITORYRESPONSE']._serialized_end=456
+  _globals['_DELETEREPOSITORYRESPONSE']._serialized_start=458
+  _globals['_DELETEREPOSITORYRESPONSE']._serialized_end=546
 # @@protoc_insertion_point(module_scope)

@@ -1,15 +1,22 @@
-import {delay, extractRepoName, validateGitHubUrl} from '@/utils/repositoryUtils';
-import type {ApiError, Repository} from '@/types/repository';
+import type {Repository} from '@/types/repository';
 import type {StateCreator} from "zustand";
+import {repoAPI, repoRescanAPI, reposAPI} from "@/store/apiPaths.tsx";
+import {
+  AddGithubRepositoryRequest,
+  AddGithubRepositoryResponse,
+  DeleteRepositoryResponse,
+  GetRepositoryResponse,
+  ListGithubRepositoriesResponse
+} from "@/pb/dev_observer/api/web/repositories.ts";
 
 export interface RepositoryState {
   repositories: Record<string, Repository>;
 
-  // Actions
   fetchRepositories: () => Promise<void>;
   fetchRepositoryById: (id: string) => Promise<void>;
   addRepository: (url: string) => Promise<void>;
-  reset: () => void;
+  deleteRepository: (id: string) => Promise<void>;
+  rescanRepository: (id: string) => Promise<void>;
 }
 
 // Initial repositories data
@@ -26,94 +33,51 @@ const initialRepositories: Record<string, Repository> = {
   },
 };
 
-export const createRepositoriesSlice:  StateCreator<
+export const createRepositoriesSlice: StateCreator<
   RepositoryState,
   [],
   [],
   RepositoryState
-> = ((set, get) => ({
+> = ((set) => ({
   repositories: initialRepositories,
 
-  fetchRepositories: async () => {
-    try {
-      // Simulate network latency (500-1000ms)
-      const latency = Math.floor(Math.random() * 500) + 500;
-      await delay(latency);
+  fetchRepositories: async () => fetch(reposAPI())
+    .then(r => r.ok ? r.json() : Promise.resolve(new Error(r.statusText)))
+    .then(js => {
+      const {repos} = ListGithubRepositoriesResponse.fromJSON(js)
+      const repositories = repos.reduce((a, r) => ({...a, [r.id]: r}), {} as Record<string, Repository>)
+      set(s => ({...s, repositories}))
+    }),
 
-      // Randomly simulate an error (10% chance)
-      if (Math.random() < 0.1) {
-        const apiError = new Error("Failed to fetch repositories. Please try again.") as Error & ApiError;
-        apiError.status = 500;
-        throw apiError;
+  fetchRepositoryById: async id => fetch(repoAPI(id))
+    .then(r => r.ok ? r.json() : Promise.reject(new Error(r.statusText)))
+    .then(js => {
+      const {repo} = GetRepositoryResponse.fromJSON(js)
+      if (repo) {
+        set(s => ({...s, repositories: {...s.repositories, [repo.id]: repo}}))
       }
-    } catch (err) {
-      const error = err as Error;
-      console.error("Error loading repositories:", error);
-      throw err;
-    }
-  },
+    }),
 
-  fetchRepositoryById: async id => {
-    try {
-      // Simulate network latency (500-1000ms)
-      const latency = Math.floor(Math.random() * 500) + 500;
-      await delay(latency);
-
-      // Randomly simulate an error (10% chance)
-      if (Math.random() < 0.1) {
-        const apiError = new Error("Failed to fetch repository. Please try again.") as Error & ApiError;
-        apiError.status = 500;
-        throw apiError;
+  addRepository: async url => fetch(reposAPI(),
+    {method: "POST", body: JSON.stringify(AddGithubRepositoryRequest.toJSON({url}))}
+  ).then(r => r.ok ? r.json() : Promise.reject(new Error(r.statusText)))
+    .then(js => {
+      const {repo} = AddGithubRepositoryResponse.fromJSON(js)
+      if (repo) {
+        set(s => ({...s, repositories: {...s.repositories, [repo.id]: repo}}))
       }
-
-      const repository = get().repositories[id]
-
-      if (!repository) {
-        const apiError = new Error("Repository not found") as Error & ApiError;
-        apiError.status = 404;
-        throw apiError;
+    }),
+  deleteRepository: async id => fetch(repoAPI(id), {method: "DELETE"})
+    .then(r => r.ok ? r.json() : Promise.reject(new Error(r.statusText)))
+    .then(js => {
+      const {repos} = DeleteRepositoryResponse.fromJSON(js)
+      const repositories = repos.reduce((a, r) => ({...a, [r.id]: r}), {} as Record<string, Repository>)
+      set(s => ({...s, repositories}))
+    }),
+  rescanRepository: async id => fetch(repoRescanAPI(id), {method: "POST"})
+    .then(r => {
+      if (!r.ok) {
+        return Promise.reject(new Error(r.statusText))
       }
-
-    } catch (err) {
-      const error = err as Error;
-      console.error("Error loading repository:", error);
-      throw err;
-    }
-  },
-
-  addRepository: async url => {
-    // Simulate network latency (500-1000ms)
-    const latency = Math.floor(Math.random() * 500) + 500;
-    await delay(latency);
-
-    // Update repositories for validation
-    const {repositories} = get();
-    // Validate URL
-    const validationError = validateGitHubUrl(url, repositories);
-    if (validationError) {
-      const apiError = new Error("Validation failed") as Error & ApiError;
-      apiError.errors = [validationError];
-      apiError.status = 400;
-      throw apiError;
-    }
-
-    // Randomly simulate an error (10% chance)
-    if (Math.random() < 0.1) {
-      const apiError = new Error("Failed to add repository. Please try again.") as Error & ApiError;
-      apiError.status = 500;
-      throw apiError;
-    }
-
-    // Create new repository
-    const newRepository: Repository = {
-      id: (Object.values(repositories).length + 1).toString(),
-      name: extractRepoName(url),
-      url,
-    };
-
-    // Update state
-    set(s => ({...s, repositories: {...s.repositories, [newRepository.id]: newRepository}}));
-  },
-
-  reset: () => set({repositories: {}}),
+    }),
 }));

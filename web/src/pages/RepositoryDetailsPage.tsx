@@ -1,31 +1,40 @@
-import React from "react";
+import React, {useCallback, useState} from "react";
 import {useNavigate, useParams} from "react-router";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import {useRepositoryQuery} from "@/hooks/useRepositoryQueries";
+import {useBoundStore} from "@/store/use-bound-store.tsx";
+import {toast} from "sonner";
+import {Loader} from "@/components/Loader.tsx";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "@/components/ui/alert-dialog.tsx";
 
 const RepositoryDetailsPage: React.FC = () => {
   const {id} = useParams<{ id: string }>();
   const navigate = useNavigate();
   const {repository, loading, error} = useRepositoryQuery(id ?? '');
-
   const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+  const {rescanRepository} = useBoundStore()
+  const rescan = useCallback(() => {
+    rescanRepository(id!)
+      .then(() => toast.success(`Rescan started`))
+      .catch(e => toast.error(`Failed to initialize rescan: ${e}`))
+  }, [id, rescanRepository])
 
   const handleBack = () => navigate("/repositories");
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <Button
-        variant="outline"
-        onClick={() => {
-          void handleBack();
-        }}
-        className="mb-6"
-      >
-        ← Back to Repositories
-      </Button>
-
       {error ? (
         <Alert variant="destructive" className="mb-6">
           <AlertTitle>Error</AlertTitle>
@@ -54,6 +63,10 @@ const RepositoryDetailsPage: React.FC = () => {
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground">Repository ID</h3>
                   <p>{repository.id}</p>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <DeleteRepoButton repoId={id!}/>
+                  <Button onClick={rescan}>Rescan</Button>
                 </div>
               </div>
             </CardContent>
@@ -87,5 +100,41 @@ const RepositoryDetailsPage: React.FC = () => {
     </div>
   );
 };
+
+function DeleteRepoButton({repoId}: { repoId: string }) {
+  const {deleteRepository} = useBoundStore()
+  const [deleting, setDeleting] = useState(false);
+  const navigate = useNavigate();
+  const onDelete = useCallback(() => {
+    setDeleting(true);
+    deleteRepository(repoId)
+      .then(() => navigate("/repositories"))
+      .catch(e => {
+        toast.error(`Failed to delete repo: ${e}`)
+        throw e
+      }).finally(() => setDeleting(false));
+  }, [deleteRepository, repoId, navigate])
+  return <div>
+    <AlertDialog>
+      <AlertDialogTrigger>
+        <Button variant="destructive">Delete</Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure you want to delete repo?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction asChild>
+            <Button onClick={onDelete} disabled={deleting}>{deleting && <Loader/>} Delete</Button>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </div>
+}
 
 export default RepositoryDetailsPage;

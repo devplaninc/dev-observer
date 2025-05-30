@@ -13,7 +13,10 @@ class StorageProvider(Protocol):
     async def get_github_repo(self, repo_id: str) -> Optional[GitHubRepository]:
         ...
 
-    async def add_github_repo(self, repo: GitHubRepository) -> MutableSequence[GitHubRepository]:
+    async def delete_github_repo(self, repo_id: str):
+        ...
+
+    async def add_github_repo(self, repo: GitHubRepository) -> GitHubRepository:
         ...
 
     async def next_processing_item(self) -> Optional[ProcessingItem]:

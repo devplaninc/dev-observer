@@ -2,6 +2,7 @@ import abc
 import asyncio
 import datetime
 import logging
+import uuid
 from abc import abstractmethod
 from typing import Optional, Callable, MutableSequence
 
@@ -34,7 +35,17 @@ class SingleBlobStorageProvider(abc.ABC, StorageProvider):
                 return r
         return None
 
-    async def add_github_repo(self, repo: GitHubRepository) -> MutableSequence[GitHubRepository]:
+    async def delete_github_repo(self, repo_id: str):
+        def up(d: LocalStorageData):
+            new_repos = [r for r in d.github_repos if r.id != repo_id]
+            d.ClearField("github_repos")
+            d.github_repos.extend(new_repos)
+
+        await self._update(up)
+
+    async def add_github_repo(self, repo: GitHubRepository) -> GitHubRepository:
+        if not repo.id or len(repo.id) == 0:
+            repo.id = f"{uuid.uuid4()}"
         def up(d: LocalStorageData):
             if repo.id in [r.id for r in self._get().github_repos]:
                 return
@@ -45,8 +56,8 @@ class SingleBlobStorageProvider(abc.ABC, StorageProvider):
                     next_processing=self._clock.now(),
                 ))
 
-        data = await self._update(up)
-        return data.github_repos
+        await self._update(up)
+        return repo
 
     async def next_processing_item(self) -> Optional[ProcessingItem]:
         now = self._clock.now()

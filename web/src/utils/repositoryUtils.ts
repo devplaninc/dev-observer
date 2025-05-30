@@ -3,14 +3,7 @@ import type {Repository, ValidationError} from "@/types/repository";
 // Validate GitHub repository URL
 export const validateGitHubUrl = (url: string, repos: Record<string, Repository>): ValidationError | null => {
   if (!url) {
-    return { field: "url", message: "Repository URL is required" };
-  }
-
-  // Check if it's a valid URL
-  try {
-    new URL(url);
-  } catch {
-    return { field: "url", message: "Invalid URL format" };
+    return {field: "url", message: "Repository URL is required"};
   }
 
   // Check if it's a GitHub URL

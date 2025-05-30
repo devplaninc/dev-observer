@@ -6,6 +6,9 @@ class ParsedRepoUrl:
     owner: str
     name: str
 
+    def get_full_name(self) -> str:
+        return f"{self.owner}/{self.name}"
+
 
 def parse_github_url(github_url: str) -> ParsedRepoUrl:
     github_url = github_url.rstrip('/').rstrip('.git')
