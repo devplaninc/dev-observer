@@ -99,11 +99,11 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
 
   fromJSON(object: any): GitHubRepository {
     return {
-      id: isSet(object.id) ? globalThis.String(object.id) : "",
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      fullName: isSet(object.fullName) ? globalThis.String(object.fullName) : "",
-      url: isSet(object.url) ? globalThis.String(object.url) : "",
-      description: isSet(object.description) ? globalThis.String(object.description) : "",
+      id: isSet(object.id) ? gt.String(object.id) : "",
+      name: isSet(object.name) ? gt.String(object.name) : "",
+      fullName: isSet(object.fullName) ? gt.String(object.fullName) : "",
+      url: isSet(object.url) ? gt.String(object.url) : "",
+      description: isSet(object.description) ? gt.String(object.description) : "",
     };
   },
 
@@ -140,6 +140,25 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
     return message;
   },
 };
+
+declare const self: any | undefined;
+declare const window: any | undefined;
+declare const global: any | undefined;
+const gt: any = (() => {
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  if (typeof self !== "undefined") {
+    return self;
+  }
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  if (typeof global !== "undefined") {
+    return global;
+  }
+  throw "Unable to locate global object";
+})();
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 

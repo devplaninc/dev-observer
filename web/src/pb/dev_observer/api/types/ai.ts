@@ -154,9 +154,9 @@ export const ModelConfig: MessageFns<ModelConfig> = {
 
   fromJSON(object: any): ModelConfig {
     return {
-      provider: isSet(object.provider) ? globalThis.String(object.provider) : "",
-      modelName: isSet(object.modelName) ? globalThis.String(object.modelName) : "",
-      temperature: isSet(object.temperature) ? globalThis.Number(object.temperature) : 0,
+      provider: isSet(object.provider) ? gt.String(object.provider) : "",
+      modelName: isSet(object.modelName) ? gt.String(object.modelName) : "",
+      temperature: isSet(object.temperature) ? gt.Number(object.temperature) : 0,
     };
   },
 
@@ -223,7 +223,7 @@ export const SystemMessage: MessageFns<SystemMessage> = {
   },
 
   fromJSON(object: any): SystemMessage {
-    return { text: isSet(object.text) ? globalThis.String(object.text) : "" };
+    return { text: isSet(object.text) ? gt.String(object.text) : "" };
   },
 
   toJSON(message: SystemMessage): unknown {
@@ -293,8 +293,8 @@ export const UserMessage: MessageFns<UserMessage> = {
 
   fromJSON(object: any): UserMessage {
     return {
-      text: isSet(object.text) ? globalThis.String(object.text) : undefined,
-      imageUrl: isSet(object.imageUrl) ? globalThis.String(object.imageUrl) : undefined,
+      text: isSet(object.text) ? gt.String(object.text) : undefined,
+      imageUrl: isSet(object.imageUrl) ? gt.String(object.imageUrl) : undefined,
     };
   },
 
@@ -417,6 +417,25 @@ export const PromptTemplate: MessageFns<PromptTemplate> = {
     return message;
   },
 };
+
+declare const self: any | undefined;
+declare const window: any | undefined;
+declare const global: any | undefined;
+const gt: any = (() => {
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  if (typeof self !== "undefined") {
+    return self;
+  }
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  if (typeof global !== "undefined") {
+    return global;
+  }
+  throw "Unable to locate global object";
+})();
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 

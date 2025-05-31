@@ -22,5 +22,5 @@ protoc \
   -I "${root}/proto"  \
   --plugin=./web/node_modules/.bin/protoc-gen-ts_proto \
   --ts_proto_out=web/src/pb \
-  --ts_proto_opt=unrecognizedEnum=false,oneof=unions-value,outputServices=nice-grpc,outputServices=generic-definitions,useExactTypes=false \
+  --ts_proto_opt=globalThisPolyfill=true,unrecognizedEnum=false,oneof=unions-value,outputServices=nice-grpc,outputServices=generic-definitions,useExactTypes=false \
   ${PROTO_FILES}

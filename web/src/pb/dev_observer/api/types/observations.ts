@@ -86,9 +86,9 @@ export const ObservationKey: MessageFns<ObservationKey> = {
 
   fromJSON(object: any): ObservationKey {
     return {
-      kind: isSet(object.kind) ? globalThis.String(object.kind) : "",
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      key: isSet(object.key) ? globalThis.String(object.key) : "",
+      kind: isSet(object.kind) ? gt.String(object.kind) : "",
+      name: isSet(object.name) ? gt.String(object.name) : "",
+      key: isSet(object.key) ? gt.String(object.key) : "",
     };
   },
 
@@ -256,9 +256,9 @@ export const Analyzer: MessageFns<Analyzer> = {
 
   fromJSON(object: any): Analyzer {
     return {
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      promptPrefix: isSet(object.promptPrefix) ? globalThis.String(object.promptPrefix) : "",
-      fileName: isSet(object.fileName) ? globalThis.String(object.fileName) : "",
+      name: isSet(object.name) ? gt.String(object.name) : "",
+      promptPrefix: isSet(object.promptPrefix) ? gt.String(object.promptPrefix) : "",
+      fileName: isSet(object.fileName) ? gt.String(object.fileName) : "",
     };
   },
 
@@ -288,11 +288,30 @@ export const Analyzer: MessageFns<Analyzer> = {
   },
 };
 
+declare const self: any | undefined;
+declare const window: any | undefined;
+declare const global: any | undefined;
+const gt: any = (() => {
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  if (typeof self !== "undefined") {
+    return self;
+  }
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  if (typeof global !== "undefined") {
+    return global;
+  }
+  throw "Unable to locate global object";
+})();
+
 function bytesFromBase64(b64: string): Uint8Array {
-  if ((globalThis as any).Buffer) {
-    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+  if ((gt as any).Buffer) {
+    return Uint8Array.from(gt.Buffer.from(b64, "base64"));
   } else {
-    const bin = globalThis.atob(b64);
+    const bin = gt.atob(b64);
     const arr = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; ++i) {
       arr[i] = bin.charCodeAt(i);
@@ -302,14 +321,14 @@ function bytesFromBase64(b64: string): Uint8Array {
 }
 
 function base64FromBytes(arr: Uint8Array): string {
-  if ((globalThis as any).Buffer) {
-    return globalThis.Buffer.from(arr).toString("base64");
+  if ((gt as any).Buffer) {
+    return gt.Buffer.from(arr).toString("base64");
   } else {
     const bin: string[] = [];
     arr.forEach((byte) => {
-      bin.push(globalThis.String.fromCharCode(byte));
+      bin.push(gt.String.fromCharCode(byte));
     });
-    return globalThis.btoa(bin.join(""));
+    return gt.btoa(bin.join(""));
   }
 }
 

@@ -26,7 +26,6 @@ export const createConfigSlice: StateCreator<
     .then(js => {
 
       const {config} = GetGlobalConfigResponse.fromJSON(js)
-      console.log("Config", {config, js})
       set(s => ({...s, globalConfig: config}))
     }),
   updateGlobalConfig: async update => fetch(configAPI(),

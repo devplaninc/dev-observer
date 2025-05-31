@@ -70,9 +70,7 @@ export const ListGithubRepositoriesResponse: MessageFns<ListGithubRepositoriesRe
   },
 
   fromJSON(object: any): ListGithubRepositoriesResponse {
-    return {
-      repos: globalThis.Array.isArray(object?.repos) ? object.repos.map((e: any) => GitHubRepository.fromJSON(e)) : [],
-    };
+    return { repos: gt.Array.isArray(object?.repos) ? object.repos.map((e: any) => GitHubRepository.fromJSON(e)) : [] };
   },
 
   toJSON(message: ListGithubRepositoriesResponse): unknown {
@@ -130,7 +128,7 @@ export const AddGithubRepositoryRequest: MessageFns<AddGithubRepositoryRequest> 
   },
 
   fromJSON(object: any): AddGithubRepositoryRequest {
-    return { url: isSet(object.url) ? globalThis.String(object.url) : "" };
+    return { url: isSet(object.url) ? gt.String(object.url) : "" };
   },
 
   toJSON(message: AddGithubRepositoryRequest): unknown {
@@ -351,9 +349,7 @@ export const DeleteRepositoryResponse: MessageFns<DeleteRepositoryResponse> = {
   },
 
   fromJSON(object: any): DeleteRepositoryResponse {
-    return {
-      repos: globalThis.Array.isArray(object?.repos) ? object.repos.map((e: any) => GitHubRepository.fromJSON(e)) : [],
-    };
+    return { repos: gt.Array.isArray(object?.repos) ? object.repos.map((e: any) => GitHubRepository.fromJSON(e)) : [] };
   },
 
   toJSON(message: DeleteRepositoryResponse): unknown {
@@ -373,6 +369,25 @@ export const DeleteRepositoryResponse: MessageFns<DeleteRepositoryResponse> = {
     return message;
   },
 };
+
+declare const self: any | undefined;
+declare const window: any | undefined;
+declare const global: any | undefined;
+const gt: any = (() => {
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  if (typeof self !== "undefined") {
+    return self;
+  }
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  if (typeof global !== "undefined") {
+    return global;
+  }
+  throw "Unable to locate global object";
+})();
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 

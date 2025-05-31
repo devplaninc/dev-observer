@@ -165,8 +165,8 @@ export const Timestamp: MessageFns<Timestamp> = {
 
   fromJSON(object: any): Timestamp {
     return {
-      seconds: isSet(object.seconds) ? globalThis.Number(object.seconds) : 0,
-      nanos: isSet(object.nanos) ? globalThis.Number(object.nanos) : 0,
+      seconds: isSet(object.seconds) ? gt.Number(object.seconds) : 0,
+      nanos: isSet(object.nanos) ? gt.Number(object.nanos) : 0,
     };
   },
 
@@ -192,6 +192,25 @@ export const Timestamp: MessageFns<Timestamp> = {
   },
 };
 
+declare const self: any | undefined;
+declare const window: any | undefined;
+declare const global: any | undefined;
+const gt: any = (() => {
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  if (typeof self !== "undefined") {
+    return self;
+  }
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  if (typeof global !== "undefined") {
+    return global;
+  }
+  throw "Unable to locate global object";
+})();
+
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
@@ -202,12 +221,12 @@ export type DeepPartial<T> = T extends Builtin ? T
   : Partial<T>;
 
 function longToNumber(int64: { toString(): string }): number {
-  const num = globalThis.Number(int64.toString());
-  if (num > globalThis.Number.MAX_SAFE_INTEGER) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  const num = gt.Number(int64.toString());
+  if (num > gt.Number.MAX_SAFE_INTEGER) {
+    throw new gt.Error("Value is larger than Number.MAX_SAFE_INTEGER");
   }
-  if (num < globalThis.Number.MIN_SAFE_INTEGER) {
-    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
+  if (num < gt.Number.MIN_SAFE_INTEGER) {
+    throw new gt.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
   }
   return num;
 }

@@ -116,7 +116,7 @@ export const AnalysisConfig: MessageFns<AnalysisConfig> = {
 
   fromJSON(object: any): AnalysisConfig {
     return {
-      repoAnalyzers: globalThis.Array.isArray(object?.repoAnalyzers)
+      repoAnalyzers: gt.Array.isArray(object?.repoAnalyzers)
         ? object.repoAnalyzers.map((e: any) => Analyzer.fromJSON(e))
         : [],
     };
@@ -139,6 +139,25 @@ export const AnalysisConfig: MessageFns<AnalysisConfig> = {
     return message;
   },
 };
+
+declare const self: any | undefined;
+declare const window: any | undefined;
+declare const global: any | undefined;
+const gt: any = (() => {
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  if (typeof self !== "undefined") {
+    return self;
+  }
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  if (typeof global !== "undefined") {
+    return global;
+  }
+  throw "Unable to locate global object";
+})();
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
