@@ -10,7 +10,7 @@ message ObservationKey {
 
 message Observation {
   ObservationKey key = 1;
-  bytes content = 2;
+  string content = 2;
 }
 
 message Analyzer {

@@ -82,7 +82,7 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
               name={`analysis.repoAnalyzers.${i}.promptPrefix`}
               render={({field}) => (
                 <FormItem className="flex items-center gap-4">
-                  <FormLabel className="w-[100px]">Prompt PRefix:</FormLabel>
+                  <FormLabel className="w-[100px]">Prompt Prefix:</FormLabel>
                   <FormControl className="w-[200px]">
                     <Input placeholder="Analyzer prompt prefix" {...field}/>
                   </FormControl>

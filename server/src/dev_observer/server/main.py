@@ -9,13 +9,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import dev_observer.log
-from dev_observer.api.web.observations_pb2 import GetObservationsResponse
 from dev_observer.env_detection import detect_server_env
 from dev_observer.server.env import ServerEnv
 from dev_observer.server.services.config import ConfigService
+from dev_observer.server.services.observations import ObservationsService
 from dev_observer.server.services.repositories import RepositoriesService
 from dev_observer.settings import Settings
-from dev_observer.util import pb_to_json
 
 dev_observer.log.encoder = dev_observer.log.PlainTextEncoder()
 logging.basicConfig(level=logging.DEBUG)
@@ -42,8 +41,10 @@ async def lifespan(_: FastAPI):
 app = FastAPI(lifespan=lifespan)
 config_service = ConfigService(env.storage)
 repos_service = RepositoriesService(env.storage)
+observations_service = ObservationsService(env.observations)
 app.include_router(config_service.router, prefix="/api/v1")
 app.include_router(repos_service.router, prefix="/api/v1")
+app.include_router(observations_service.router, prefix="/api/v1")
 
 origins = [
     "http://localhost:5173",
@@ -59,16 +60,10 @@ app.add_middleware(
 )
 
 
-@app.get("/api/v1/observations/{kind}")
-async def get_observations(kind: str):
-    keys = await env.observations.list(kind=kind)
-    return pb_to_json(GetObservationsResponse(keys=keys))
-
-
 async def start_fastapi_server():
     import uvicorn
     port = 8090
-    uvicorn_config = uvicorn.Config("dev_observer.server.main:app", host="0.0.0.0", port=port, log_level="info")
+    uvicorn_config = uvicorn.Config("dev_observer.server.main:app", host="0.0.0.0", port=port, log_level="debug")
     uvicorn_server = uvicorn.Server(uvicorn_config)
     _log.info(s_("Starting FastAPI server...", port=port))
     await uvicorn_server.serve()

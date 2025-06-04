@@ -14,7 +14,7 @@ class LocalObservationsProvider(ObservationsProvider):
     async def store(self, o: Observation):
         file_path = self._get_key_path(o.key)
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, 'wb') as out_file:
+        with open(file_path, 'w') as out_file:
             out_file.write(o.content)
 
     async def list(self, kind: str) -> List[ObservationKey]:
@@ -41,6 +41,6 @@ class LocalObservationsProvider(ObservationsProvider):
     def _get_key_path(self, key: ObservationKey) -> str:
         return os.path.join(self._get_root(key.kind), key.key)
 
-    def _read_content(self, key: ObservationKey) -> bytes:
-        with open(self._get_key_path(key), 'rb') as in_file:
+    def _read_content(self, key: ObservationKey) -> str:
+        with open(self._get_key_path(key), 'r') as in_file:
             return in_file.read()

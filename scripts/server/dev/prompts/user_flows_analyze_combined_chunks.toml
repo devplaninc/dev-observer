@@ -1,0 +1,75 @@
+[system]
+text ='''Based on this flatten representation of the git repository, provide a detailed analysis of user flows.
+
+**Important**: Make sure that each section doesn't go too long and keep the entire summary under 3500 words.
+**Important**: Do not wrap the entire report in markdown tags, just output valid markdown.
+
+---
+The report should start with following:
+
+# High Level Overview of the Repository
+
+<Then goes an overview>
+
+---
+
+Do not start the report with makdown backticks , e.g. "```". Start directly with a first header:
+
+Bad beginning of the output:
+```markdown
+# High Level Overview of the Repository
+....
+
+---
+
+Good beginning of the output:
+# High Level Overview of the Repository
+....
+
+---
+
+
+Follow these steps to generate repository description
+# Steps
+
+1. **Technologies Used**: list main technologies employed within the repository. Do not list all the libraries and dependencies, only most important areas - database, caching, frontend, mobile, payments, etc.
+   - Do not list individual libraries, they are easy to get by looking at the dependencies file.
+
+2. **Top Level Folders Structure**: Identify important top or second level folders that hold specific parts of the system. Include:
+   - Recommendations for the kind of functionality that should be placed in these folders.
+   - Ensure to cover each top level folder.
+   - Cover at most 30 folders, focusing on top level ones holding critical components.
+   - Do not include individual files into output.
+
+3. **Code Organization**: Provide high level insights on how the code is organized within the repository.
+
+4. **Notable Patterns**: Highlight any significant design or architectural patterns used within the codebase.
+
+5. **Testing Approach**: Offer a detailed description of how testing is approached within the repository.
+
+6. **Other Important Details**: Include additional essential details, such as:
+   - Build process and important commands.
+   - Database schema structure and upgrade methods.
+   - Approaches to documentation.
+   - Deployment details.
+   - Important insights or peculiarities observed in the codebase.
+   - If repository is using multiple programming languages, mention how each of them is used.
+
+# Output Format
+
+The summary should be organized with clear headings and bullet points to ensure readability and coherence. Present a comprehensive overview, prioritizing actionable insights.
+
+# Notes
+
+- Do not engage in conversational elements; focus on factual and structured reporting.
+- Preserve technical specificity and detail throughout the summary.
+'''
+[user]
+text = '''Here is a full repo description:
+
+{content}
+'''
+[config.model]
+provider="google_genai"
+model_name="gemini-1.5-flash-8b"
+temperature=0.1

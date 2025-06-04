@@ -7,6 +7,7 @@ import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar.tsx";
 import {SiteHeader} from "@/components/layout/SiteHeader.tsx";
 import {AppSidebar} from "@/components/layout/AppSidebar.tsx";
 import {Toaster} from "@/components/ui/sonner"
+import {useObservationKeys} from "@/hooks/useObservationQueries.ts";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -23,13 +24,7 @@ function App() {
               <AppSidebar/>
               <SidebarInset>
                 <div className="p-4">
-                  <Routes>
-                    <Route path="/repositories" element={<RepositoryListPage/>}/>
-                    <Route path="/repositories/:id" element={<RepositoryDetailsPage/>}/>
-                    <Route path="/admin/config-editor" element={<GlobalConfigEditorPage/>}/>
-                    <Route path="/" element={<Navigate to="/repositories" replace/>}/>
-                    <Route path="*" element={<Navigate to="/repositories" replace/>}/>
-                  </Routes>
+                  <AppRoutes />
                 </div>
               </SidebarInset>
             </div>
@@ -38,6 +33,17 @@ function App() {
       </BrowserRouter>
     </QueryClientProvider>
   </div>;
+}
+
+function AppRoutes() {
+  useObservationKeys("repos")
+  return <Routes>
+    <Route path="/repositories" element={<RepositoryListPage/>}/>
+    <Route path="/repositories/:id" element={<RepositoryDetailsPage/>}/>
+    <Route path="/admin/config-editor" element={<GlobalConfigEditorPage/>}/>
+    <Route path="/" element={<Navigate to="/repositories" replace/>}/>
+    <Route path="*" element={<Navigate to="/repositories" replace/>}/>
+  </Routes>
 }
 
 export default App;

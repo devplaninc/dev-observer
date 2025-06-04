@@ -21,13 +21,10 @@ class TokenizedAnalyzer:
         self.prompts = prompts
 
     async def analyze_flatten(self, flatten_result: FlattenResult) -> str:
-        try:
-            if len(flatten_result.file_paths) > 0:
-                return await self._analyze_tokenized(flatten_result.file_paths)
-            else:
-                return await self._analyze_file(flatten_result.full_file_path, f"{self.prompts_prefix}_analyze_full")
-        finally:
-            flatten_result.clean_up()
+        if len(flatten_result.file_paths) > 0:
+            return await self._analyze_tokenized(flatten_result.file_paths)
+        else:
+            return await self._analyze_file(flatten_result.full_file_path, f"{self.prompts_prefix}_analyze_full")
 
     async def _analyze_tokenized(self, paths: List[str]) -> str:
         summaries: List[str] = []

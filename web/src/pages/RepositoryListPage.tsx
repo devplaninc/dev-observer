@@ -4,7 +4,6 @@ import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components
 import {Button} from "@/components/ui/button";
 import AddRepositoryForm from "@/components/AddRepositoryForm";
 import {useRepositories} from "@/hooks/useRepositoryQueries";
-import type {Repository} from "@/types/repository";
 import {ErrorAlert} from "@/components/ErrorAlert.tsx";
 import {Loader} from "@/components/Loader.tsx";
 
@@ -35,7 +34,7 @@ const RepositoryListPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {repositories.map((repo: Repository) => (
+          {repositories.map(repo => (
             <Link to={`/repositories/${repo.id}`} key={repo.id}>
               <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
                 <CardHeader>

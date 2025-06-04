@@ -31,7 +31,10 @@ class PeriodicProcessor:
         # TODO: add proper background processing
         _log.info("Starting periodic processor")
         while True:
-            await self.process_next()
+            try:
+                await self.process_next()
+            except Exception as e:
+                _log.error(s_("Failed to process next item"), exc_info=e)
             await asyncio.sleep(5)
 
     async def process_next(self) -> Optional[ProcessingItem]:

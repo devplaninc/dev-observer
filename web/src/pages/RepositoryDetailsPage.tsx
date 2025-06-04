@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog.tsx";
+import {RepoAnalysisList} from "@/components/repos/RepoAnalysisList.tsx";
 
 const RepositoryDetailsPage: React.FC = () => {
   const {id} = useParams<{ id: string }>();
@@ -57,11 +58,19 @@ const RepositoryDetailsPage: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Repository URL</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground">URL</h3>
                   <p className="break-all">{repository.url}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Repository ID</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground">Full Name</h3>
+                  <p className="break-all">{repository.fullName}</p>
+                </div>
+                {repository.description && <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Description</h3>
+                  <p className="break-all">{repository.description}</p>
+                </div>}
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">ID</h3>
                   <p>{repository.id}</p>
                 </div>
                 <div className="flex gap-2 items-center">
@@ -72,19 +81,7 @@ const RepositoryDetailsPage: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Analysis Data</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-muted p-8 rounded-lg text-center">
-                <h3 className="text-xl font-medium mb-2">No analysis data available</h3>
-                <p className="text-muted-foreground">
-                  This is a placeholder for future detailed analysis data.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <RepoAnalysisList repo={repository}/>
         </div>
       ) : (
         <div className="bg-muted p-8 rounded-lg text-center">
@@ -116,7 +113,7 @@ function DeleteRepoButton({repoId}: { repoId: string }) {
   }, [deleteRepository, repoId, navigate])
   return <div>
     <AlertDialog>
-      <AlertDialogTrigger>
+      <AlertDialogTrigger asChild>
         <Button variant="destructive">Delete</Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

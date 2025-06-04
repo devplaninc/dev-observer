@@ -19,8 +19,8 @@ class Observation(_message.Message):
     KEY_FIELD_NUMBER: _ClassVar[int]
     CONTENT_FIELD_NUMBER: _ClassVar[int]
     key: ObservationKey
-    content: bytes
-    def __init__(self, key: _Optional[_Union[ObservationKey, _Mapping]] = ..., content: _Optional[bytes] = ...) -> None: ...
+    content: str
+    def __init__(self, key: _Optional[_Union[ObservationKey, _Mapping]] = ..., content: _Optional[str] = ...) -> None: ...
 
 class Analyzer(_message.Message):
     __slots__ = ("name", "prompt_prefix", "file_name")

@@ -17,7 +17,7 @@ export interface ObservationKey {
 
 export interface Observation {
   key: ObservationKey | undefined;
-  content: Uint8Array;
+  content: string;
 }
 
 export interface Analyzer {
@@ -119,7 +119,7 @@ export const ObservationKey: MessageFns<ObservationKey> = {
 };
 
 function createBaseObservation(): Observation {
-  return { key: undefined, content: new Uint8Array(0) };
+  return { key: undefined, content: "" };
 }
 
 export const Observation: MessageFns<Observation> = {
@@ -127,8 +127,8 @@ export const Observation: MessageFns<Observation> = {
     if (message.key !== undefined) {
       ObservationKey.encode(message.key, writer.uint32(10).fork()).join();
     }
-    if (message.content.length !== 0) {
-      writer.uint32(18).bytes(message.content);
+    if (message.content !== "") {
+      writer.uint32(18).string(message.content);
     }
     return writer;
   },
@@ -153,7 +153,7 @@ export const Observation: MessageFns<Observation> = {
             break;
           }
 
-          message.content = reader.bytes();
+          message.content = reader.string();
           continue;
         }
       }
@@ -168,7 +168,7 @@ export const Observation: MessageFns<Observation> = {
   fromJSON(object: any): Observation {
     return {
       key: isSet(object.key) ? ObservationKey.fromJSON(object.key) : undefined,
-      content: isSet(object.content) ? bytesFromBase64(object.content) : new Uint8Array(0),
+      content: isSet(object.content) ? gt.String(object.content) : "",
     };
   },
 
@@ -177,8 +177,8 @@ export const Observation: MessageFns<Observation> = {
     if (message.key !== undefined) {
       obj.key = ObservationKey.toJSON(message.key);
     }
-    if (message.content.length !== 0) {
-      obj.content = base64FromBytes(message.content);
+    if (message.content !== "") {
+      obj.content = message.content;
     }
     return obj;
   },
@@ -191,7 +191,7 @@ export const Observation: MessageFns<Observation> = {
     message.key = (object.key !== undefined && object.key !== null)
       ? ObservationKey.fromPartial(object.key)
       : undefined;
-    message.content = object.content ?? new Uint8Array(0);
+    message.content = object.content ?? "";
     return message;
   },
 };
@@ -306,31 +306,6 @@ const gt: any = (() => {
   }
   throw "Unable to locate global object";
 })();
-
-function bytesFromBase64(b64: string): Uint8Array {
-  if ((gt as any).Buffer) {
-    return Uint8Array.from(gt.Buffer.from(b64, "base64"));
-  } else {
-    const bin = gt.atob(b64);
-    const arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; ++i) {
-      arr[i] = bin.charCodeAt(i);
-    }
-    return arr;
-  }
-}
-
-function base64FromBytes(arr: Uint8Array): string {
-  if ((gt as any).Buffer) {
-    return gt.Buffer.from(arr).toString("base64");
-  } else {
-    const bin: string[] = [];
-    arr.forEach((byte) => {
-      bin.push(gt.String.fromCharCode(byte));
-    });
-    return gt.btoa(bin.join(""));
-  }
-}
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 

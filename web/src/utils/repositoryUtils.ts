@@ -1,7 +1,8 @@
-import type {Repository, ValidationError} from "@/types/repository";
+import type {ValidationError} from "@/types/repository";
+import type {GitHubRepository} from "@/pb/dev_observer/api/types/repo.ts";
 
 // Validate GitHub repository URL
-export const validateGitHubUrl = (url: string, repos: Record<string, Repository>): ValidationError | null => {
+export const validateGitHubUrl = (url: string, repos: Record<string, GitHubRepository>): ValidationError | null => {
   if (!url) {
     return {field: "url", message: "Repository URL is required"};
   }

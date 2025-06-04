@@ -2,9 +2,9 @@ import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import type {RepositoryState} from '@/store/repositoryStore.tsx';
 import {useCallback} from "react";
 import {useShallow} from "zustand/react/shallow";
-import type {Repository} from "@/types/repository.ts";
 import {useBoundStore} from "@/store/use-bound-store.tsx";
 import type {QueryResultCommon} from "@/hooks/queries.tsx";
+import type {GitHubRepository} from "@/pb/dev_observer/api/types/repo.ts";
 
 // Query keys for caching and invalidation
 export const repositoryKeys = {
@@ -13,7 +13,7 @@ export const repositoryKeys = {
   detail: (id: string) => [...repositoryKeys.all, 'detail', id] as const,
 };
 
-export function useRepositories(): { repositories: Repository[] | undefined } & QueryResultCommon {
+export function useRepositories(): { repositories: GitHubRepository[] | undefined } & QueryResultCommon {
   const {fetchRepositories} = useBoundStore();
   const queryFn = useCallback(async () => {
     await fetchRepositories();
@@ -30,7 +30,7 @@ export function useRepositories(): { repositories: Repository[] | undefined } & 
 }
 
 // Hook for fetching a single repository by ID
-export function useRepositoryQuery(id: string): { repository: Repository | undefined } & QueryResultCommon {
+export function useRepositoryQuery(id: string): { repository: GitHubRepository | undefined } & QueryResultCommon {
   const fetchRepositoryById = useBoundStore((state: RepositoryState) => state.fetchRepositoryById);
   const queryFn = useCallback(async () => {
     await fetchRepositoryById(id);

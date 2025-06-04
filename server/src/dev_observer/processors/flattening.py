@@ -1,16 +1,20 @@
 import abc
 import dataclasses
+import logging
 from abc import abstractmethod
 from typing import TypeVar, Generic, List
 
 from dev_observer.analysis.provider import AnalysisProvider
 from dev_observer.api.types.observations_pb2 import ObservationKey, Observation
 from dev_observer.flatten.flatten import FlattenResult
+from dev_observer.log import s_
 from dev_observer.observations.provider import ObservationsProvider
 from dev_observer.processors.tokenized import TokenizedAnalyzer
 from dev_observer.prompts.provider import PromptsProvider
 
 E = TypeVar("E")
+
+_log = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
@@ -36,12 +40,18 @@ class FlatteningProcessor(abc.ABC, Generic[E]):
 
     async def process(self, entity: E, requests: List[ObservationRequest]):
         res = await self.get_flatten(entity)
-        for request in requests:
-            prompts_prefix = request.prompt_prefix
-            key = request.key
-            analyzer = TokenizedAnalyzer(prompts_prefix=prompts_prefix, analysis=self.analysis, prompts=self.prompts)
-            content = await analyzer.analyze_flatten(res)
-            await self.observations.store(Observation(key=key, content=content.encode('utf-8')))
+        try:
+            for request in requests:
+                try:
+                    prompts_prefix = request.prompt_prefix
+                    key = request.key
+                    analyzer = TokenizedAnalyzer(prompts_prefix=prompts_prefix, analysis=self.analysis, prompts=self.prompts)
+                    content = await analyzer.analyze_flatten(res)
+                    await self.observations.store(Observation(key=key, content=content))
+                except Exception as e:
+                    _log.exception(s_("Analysis failed.", request=request), exc_info=e)
+        finally:
+            res.clean_up()
 
     @abstractmethod
     async def get_flatten(self, entity: E) -> FlattenResult:
