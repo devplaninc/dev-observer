@@ -1,0 +1,5 @@
+[git.github]
+auth_type = "token"
+
+[prompts]
+provider = "local"

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import subprocess
 import threading
 from contextlib import asynccontextmanager
@@ -21,7 +22,7 @@ logging.basicConfig(level=logging.DEBUG)
 from dev_observer.log import s_
 
 _log = logging.getLogger(__name__)
-Settings.model_config["toml_file"] = "default_config.toml"
+Settings.model_config["toml_file"] = os.environ.get("DEV_OBSERVER_CONFIG_FILE", "default_config.toml")
 env: ServerEnv = detect_server_env(Settings())
 
 

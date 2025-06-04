@@ -72,10 +72,14 @@ class Tokenizer(BaseModel):
 class LocalStorage(BaseModel):
     dir: str
 
+class PostgresqlStorage(BaseModel):
+    db_url: str
+
 class Storage(BaseModel):
-    provider: Literal["local", "memory"] = "local"
+    provider: Literal["local", "memory", "postgresql"] = "postgresql"
 
     local: Optional[LocalStorage] = None
+    postgresql: Optional[PostgresqlStorage] = None
 
 
 class Settings(BaseSettings):

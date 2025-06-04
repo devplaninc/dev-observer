@@ -31,6 +31,9 @@ dependencies = [
     "grpcio-tools>=1.71.0",
     "uvicorn>=0.34.2",
     "protobuf>=5.29.4",
+    "alembic>=1.16.1",
+    "psycopg2>=2.9.10",
+    "sqlalchemy>=2.0.40",
 ]
 
 [build-system]

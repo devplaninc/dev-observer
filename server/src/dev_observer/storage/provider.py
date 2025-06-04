@@ -22,16 +22,7 @@ class StorageProvider(Protocol):
     async def next_processing_item(self) -> Optional[ProcessingItem]:
         ...
 
-    async def get_processing_items(self) -> MutableSequence[ProcessingItem]:
-        ...
-
-    async def get_processing_item(self, key: ProcessingItemKey) -> Optional[ProcessingItem]:
-        ...
-
     async def set_next_processing_time(self, key: ProcessingItemKey, next_time: Optional[datetime.datetime]):
-        ...
-
-    async def upsert_processing_item(self, item: ProcessingItem):
         ...
 
     async def get_global_config(self) -> GlobalConfig:

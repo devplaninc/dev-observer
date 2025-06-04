@@ -1,6 +1,6 @@
 import datetime
 from abc import abstractmethod
-from typing import Protocol, TypeVar
+from typing import Protocol, TypeVar, Optional
 
 from google.protobuf import json_format
 from google.protobuf.message import Message
@@ -30,11 +30,16 @@ class MockClock(Clock):
 M = TypeVar("M", bound=Message)
 
 
-def pb_to_json(pb: M, indent=0) -> str:
+def pb_to_json(pb: M, indent: Optional[int] = None) -> str:
     return json_format.MessageToJson(pb, indent=indent, sort_keys=True)
+
 
 def pb_to_dict(pb: M) -> dict:
     return json_format.MessageToDict(pb)
+
+
+def parse_json_pb(msg: str, m: M) -> M:
+    return json_format.Parse(msg, m, ignore_unknown_fields=True)
 
 
 def parse_dict_pb(msg: dict, m: M) -> M:

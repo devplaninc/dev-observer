@@ -3,6 +3,9 @@ MAKEFLAGS += -j2
 
 .PHONY: py-install npm-install generate-protos generate test test-py
 
+start-local-pg:
+	@scripts/local-pg.sh
+
 py-install:
 	uv --directory server sync
 
@@ -16,6 +19,24 @@ generate: generate-protos
 
 test-py:
 	uv --directory server run pytest
+
+new-migration: start-local-pg
+	uv --directory server run alembic revision --autogenerate -m "init tables"
+
+migration-new:
+ifndef MNAME
+	$(error MSG is not set. Please run: make new-migration MNAME="migration name")
+endif
+	uv --directory server run alembic revision --autogenerate -m "$(MNAME)"
+
+migration-apply:
+	uv --directory server run alembic upgrade head
+
+dev-server:
+	@scripts/server/dev/start.sh
+
+dev-web:
+	@cd web && npm run dev
 
 test: test-py
 	# all tests executed

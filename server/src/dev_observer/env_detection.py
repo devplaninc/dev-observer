@@ -22,6 +22,7 @@ from dev_observer.server.env import ServerEnv
 from dev_observer.settings import Settings, LocalPrompts, Github
 from dev_observer.storage.local import LocalStorageProvider
 from dev_observer.storage.memory import MemoryStorageProvider
+from dev_observer.storage.postgresql.provider import PostgresqlStorageProvider
 from dev_observer.storage.provider import StorageProvider
 from dev_observer.tokenizer.provider import TokenizerProvider
 from dev_observer.tokenizer.stub import StubTokenizerProvider
@@ -116,6 +117,8 @@ def detect_storage_provider(settings: Settings) -> StorageProvider:
     match s.provider:
         case "memory":
             return MemoryStorageProvider()
+        case "postgresql":
+            return PostgresqlStorageProvider(s.postgresql.db_url)
         case "local":
             return LocalStorageProvider(s.local.dir)
     raise ValueError(f"Unsupported storage provider: {s.provider}")
