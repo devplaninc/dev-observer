@@ -38,6 +38,9 @@ dev-server:
 dev-web:
 	@cd web && npm run dev
 
+local-compose:
+	@scripts/compose-up.sh
+
 test: test-py
 	# all tests executed
 

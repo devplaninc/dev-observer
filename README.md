@@ -79,6 +79,88 @@ docker run -p 3000:3000 dev-observer-web:local
 docker run -p 8090:8090 dev-observer-server:local
 ```
 
+## Docker Compose Setup
+
+This repository includes a Docker Compose configuration that runs the web and server services behind a single Envoy proxy container, enabling unified domain and port access with path-based routing.
+
+### Services
+
+The Docker Compose setup includes three services:
+
+1. **Envoy Proxy**: Routes requests based on path prefixes:
+   - `/api/*` → routes to the `server` container
+   - All other paths → route to the `web` container
+
+2. **Web Service**: Serves the frontend application
+
+3. **Server Service**: Provides the backend API
+
+### Configuration
+
+All service ports, Docker image tags, and logging levels are configurable via environment variables. The following environment variables are available:
+
+#### Envoy Configuration
+- `ENVOY_PORT`: The port on which Envoy listens (default: 8080)
+- `ENVOY_IMAGE_TAG`: The Docker image tag for Envoy (default: v1.25-latest)
+- `ENVOY_LOG_LEVEL`: The log level for Envoy (default: info)
+
+#### Web Service Configuration
+- `WEB_IMAGE_TAG`: The Docker image tag for the web service (default: dev-observer-web:latest)
+- `WEB_PORT`: The internal port on which the web service listens (default: 3000)
+- `WEB_LOG_LEVEL`: The log level for the web service (default: info)
+- `NODE_ENV`: The Node.js environment (default: development)
+
+#### Server Service Configuration
+- `SERVER_IMAGE_TAG`: The Docker image tag for the server service (default: dev-observer-server:latest)
+- `SERVER_PORT`: The internal port on which the server service listens (default: 8000)
+- `SERVER_LOG_LEVEL`: The log level for the server service (default: info)
+- `PYTHON_ENV`: The Python environment (default: development)
+
+### Environment Files
+
+The repository includes three environment files for different deployment stages:
+
+- `.env.local`: Configuration for local development
+- `.env.beta`: Configuration for beta deployment
+- `.env.prod`: Configuration for production deployment
+
+To use a specific environment file, use the `--env-file` option with the `docker-compose` command:
+
+```bash
+docker-compose --env-file .env.local up
+```
+
+### Usage
+
+To start the services:
+
+```bash
+# Using the default environment
+docker-compose up
+
+# Using a specific environment
+docker-compose --env-file .env.beta up
+
+# Running in detached mode
+docker-compose up -d
+```
+
+To stop the services:
+
+```bash
+docker-compose down
+```
+
+### Testing
+
+You can test the setup by sending HTTP requests to the Envoy proxy:
+
+- Web service: `http://localhost:8080/`
+- Server API: `http://localhost:8080/api/`
+
+Replace `localhost` with your server's hostname and `8080` with the configured `ENVOY_PORT` if different.
+
+
 ## TODO:
 
 - Storage:
@@ -88,7 +170,6 @@ docker run -p 8090:8090 dev-observer-server:local
   - local
   - S3-compatible
 - Serving API.
-- 
 - UI for serving
 - Offline testing:
   - Fully local cloning
