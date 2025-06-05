@@ -1,4 +1,4 @@
-export const ownDomain = "http://localhost:8090"
+export const ownDomain = import.meta.env.VITE_KEEP_OWN_DOMAIN !== undefined ? "" : "http://localhost:8090";
 
 export function baseAPI() {
   return `${ownDomain}/api/v1` as const;
@@ -24,7 +24,7 @@ export function observationsAPI<K extends string>(kind: K) {
   return `${baseAPI()}/observations/kind/${kind}` as const;
 }
 
-export function observationAPI<K extends string,N extends string, C extends string>(kind: K, name: N, key: C) {
+export function observationAPI<K extends string, N extends string, C extends string>(kind: K, name: N, key: C) {
   return `${baseAPI()}/observation/${kind}/${encodeURIComponent(name)}/${enc(key)}` as const;
 }
 
