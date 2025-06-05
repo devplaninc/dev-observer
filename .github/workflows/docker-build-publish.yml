@@ -47,6 +47,7 @@ jobs:
           context: .
           file: ./docker/web/Dockerfile
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ghcr.io/devplaninc/dev-observer-web:${{ github.event.inputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -58,6 +59,7 @@ jobs:
           context: .
           file: ./docker/server/Dockerfile
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ghcr.io/devplaninc/dev-observer-server:${{ github.event.inputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
