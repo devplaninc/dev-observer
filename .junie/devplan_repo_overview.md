@@ -1,90 +1,115 @@
 # High Level Overview of the Repository
 
-This repository appears to be a Python-based project focused on observing and analyzing software repositories, specifically GitHub repositories. It leverages various tools and libraries for cloning, processing, and summarizing code. The project includes functionalities for interacting with the GitHub API, combining repository contents, and tokenizing files for further processing, potentially for use with language models or other analysis tools.
+This repository is a comprehensive system designed for observing, analyzing, and providing insights into GitHub repositories. It is composed of a Python-based backend and a React/TypeScript-based frontend, offering a full-stack solution for code analysis and potentially, interaction with language models. The system leverages various technologies for repository cloning, data processing, and user interface presentation.
 
 ## Technologies Used
 
-*   **Python:** The primary programming language used throughout the project.
+*   **Python:** The primary language for the backend, handling tasks such as repository cloning, data processing, and analysis.
+*   **React/TypeScript:** Used for building the interactive web frontend, providing a user interface for interacting with the system.
+*   **Tailwind CSS:** Used for styling and layout of the web application, ensuring a consistent and responsive design.
 *   **GitHub API:** Used for interacting with GitHub repositories, retrieving information, and cloning.
 *   **Git:** Used for cloning repositories.
-*   **Protocol Buffers (protobuf):** Used for defining data structures for inter-service communication.
-*   **Logging:** `structlog` and standard `logging` library are used for logging.
-*   **Tokenization:** `tiktoken` library is used for tokenizing text, likely for use with language models.
-*   **Environment Variables:** `.env` files and `load_dotenv` are used for managing environment-specific configurations.
-*   **Testing:** `pytest` is used for testing the code.
+*   **Protocol Buffers (protobuf):** Used for defining data structures and service interfaces, enabling efficient data serialization and communication between the backend and frontend.
+*   **`pytest`:** Used for unit testing the Python code, ensuring code quality and reliability.
+*   **`@tanstack/react-query`:** Used for managing asynchronous data fetching and caching in the frontend, improving performance and user experience.
+*   **Zustand:** Used for managing application state in the frontend, providing a centralized store for application data.
+*   **`langchain`:** Likely used for interacting with large language models (LLMs) for code analysis and summarization.
+*   **`langfuse`:** Used for managing prompts and interactions with LLMs.
+*   **`uvicorn`:** Used for running the FastAPI server.
+*   **`protobuf`:** Used for defining data structures, facilitating communication between services.
 
 ## Top Level Folders Structure
 
-*   **`proto/`**:
-    *   Contains Protocol Buffer definitions (`.proto` files) for defining data structures and service interfaces.
-    *   **Recommendation:** This folder should contain all the protobuf definitions used for communication within the system or with external services.
-    *   `devplan/observer/service/analysis.proto`: Defines the service interface for analyzing repositories.
-    *   `devplan/observer/types/common.proto`: Defines common data types used throughout the project, such as `Location`.
-*   **`server/`**:
-    *   Contains the core server-side logic of the application.
-    *   **Recommendation:** This folder should contain all the server-side code, including scripts, source code, and tests.
-    *   `server/scripts/`:
-        *   Contains scripts for running various tasks, such as repository analysis.
-        *   **Recommendation:** Scripts for automation, data processing, and other command-line utilities should reside here.
-        *   `server/scripts/analysis/process.py`: A script that clones and processes a repository.
-    *   `server/src/`:
-        *   Contains the source code for the server application.
-        *   **Recommendation:** This is where the main application logic resides, organized into modules and packages.
-        *   `server/src/dev_observer/`:
-            *   Contains the core logic for observing and analyzing repositories.
-            *   `server/src/dev_observer/analysis/`:
-                *   Contains modules related to repository analysis.
-                *   `server/src/dev_observer/analysis/repository/`:
-                    *   Contains modules for interacting with repositories.
-                    *   **Recommendation:** This sub-folder should contain all the logic related to cloning, parsing, and summarizing repositories.
-                    *   `__init__.py`: Initializes the `repository` package.
-                    *   `cloner.py`: Contains the logic for cloning repositories using Git.
-                    *   `github_provider.py`: Provides an interface for interacting with GitHub repositories.
-                    *   `parser.py`: Contains functions for parsing repository URLs.
-                    *   `provider.py`: Defines the `GitRepositoryProvider` abstract class.
-                    *   `summarizer.py`: Contains the logic for combining and tokenizing repository contents.
-            *   `server/src/dev_observer/common/`:
-                *   Contains common utility functions and configurations.
-                *   **Recommendation:** This folder should contain reusable code, such as logging configuration and environment variable handling.
-                *   `env.py`: Contains functions for retrieving environment variables.
-                *   `log.py`: Configures logging using `structlog`.
-    *   `server/tests/`:
-        *   Contains unit tests for the server-side code.
-        *   **Recommendation:** This folder should contain all the tests for the server-side code.
-        *   `server/tests/analysis/`:
-            *   Contains tests for the analysis modules.
-            *   `server/tests/analysis/repository/`:
-                *   Contains tests for the repository-related modules.
-                *   `test_parser.py`: Tests for the `parser.py` module.
-    *   `.env`: Contains environment variables for development.
-    *   `pyproject.toml`: Defines the project's dependencies and build configuration.
-    *   `README.md`: Provides information about the project.
-*   `.gitignore`: Specifies intentionally untracked files that Git should ignore.
-*   `README.md`: Provides a general overview of the project.
+*   **.junie/**:
+    *   **Purpose:** Contains development plans, insights, and rules for the project.
+    *   **Recommendations:** This folder should contain documents that guide the development process, including insights gained during development, rules for code style, and feature specifications.
+*   **proto/dev_observer/api/storage/**:
+    *   **Purpose:** Contains Protocol Buffer definitions for local storage data.
+    *   **Recommendations:** This folder should contain all the protobuf definitions used for communication within the system or with external services.
+*   **proto/dev_observer/api/types/**:
+    *   **Purpose:** Contains Protocol Buffer definitions for various data types used throughout the project.
+    *   **Recommendations:** This folder should contain all the protobuf definitions used for communication within the system or with external services.
+*   **proto/dev_observer/api/web/**:
+    *   **Purpose:** Contains Protocol Buffer definitions for web-related API endpoints.
+    *   **Recommendations:** This folder should contain all the protobuf definitions used for communication within the system or with external services.
+*   **scripts/**:
+    *   **Purpose:** Contains shell scripts for generating Protocol Buffer code and other build-related tasks.
+    *   **Recommendations:** This folder should contain scripts for automation, data processing, and other command-line utilities.
+*   **server/default_prompts/**:
+    *   **Purpose:** Contains default prompt templates for language model interactions.
+    *   **Recommendations:** This folder should contain the default prompt templates used by the system.
+*   **server/scripts/self_analysis/**:
+    *   **Purpose:** Contains scripts for self-analysis of the repository.
+    *   **Recommendations:** This folder should contain scripts for automation, data processing, and other command-line utilities.
+*   **server/src/**:
+    *   **Purpose:** Contains the core server-side logic of the application.
+    *   **Recommendations:** This is where the main application logic resides, organized into modules and packages.
+    *   **dev_observer/**: Contains the core logic for observing and analyzing repositories.
+        *   **analysis/ :** Modules related to repository analysis.
+        *   **api/ :** Modules for defining API endpoints.
+        *   **flatten/ :** Modules for flattening the repository.
+        *   **observations/ :** Modules for storing and retrieving observations.
+        *   **processors/ :** Modules for processing data.
+        *   **prompts/ :** Modules for managing prompts.
+        *   **repository/ :** Modules for interacting with repositories (cloning, parsing, etc.).
+        *   **server/ :** Modules for the server.
+        *   **storage/ :** Modules for storing data.
+        *   **tokenizer/ :** Modules for tokenizing text.
+        *   **env_detection.py:** Contains the logic for detecting the server environment.
+        *   **log.py:** Contains the logic for logging.
+        *   **settings.py:** Contains the logic for settings.
+        *   **util.py:** Contains utility functions.
+    *   **tests/ :** Contains unit tests for the server-side code.
+*   **web/src/components/**:
+    *   **Purpose:** Contains React components for the web application.
+    *   **Recommendations:** This folder should contain all the reusable React components used in the web application.
+*   **web/src/hooks/**:
+    *   **Purpose:** Contains custom React hooks for data fetching and other tasks.
+    *   **Recommendations:** This folder should contain all the custom React hooks used in the web application.
+*   **web/src/lib/**:
+    *   **Purpose:** Contains utility functions and helper code for the web application.
+    *   **Recommendations:** This folder should contain all the utility functions and helper code used in the web application.
+*   **web/src/pages/**:
+    *   **Purpose:** Contains page-level components for the web application.
+    *   **Recommendations:** This folder should contain all the page-level components used in the web application.
+*   **web/src/pb/**:
+    *   **Purpose:** Contains generated code for Protocol Buffers used in the web application.
+    *   **Recommendations:** This folder should contain all the generated code for Protocol Buffers used in the web application.
+*   **web/src/store/**:
+    *   **Purpose:** Contains state management logic for the web application.
+    *   **Recommendations:** This folder should contain all the state management logic for the web application.
+*   **web/src/types/**:
+    *   **Purpose:** Contains TypeScript type definitions for the web application.
+    *   **Recommendations:** This folder should contain all the TypeScript type definitions for the web application.
+*   **web/src/utils/**:
+    *   **Purpose:** Contains utility functions for the web application.
+    *   **Recommendations:** This folder should contain all the utility functions for the web application.
 
 ## Code Organization
 
-The code is organized into a modular structure, with clear separation of concerns. The `server/src/dev_observer` directory contains the core logic for observing and analyzing repositories. The code is further divided into sub-modules for specific tasks, such as cloning, parsing, and summarizing repositories. The use of packages and modules promotes code reusability and maintainability. The project uses Protocol Buffers for defining data structures, which suggests a focus on interoperability and potentially communication with other services.
+The code is organized into a modular structure, with a clear separation of concerns between the server-side (Python) and client-side (React/TypeScript). The use of packages and modules promotes code reusability and maintainability. The project uses Protocol Buffers for defining data structures, which suggests a focus on interoperability and potentially communication with other services.
 
 ## Notable Patterns
 
-*   **Dependency Injection:** The `GithubProvider` class takes a `Auth` object in its constructor, demonstrating dependency injection.
+*   **Dependency Injection:** Used to manage dependencies, particularly for external services like the GitHub API and language models.
 *   **Abstract Class/Interface:** The `GitRepositoryProvider` class acts as an abstract class, defining an interface for interacting with Git repositories.
-*   **Configuration:** The use of `.env` files and environment variables for configuration.
-*   **Logging:** The use of `structlog` for structured logging.
-*   **Command-line Interface:** The `process.py` script uses `argparse` to handle command-line arguments.
+*   **Configuration:** Uses `.env` files and environment variables for configuration.
+*   **Logging:** Uses `structlog` for structured logging.
+*   **Asynchronous Operations:** The code uses asynchronous operations (`async` and `await`) for efficient handling of potentially time-consuming tasks.
+*   **State Management (Zustand):** Used for managing application state in the React frontend.
+*   **React Hook Form:** Used for form management in the React frontend.
 
 ## Testing Approach
 
-The project uses `pytest` for testing. The `server/tests/analysis/repository/test_parser.py` file contains unit tests for the `parse_github_url` function. The tests use `pytest.mark.parametrize` to test the function with various inputs and expected outputs.
+The project uses `pytest` for unit testing the Python backend. The tests are likely structured to cover various aspects of the application's logic, including interactions with the GitHub API, data processing, and language model integration.
 
 ## Other Important Details
 
-*   **Build Process:** The project uses `pyproject.toml` and `hatchling` for build configuration.
-*   **Database Schema/Upgrades:** The provided code does not include database interactions or schema management.
-*   **Documentation:** The project includes `README.md` files for documentation.
-*   **Deployment:** Deployment details are not explicitly mentioned in the provided code.
-*   **Programming Languages:** The project primarily uses Python. Protocol Buffers are used for defining data structures.
+*   **Build Process:** The project uses `pyproject.toml` and `hatchling` for Python package building, and `vite.config.ts` for the React application build.
+*   **Database Schema/Upgrades:** No database schema is directly apparent in the provided code.
+*   **Documentation:** The project includes README files and other documentation.
+*   **Deployment:** Deployment details are not explicitly provided.
+*   **Programming Languages:** The project primarily uses Python and TypeScript. Protocol Buffers are used for defining data structures.
 *   **Environment Variables:** The project uses environment variables for configuration, such as `GITHUB_AUTH_TYPE` and `GITHUB_PERSONAL_TOKEN`.
 *   **File Combination:** The `summarizer.py` uses `repomix` to combine the repository files into a single markdown file.
 *   **Tokenization:** The `summarizer.py` uses `tiktoken` to tokenize the combined file.
@@ -92,34 +117,50 @@ The project uses `pytest` for testing. The `server/tests/analysis/repository/tes
 
 ## User experience flows
 
-Based on the provided code, the application's primary user flow involves:
+The web application provides the following user flows:
 
-1.  **Setup:**
-    *   The user creates a `.env.local` file.
-    *   The user adds `GITHUB_PERSONAL_TOKEN` to the `.env.local` file.
-2.  **Execution:**
-    *   The user runs the `scripts/analysis/process.py` script with the `--repo` argument, providing a GitHub repository URL.
-    *   Example: `uv run scripts/analysis/process.py --repo git@github.com:devplaninc/webapp.git`
-3.  **Processing:**
-    *   The script clones the specified repository.
-    *   The script combines the repository files into a single markdown file using `repomix`.
-    *   The script tokenizes the combined file using `tiktoken`.
-    *   The script cleans up the cloned repository and combined file (if `cleanup` is set to `True`).
+*   **Adding a Repository:**
+    *   The user enters a GitHub repository URL in a form.
+    *   The application validates the URL.
+    *   The application adds the repository to the system.
+*   **Viewing Repository Details:**
+    *   The user navigates to a repository details page.
+    *   The application displays information about the repository.
+    *   The user can initiate a rescan of the repository.
+*   **Viewing the List of Repositories:**
+    *   The user navigates to the repository list page.
+    *   The application displays a list of added repositories.
+    *   The user can navigate to the details page of a repository.
+*   **Configuring the Application:**
+    *   The user navigates to the configuration editor page.
+    *   The user can modify the global configuration of the application.
 
 **Screens/Pages:**
 
-*   There are no explicit screens or pages in this application, as it is a command-line tool.
+*   Repository List Page
+*   Repository Details Page
+*   Global Configuration Editor Page
 
 **Elements:**
 
-*   **Command-line arguments:**
-    *   `--repo`: The URL of the GitHub repository to analyze.
+*   Input field for GitHub repository URL
+*   Buttons for adding, rescanning, and deleting repositories
+*   Display of repository details (URL, ID, etc.)
+*   Form fields for configuring the application
 
 **User Flows:**
 
-1.  **Analyze a GitHub Repository:**
-    *   User provides a GitHub repository URL via the `--repo` argument.
-    *   The script clones the repository.
-    *   The script combines the repository files.
-    *   The script tokenizes the combined file.
-    *   The script outputs the tokenized files.
+1.  **Add a GitHub Repository:**
+    *   User enters a GitHub repository URL.
+    *   The application validates the URL.
+    *   The application adds the repository.
+2.  **View Repository Details:**
+    *   User selects a repository from the list.
+    *   The application displays the repository details.
+    *   User can initiate a rescan.
+3.  **View Repository List:**
+    *   User navigates to the repository list page.
+    *   The application displays a list of repositories.
+4.  **Configure the Application:**
+    *   User navigates to the configuration editor page.
+    *   User modifies the global configuration.
