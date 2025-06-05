@@ -1,0 +1,42 @@
+services:
+  envoy:
+    image: envoyproxy/envoy:${ENVOY_IMAGE_TAG:-v1.25-latest}
+    ports:
+      - "${ENVOY_PORT:-8099}:8080"
+    volumes:
+      - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml
+    environment:
+      - ENVOY_LOG_LEVEL=${ENVOY_LOG_LEVEL:-info}
+    networks:
+      - dev-observer-network
+    depends_on:
+      - web
+      - server
+
+  web:
+    image: ghcr.io/devplaninc/dev-observer-web:${WEB_IMAGE_TAG:-latest}
+    expose:
+      - "${WEB_PORT:-5173}"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - LOG_LEVEL=${WEB_LOG_LEVEL:-info}
+    networks:
+      - dev-observer-network
+
+  server:
+    image: ghcr.io/devplaninc/dev-observer-server:${SERVER_IMAGE_TAG:-latest}
+    expose:
+      - "${SERVER_PORT:-8090}"
+    volumes:
+      - ./compose_env/${SERVER_CONFIG_FILE}:/etc/dev-observer-server/config.toml
+    environment:
+      - PYTHON_ENV=${PYTHON_ENV:-development}
+      - LOG_LEVEL=${SERVER_LOG_LEVEL:-info}
+      - DEV_OBSERVER_CONFIG_FILE=/etc/dev-observer-server/config.toml
+      - DEV_OBSERVER__GIT__GITHUB__PERSONAL_TOKEN=${DEV_OBSERVER__GIT__GITHUB__PERSONAL_TOKEN}
+    networks:
+      - dev-observer-network
+
+networks:
+  dev-observer-network:
+    driver: bridge
