@@ -1,10 +1,9 @@
 import logging
 from typing import Optional, Tuple, Literal, ClassVar
 
+from dev_observer.log import s_
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSettingsSource, TomlConfigSettingsSource
-
-from dev_observer.log import s_
 
 _log = logging.getLogger(__name__)
 
@@ -63,6 +62,7 @@ class SettingsProps(BaseModel):
 class Tiktoken(BaseModel):
     encoding: str = "cl100k_base"
 
+
 class Tokenizer(BaseModel):
     provider: Literal["tiktoken", "stub"] = "tiktoken"
 
@@ -72,14 +72,26 @@ class Tokenizer(BaseModel):
 class LocalStorage(BaseModel):
     dir: str
 
+
 class PostgresqlStorage(BaseModel):
     db_url: str
+
 
 class Storage(BaseModel):
     provider: Literal["local", "memory", "postgresql"] = "postgresql"
 
     local: Optional[LocalStorage] = None
     postgresql: Optional[PostgresqlStorage] = None
+
+
+class Clerk(BaseModel):
+    public_key: str
+    secret_key: str
+
+
+class UserManagement(BaseModel):
+    provider: Literal["clerk", "none"] = "none"
+    clerk: Optional[Clerk] = None
 
 
 class Settings(BaseSettings):
@@ -91,6 +103,7 @@ class Settings(BaseSettings):
     observations: Optional[Observations] = None
     tokenizer: Optional[Tokenizer] = None
     storage: Optional[Storage] = None
+    users_management: Optional[UserManagement] = None
 
     def __init__(self) -> None:
         toml_file = Settings.model_config.get("toml_file", None)

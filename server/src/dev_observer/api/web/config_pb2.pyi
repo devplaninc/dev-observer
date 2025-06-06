@@ -22,3 +22,9 @@ class UpdateGlobalConfigResponse(_message.Message):
     CONFIG_FIELD_NUMBER: _ClassVar[int]
     config: _config_pb2.GlobalConfig
     def __init__(self, config: _Optional[_Union[_config_pb2.GlobalConfig, _Mapping]] = ...) -> None: ...
+
+class GetUserManagementStatusResponse(_message.Message):
+    __slots__ = ("status",)
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    status: _config_pb2.UserManagementStatus
+    def __init__(self, status: _Optional[_Union[_config_pb2.UserManagementStatus, _Mapping]] = ...) -> None: ...

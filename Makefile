@@ -33,7 +33,7 @@ migration-apply:
 	uv --directory server run alembic upgrade head
 
 dev-server:
-	@scripts/server/dev/start.sh
+	@cd server && uv run scripts/dev/main.py
 
 dev-web:
 	@cd web && npm run dev

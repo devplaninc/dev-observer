@@ -1,0 +1,34 @@
+[git]
+provider="copying"
+
+[git.github]
+auth_type = "token"
+
+[analysis]
+provider="stub"
+
+[tokenizer]
+provider="stub"
+
+[prompts]
+provider = "local"
+[prompts.local]
+dir = "scripts/dev/prompts"
+
+[storage]
+provider = "local"
+#provider = "postgresql"
+[storage.local]
+dir = "scripts/dev/_local_data_/__storage"
+
+[storage.postgresql]
+db_url="postgresql+asyncpg://postgres:test_password@localhost:54322/dev_observer"
+
+[users_management]
+provider="clerk"
+
+[users_management.clerk]
+public_key="pk_test_bGVnYWwtYW50LTI3LmNsZXJrLmFjY291bnRzLmRldiQ"
+
+[observations.local]
+dir = "scripts/dev/_local_data_"

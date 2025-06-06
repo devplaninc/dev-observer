@@ -27,6 +27,9 @@ from dev_observer.storage.provider import StorageProvider
 from dev_observer.tokenizer.provider import TokenizerProvider
 from dev_observer.tokenizer.stub import StubTokenizerProvider
 from dev_observer.tokenizer.tiktoken import TiktokenTokenizerProvider
+from dev_observer.users.clerk import ClerkUsersProvider
+from dev_observer.users.no_auth import NoAuthUsersProvider
+from dev_observer.users.provider import UsersProvider
 
 _log = logging.getLogger(__name__)
 
@@ -124,6 +127,18 @@ def detect_storage_provider(settings: Settings) -> StorageProvider:
     raise ValueError(f"Unsupported storage provider: {s.provider}")
 
 
+def detect_users_provider(settings: Settings) -> UsersProvider:
+    u = settings.users_management
+    if u is None:
+        return NoAuthUsersProvider()
+    match u.provider:
+        case "clerk":
+            return ClerkUsersProvider(u.clerk.secret_key, u.clerk.public_key)
+        case "none":
+            return NoAuthUsersProvider()
+    raise ValueError(f"Unsupported users management provider: {u.provider}")
+
+
 def detect_server_env(settings: Settings) -> ServerEnv:
     analysis = detect_analysis_provider(settings)
     repository = detect_git_provider(settings)
@@ -131,13 +146,21 @@ def detect_server_env(settings: Settings) -> ServerEnv:
     observations = detect_observer(settings)
     tokenizer = detect_tokenizer(settings)
     storage = detect_storage_provider(settings)
+    bg_storage = detect_storage_provider(settings)
     repos_processor = ReposProcessor(analysis, repository, prompts, observations, tokenizer)
+    users = detect_users_provider(settings),
     env = ServerEnv(
         observations=observations,
         storage=storage,
         repos_processor=repos_processor,
-        periodic_processor=PeriodicProcessor(storage, repos_processor),
+        periodic_processor=PeriodicProcessor(bg_storage, repos_processor),
+        users=detect_users_provider(settings),
     )
     _log.debug(s_("Detected environment",
-                  repository=repository, analysis=analysis, prompts=prompts, observations=observations, env=env))
+                  repository=repository,
+                  analysis=analysis,
+                  prompts=prompts,
+                  observations=observations,
+                  users=users,
+                  env=env))
     return env

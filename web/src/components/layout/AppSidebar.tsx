@@ -16,6 +16,7 @@ import {NavRepositories} from "@/components/layout/NavRepositories.tsx";
 import {useRepositories} from "@/hooks/useRepositoryQueries.ts";
 import {ErrorAlert} from "@/components/ErrorAlert.tsx";
 import {Loader} from "@/components/Loader.tsx";
+import {Link} from "react-router";
 
 const data = {
   user: {
@@ -66,15 +67,12 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="/">
-                {/*<div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">*/}
-                {/*  <Command className="size-4" />*/}
-                {/*</div>*/}
+              <Link to="/">
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Dev Observer</span>
                   {/*<span className="truncate text-xs">Enterprise</span>*/}
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

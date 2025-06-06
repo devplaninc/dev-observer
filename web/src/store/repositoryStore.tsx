@@ -8,6 +8,7 @@ import {
   ListGithubRepositoriesResponse
 } from "@/pb/dev_observer/api/web/repositories.ts";
 import type {GitHubRepository} from "@/pb/dev_observer/api/types/repo.ts";
+import {fetchWithAuth, VoidParser} from "@/store/api.tsx";
 
 export interface RepositoryState {
   repositories: Record<string, GitHubRepository>;
@@ -27,43 +28,36 @@ export const createRepositoriesSlice: StateCreator<
 > = ((set) => ({
   repositories: {},
 
-  fetchRepositories: async () => fetch(reposAPI())
-    .then(r => r.ok ? r.json() : Promise.resolve(new Error(r.statusText)))
-    .then(js => {
-      const {repos} = ListGithubRepositoriesResponse.fromJSON(js)
+  fetchRepositories: async () => fetchWithAuth(reposAPI(), ListGithubRepositoriesResponse)
+    .then(res => {
+      const {repos} = res
       const repositories = repos.reduce((a, r) => ({...a, [r.id]: r}), {} as Record<string, GitHubRepository>)
       set(s => ({...s, repositories}))
     }),
 
-  fetchRepositoryById: async id => fetch(repoAPI(id))
-    .then(r => r.ok ? r.json() : Promise.reject(new Error(r.statusText)))
-    .then(js => {
-      const {repo} = GetRepositoryResponse.fromJSON(js)
-      if (repo) {
-        set(s => ({...s, repositories: {...s.repositories, [repo.id]: repo}}))
-      }
-    }),
-
-  addRepository: async url => fetch(reposAPI(),
-    {method: "POST", body: JSON.stringify(AddGithubRepositoryRequest.toJSON({url}))}
-  ).then(r => r.ok ? r.json() : Promise.reject(new Error(r.statusText)))
-    .then(js => {
-      const {repo} = AddGithubRepositoryResponse.fromJSON(js)
-      if (repo) {
-        set(s => ({...s, repositories: {...s.repositories, [repo.id]: repo}}))
-      }
-    }),
-  deleteRepository: async id => fetch(repoAPI(id), {method: "DELETE"})
-    .then(r => r.ok ? r.json() : Promise.reject(new Error(r.statusText)))
-    .then(js => {
-      const {repos} = DeleteRepositoryResponse.fromJSON(js)
-      const repositories = repos.reduce((a, r) => ({...a, [r.id]: r}), {} as Record<string, GitHubRepository>)
-      set(s => ({...s, repositories}))
-    }),
-  rescanRepository: async id => fetch(repoRescanAPI(id), {method: "POST"})
+  fetchRepositoryById: async id => fetchWithAuth(repoAPI(id), GetRepositoryResponse)
     .then(r => {
-      if (!r.ok) {
-        return Promise.reject(new Error(r.statusText))
+      const {repo} = r
+      if (repo) {
+        set(s => ({...s, repositories: {...s.repositories, [repo.id]: repo}}))
       }
     }),
+
+  addRepository: async url => fetchWithAuth(
+    reposAPI(),
+    AddGithubRepositoryResponse,
+    {method: "POST", body: JSON.stringify(AddGithubRepositoryRequest.toJSON({url}))},
+  ).then(r => {
+    const {repo} = r
+    if (repo) {
+      set(s => ({...s, repositories: {...s.repositories, [repo.id]: repo}}))
+    }
+  }),
+  deleteRepository: async id => fetchWithAuth(repoAPI(id), DeleteRepositoryResponse, {method: "DELETE"})
+    .then(r => {
+      const {repos} = r
+      const repositories = repos.reduce((a, r) => ({...a, [r.id]: r}), {} as Record<string, GitHubRepository>)
+      set(s => ({...s, repositories}))
+    }),
+  rescanRepository: async id => fetchWithAuth(repoRescanAPI(id), new VoidParser(), {method: "POST"}),
 }));

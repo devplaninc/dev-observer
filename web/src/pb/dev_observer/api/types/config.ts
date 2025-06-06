@@ -18,6 +18,11 @@ export interface AnalysisConfig {
   repoAnalyzers: Analyzer[];
 }
 
+export interface UserManagementStatus {
+  enabled: boolean;
+  publicApiKey?: string | undefined;
+}
+
 function createBaseGlobalConfig(): GlobalConfig {
   return { analysis: undefined };
 }
@@ -136,6 +141,82 @@ export const AnalysisConfig: MessageFns<AnalysisConfig> = {
   fromPartial(object: DeepPartial<AnalysisConfig>): AnalysisConfig {
     const message = createBaseAnalysisConfig();
     message.repoAnalyzers = object.repoAnalyzers?.map((e) => Analyzer.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseUserManagementStatus(): UserManagementStatus {
+  return { enabled: false, publicApiKey: undefined };
+}
+
+export const UserManagementStatus: MessageFns<UserManagementStatus> = {
+  encode(message: UserManagementStatus, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.enabled !== false) {
+      writer.uint32(8).bool(message.enabled);
+    }
+    if (message.publicApiKey !== undefined) {
+      writer.uint32(18).string(message.publicApiKey);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UserManagementStatus {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUserManagementStatus();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.enabled = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.publicApiKey = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UserManagementStatus {
+    return {
+      enabled: isSet(object.enabled) ? gt.Boolean(object.enabled) : false,
+      publicApiKey: isSet(object.publicApiKey) ? gt.String(object.publicApiKey) : undefined,
+    };
+  },
+
+  toJSON(message: UserManagementStatus): unknown {
+    const obj: any = {};
+    if (message.enabled !== false) {
+      obj.enabled = message.enabled;
+    }
+    if (message.publicApiKey !== undefined) {
+      obj.publicApiKey = message.publicApiKey;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<UserManagementStatus>): UserManagementStatus {
+    return UserManagementStatus.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<UserManagementStatus>): UserManagementStatus {
+    const message = createBaseUserManagementStatus();
+    message.enabled = object.enabled ?? false;
+    message.publicApiKey = object.publicApiKey ?? undefined;
     return message;
   },
 };

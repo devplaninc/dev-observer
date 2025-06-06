@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from dev_observer.api.types import config_pb2 as dev__observer_dot_api_dot_types_dot_config__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!dev_observer/api/web/config.proto\x12\x1b\x64\x65v_observer.api.web.config\x1a#dev_observer/api/types/config.proto\"V\n\x17GetGlobalConfigResponse\x12;\n\x06\x63onfig\x18\x01 \x01(\x0b\x32+.dev_observer.api.types.config.GlobalConfig\"X\n\x19UpdateGlobalConfigRequest\x12;\n\x06\x63onfig\x18\x01 \x01(\x0b\x32+.dev_observer.api.types.config.GlobalConfig\"Y\n\x1aUpdateGlobalConfigResponse\x12;\n\x06\x63onfig\x18\x01 \x01(\x0b\x32+.dev_observer.api.types.config.GlobalConfigb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!dev_observer/api/web/config.proto\x12\x1b\x64\x65v_observer.api.web.config\x1a#dev_observer/api/types/config.proto\"V\n\x17GetGlobalConfigResponse\x12;\n\x06\x63onfig\x18\x01 \x01(\x0b\x32+.dev_observer.api.types.config.GlobalConfig\"X\n\x19UpdateGlobalConfigRequest\x12;\n\x06\x63onfig\x18\x01 \x01(\x0b\x32+.dev_observer.api.types.config.GlobalConfig\"Y\n\x1aUpdateGlobalConfigResponse\x12;\n\x06\x63onfig\x18\x01 \x01(\x0b\x32+.dev_observer.api.types.config.GlobalConfig\"f\n\x1fGetUserManagementStatusResponse\x12\x43\n\x06status\x18\x01 \x01(\x0b\x32\x33.dev_observer.api.types.config.UserManagementStatusb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -38,4 +38,6 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_UPDATEGLOBALCONFIGREQUEST']._serialized_end=279
   _globals['_UPDATEGLOBALCONFIGRESPONSE']._serialized_start=281
   _globals['_UPDATEGLOBALCONFIGRESPONSE']._serialized_end=370
+  _globals['_GETUSERMANAGEMENTSTATUSRESPONSE']._serialized_start=372
+  _globals['_GETUSERMANAGEMENTSTATUSRESPONSE']._serialized_end=474
 # @@protoc_insertion_point(module_scope)

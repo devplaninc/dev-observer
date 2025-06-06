@@ -2,6 +2,7 @@ import type {StateCreator} from "zustand";
 import {observationAPI, observationsAPI} from "@/store/apiPaths.tsx";
 import type {Observation, ObservationKey} from "@/pb/dev_observer/api/types/observations.ts";
 import {GetObservationResponse, GetObservationsResponse} from "@/pb/dev_observer/api/web/observations.ts";
+import {fetchWithAuth} from "@/store/api.tsx";
 
 export interface ObservationsState {
   observationKeys: Record<string, ObservationKey[]>;
@@ -19,17 +20,12 @@ export const createObservationsSlice: StateCreator<
 > = ((set, get) => ({
   observationKeys: {},
   observations: {},
-  fetchObservations: async kind => fetch(observationsAPI(kind))
-    .then(r => r.ok ? r.json() : Promise.reject(new Error(r.statusText)))
-    .then(js => {
-      const {keys} = GetObservationsResponse.fromJSON(js)
-      set(s => ({...s, observationKeys: {...s.observationKeys, [kind]: (keys ?? [])}}))
-    }),
-  fetchObservation: async key => fetch(observationAPI(key.kind, key.name, key.key))
-    .then(r => r.ok ? r.json() : Promise.reject(new Error(r.statusText)))
-    .then(js => {
+  fetchObservations: async kind => fetchWithAuth(observationsAPI(kind), GetObservationsResponse)
+    .then(r => set(s => ({...s, observationKeys: {...s.observationKeys, [kind]: (r.keys ?? [])}}))),
+  fetchObservation: async key => fetchWithAuth(observationAPI(key.kind, key.name, key.key), GetObservationResponse)
+    .then(r => {
       const k = observationKeyStr(key)
-      const {observation} = GetObservationResponse.fromJSON(js)
+      const {observation} = r
       if (observation) {
         set(s => ({...s, observations: {...s.observations, [k]: observation}}))
       } else {

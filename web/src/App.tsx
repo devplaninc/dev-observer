@@ -8,29 +8,51 @@ import {SiteHeader} from "@/components/layout/SiteHeader.tsx";
 import {AppSidebar} from "@/components/layout/AppSidebar.tsx";
 import {Toaster} from "@/components/ui/sonner"
 import {useObservationKeys} from "@/hooks/useObservationQueries.ts";
+import {useBoundStore} from "@/store/use-bound-store.tsx";
+import {useEffect, useState} from "react";
+import {Loader} from "@/components/Loader.tsx";
+import {ErrorAlert} from "@/components/ErrorAlert.tsx";
+import {ClerkProvider} from "@/auth/ClerkProvider.tsx";
 
 // Create a client
 const queryClient = new QueryClient();
 
 function App() {
+  const [error, setError] = useState<Error | undefined>(undefined);
+  const {fetchUsersConfig, usersStatus} = useBoundStore()
+  useEffect(() => {
+    if (usersStatus) {
+      return
+    }
+    fetchUsersConfig().catch(setError)
+  }, [fetchUsersConfig, usersStatus]);
+  if (!usersStatus) {
+    if (error) {
+      return <ErrorAlert err={error}/>
+    }
+    return <Loader/>
+  }
+
   return <div className="[--header-height:calc(theme(spacing.14))]">
     <Toaster/>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <SidebarProvider className="flex flex-col">
-          <div className="min-h-screen bg-background text-foreground">
-            <SiteHeader/>
-            <div className="flex flex-1">
-              <AppSidebar/>
-              <SidebarInset>
-                <div className="p-4">
-                  <AppRoutes />
-                </div>
-              </SidebarInset>
+      <ClerkProvider>
+        <BrowserRouter>
+          <SidebarProvider className="flex flex-col">
+            <div className="min-h-screen bg-background text-foreground">
+              <SiteHeader/>
+              <div className="flex flex-1">
+                <AppSidebar/>
+                <SidebarInset>
+                  <div className="p-4">
+                    <AppRoutes/>
+                  </div>
+                </SidebarInset>
+              </div>
             </div>
-          </div>
-        </SidebarProvider>
-      </BrowserRouter>
+          </SidebarProvider>
+        </BrowserRouter>
+      </ClerkProvider>
     </QueryClientProvider>
   </div>;
 }

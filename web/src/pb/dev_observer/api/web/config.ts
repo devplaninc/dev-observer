@@ -6,7 +6,7 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import { GlobalConfig } from "../types/config";
+import { GlobalConfig, UserManagementStatus } from "../types/config";
 
 export const protobufPackage = "dev_observer.api.web.config";
 
@@ -20,6 +20,10 @@ export interface UpdateGlobalConfigRequest {
 
 export interface UpdateGlobalConfigResponse {
   config: GlobalConfig | undefined;
+}
+
+export interface GetUserManagementStatusResponse {
+  status: UserManagementStatus | undefined;
 }
 
 function createBaseGetGlobalConfigResponse(): GetGlobalConfigResponse {
@@ -197,6 +201,66 @@ export const UpdateGlobalConfigResponse: MessageFns<UpdateGlobalConfigResponse> 
     const message = createBaseUpdateGlobalConfigResponse();
     message.config = (object.config !== undefined && object.config !== null)
       ? GlobalConfig.fromPartial(object.config)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseGetUserManagementStatusResponse(): GetUserManagementStatusResponse {
+  return { status: undefined };
+}
+
+export const GetUserManagementStatusResponse: MessageFns<GetUserManagementStatusResponse> = {
+  encode(message: GetUserManagementStatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.status !== undefined) {
+      UserManagementStatus.encode(message.status, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetUserManagementStatusResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetUserManagementStatusResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.status = UserManagementStatus.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetUserManagementStatusResponse {
+    return { status: isSet(object.status) ? UserManagementStatus.fromJSON(object.status) : undefined };
+  },
+
+  toJSON(message: GetUserManagementStatusResponse): unknown {
+    const obj: any = {};
+    if (message.status !== undefined) {
+      obj.status = UserManagementStatus.toJSON(message.status);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GetUserManagementStatusResponse>): GetUserManagementStatusResponse {
+    return GetUserManagementStatusResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GetUserManagementStatusResponse>): GetUserManagementStatusResponse {
+    const message = createBaseGetUserManagementStatusResponse();
+    message.status = (object.status !== undefined && object.status !== null)
+      ? UserManagementStatus.fromPartial(object.status)
       : undefined;
     return message;
   },

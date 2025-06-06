@@ -8,6 +8,10 @@ export function configAPI() {
   return `${baseAPI()}/config` as const;
 }
 
+export function usersStatusAPI() {
+  return `${configAPI()}/users/status` as const;
+}
+
 export function reposAPI() {
   return `${baseAPI()}/repositories` as const;
 }
