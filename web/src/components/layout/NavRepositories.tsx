@@ -1,4 +1,4 @@
-import {type LucideIcon, MoreHorizontal,} from "lucide-react"
+import {MoreHorizontal,} from "lucide-react"
 import {useMemo, useState} from "react";
 import {
   SidebarGroup,
@@ -7,16 +7,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx"
+import {Link} from "react-router";
+import type {GitHubRepository} from "@/pb/dev_observer/api/types/repo.ts";
 
-export function NavRepositories({
-                                  repositories,
-                                }: {
-  repositories: {
-    name: string
-    url: string
-    icon?: LucideIcon
-  }[]
-}) {
+export function NavRepositories({repositories}: { repositories: GitHubRepository[] }) {
   // const { isMobile } = useSidebar()
   const toShowCnt = 4
   const [showAll, setShowAll] = useState(repositories.length <= toShowCnt)
@@ -27,41 +21,13 @@ export function NavRepositories({
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
       <SidebarMenu>
-        {shown.map((item) => (
-          <SidebarMenuItem key={item.name}>
+        {shown.map((repo) => (
+          <SidebarMenuItem key={repo.name}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
-                {item.icon && <item.icon/>}
-                <span>{item.name}</span>
-              </a>
+              <Link to={repo.url}>
+                <span>{repo.name}</span>
+              </Link>
             </SidebarMenuButton>
-            {/*<DropdownMenu>*/}
-            {/*  <DropdownMenuTrigger asChild>*/}
-            {/*    <SidebarMenuAction showOnHover>*/}
-            {/*      <MoreHorizontal />*/}
-            {/*      <span className="sr-only">More</span>*/}
-            {/*    </SidebarMenuAction>*/}
-            {/*  </DropdownMenuTrigger>*/}
-            {/*  <DropdownMenuContent*/}
-            {/*    className="w-48"*/}
-            {/*    side={isMobile ? "bottom" : "right"}*/}
-            {/*    align={isMobile ? "end" : "start"}*/}
-            {/*  >*/}
-            {/*    <DropdownMenuItem>*/}
-            {/*      <Folder className="text-muted-foreground" />*/}
-            {/*      <span>View Project</span>*/}
-            {/*    </DropdownMenuItem>*/}
-            {/*    <DropdownMenuItem>*/}
-            {/*      <Share className="text-muted-foreground" />*/}
-            {/*      <span>Share Project</span>*/}
-            {/*    </DropdownMenuItem>*/}
-            {/*    <DropdownMenuSeparator />*/}
-            {/*    <DropdownMenuItem>*/}
-            {/*      <Trash2 className="text-muted-foreground" />*/}
-            {/*      <span>Delete Project</span>*/}
-            {/*    </DropdownMenuItem>*/}
-            {/*  </DropdownMenuContent>*/}
-            {/*</DropdownMenu>*/}
           </SidebarMenuItem>
         ))}
         {!showAll && <SidebarMenuItem>

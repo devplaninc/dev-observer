@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from dev_observer.api.types import observations_pb2 as dev__observer_dot_api_dot_types_dot_observations__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n#dev_observer/api/types/config.proto\x12\x1d\x64\x65v_observer.api.types.config\x1a)dev_observer/api/types/observations.proto\"O\n\x0cGlobalConfig\x12?\n\x08\x61nalysis\x18\x01 \x01(\x0b\x32-.dev_observer.api.types.config.AnalysisConfig\"W\n\x0e\x41nalysisConfig\x12\x45\n\x0erepo_analyzers\x18\x01 \x03(\x0b\x32-.dev_observer.api.types.observations.Analyzerb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n#dev_observer/api/types/config.proto\x12\x1d\x64\x65v_observer.api.types.config\x1a)dev_observer/api/types/observations.proto\"O\n\x0cGlobalConfig\x12?\n\x08\x61nalysis\x18\x01 \x01(\x0b\x32-.dev_observer.api.types.config.AnalysisConfig\"W\n\x0e\x41nalysisConfig\x12\x45\n\x0erepo_analyzers\x18\x01 \x03(\x0b\x32-.dev_observer.api.types.observations.Analyzer\"W\n\x14UserManagementStatus\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x1b\n\x0epublic_api_key\x18\x02 \x01(\tH\x00\x88\x01\x01\x42\x11\n\x0f_public_api_keyb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -36,4 +36,6 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GLOBALCONFIG']._serialized_end=192
   _globals['_ANALYSISCONFIG']._serialized_start=194
   _globals['_ANALYSISCONFIG']._serialized_end=281
+  _globals['_USERMANAGEMENTSTATUS']._serialized_start=283
+  _globals['_USERMANAGEMENTSTATUS']._serialized_end=370
 # @@protoc_insertion_point(module_scope)

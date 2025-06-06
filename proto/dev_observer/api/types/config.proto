@@ -11,3 +11,8 @@ message GlobalConfig {
 message AnalysisConfig {
   repeated dev_observer.api.types.observations.Analyzer repo_analyzers = 1;
 }
+
+message UserManagementStatus {
+  bool enabled = 1;
+  optional string public_api_key = 2;
+}

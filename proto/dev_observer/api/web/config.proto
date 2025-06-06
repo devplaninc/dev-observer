@@ -15,3 +15,7 @@ message UpdateGlobalConfigRequest {
 message UpdateGlobalConfigResponse {
   dev_observer.api.types.config.GlobalConfig config = 1;
 }
+
+message GetUserManagementStatusResponse {
+  dev_observer.api.types.config.UserManagementStatus status = 1;
+}

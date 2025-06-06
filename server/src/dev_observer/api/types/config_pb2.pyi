@@ -17,3 +17,11 @@ class AnalysisConfig(_message.Message):
     REPO_ANALYZERS_FIELD_NUMBER: _ClassVar[int]
     repo_analyzers: _containers.RepeatedCompositeFieldContainer[_observations_pb2.Analyzer]
     def __init__(self, repo_analyzers: _Optional[_Iterable[_Union[_observations_pb2.Analyzer, _Mapping]]] = ...) -> None: ...
+
+class UserManagementStatus(_message.Message):
+    __slots__ = ("enabled", "public_api_key")
+    ENABLED_FIELD_NUMBER: _ClassVar[int]
+    PUBLIC_API_KEY_FIELD_NUMBER: _ClassVar[int]
+    enabled: bool
+    public_api_key: str
+    def __init__(self, enabled: bool = ..., public_api_key: _Optional[str] = ...) -> None: ...

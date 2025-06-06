@@ -34,6 +34,9 @@ dependencies = [
     "alembic>=1.16.1",
     "psycopg2>=2.9.10",
     "sqlalchemy>=2.0.40",
+    "clerk-backend-api>=3.0.2",
+    "asyncpg>=0.30.0",
+    "greenlet>=3.2.2",
 ]
 
 [build-system]

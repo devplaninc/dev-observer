@@ -23,3 +23,6 @@ dir="_local_data_"
 provider="local"
 [storage.local]
 dir="_local_data_/__storage"
+
+[users_management]
+provider="clerk"

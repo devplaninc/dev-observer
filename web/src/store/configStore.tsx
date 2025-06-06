@@ -1,17 +1,21 @@
-import type {GlobalConfig} from "@/pb/dev_observer/api/types/config";
+import type {GlobalConfig, UserManagementStatus} from "@/pb/dev_observer/api/types/config";
 import type {StateCreator} from "zustand";
-import {configAPI} from "@/store/apiPaths.tsx";
+import {configAPI, usersStatusAPI} from "@/store/apiPaths.tsx";
 import {
   GetGlobalConfigResponse,
+  GetUserManagementStatusResponse,
   UpdateGlobalConfigRequest,
   UpdateGlobalConfigResponse
 } from "@/pb/dev_observer/api/web/config.ts";
+import {fetchWithAuth} from "@/store/api.tsx";
 
 export interface ConfigState {
   globalConfig: GlobalConfig | undefined;
+  usersStatus: UserManagementStatus | undefined;
 
   fetchGlobalConfig: () => Promise<void>;
   updateGlobalConfig: (configUpdate: Partial<GlobalConfig>) => Promise<void>;
+  fetchUsersConfig: () => Promise<void>;
 }
 
 export const createConfigSlice: StateCreator<
@@ -21,22 +25,17 @@ export const createConfigSlice: StateCreator<
   ConfigState
 > = ((set, get) => ({
   globalConfig: undefined,
-  fetchGlobalConfig: async () => fetch(configAPI())
-    .then(r => r.ok ? r.json() : Promise.reject(new Error(r.statusText)))
-    .then(js => {
-
-      const {config} = GetGlobalConfigResponse.fromJSON(js)
-      set(s => ({...s, globalConfig: config}))
-    }),
-  updateGlobalConfig: async update => fetch(configAPI(),
+  usersStatus: undefined,
+  fetchGlobalConfig: async () => fetchWithAuth(configAPI(), GetGlobalConfigResponse)
+    .then(r => set(s => ({...s, globalConfig: r.config}))),
+  updateGlobalConfig: async update => fetchWithAuth(configAPI(),
+    UpdateGlobalConfigResponse,
     {
       method: "POST", body: JSON.stringify(UpdateGlobalConfigRequest.toJSON(
         {config: {...get().globalConfig!, ...update}}
       ))
     }
-  ).then(r => r.ok ? r.json() : Promise.reject(new Error(r.statusText)))
-    .then(js => {
-      const {config} = UpdateGlobalConfigResponse.fromJSON(js)
-      set(s => ({...s, globalConfig: config}))
-    }),
+  ).then(r => set(s => ({...s, globalConfig: r.config}))),
+  fetchUsersConfig: async () => fetchWithAuth(usersStatusAPI(), GetUserManagementStatusResponse)
+    .then(r => set(s => ({...s, usersStatus: r.status ?? {enabled: false}}))),
 }))

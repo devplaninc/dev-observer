@@ -1,6 +1,7 @@
 **/.idea/
 **/.venv/
 **/*.secrets*
+server/.env.*
 **/node_modules
 
 **/devplan_current_feature.md*

@@ -5,12 +5,13 @@ import subprocess
 import threading
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 import dev_observer.log
 from dev_observer.env_detection import detect_server_env
 from dev_observer.server.env import ServerEnv
+from dev_observer.server.middleware.auth import AuthMiddleware
 from dev_observer.server.services.config import ConfigService
 from dev_observer.server.services.observations import ObservationsService
 from dev_observer.server.services.repositories import RepositoriesService
@@ -21,7 +22,7 @@ logging.basicConfig(level=logging.DEBUG)
 from dev_observer.log import s_
 
 _log = logging.getLogger(__name__)
-Settings.model_config["toml_file"] = os.environ.get("DEV_OBSERVER_CONFIG_FILE", "default_config.toml")
+Settings.model_config["toml_file"] = os.environ.get("DEV_OBSERVER_CONFIG_FILE", None)
 env: ServerEnv = detect_server_env(Settings())
 
 
@@ -39,12 +40,31 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-config_service = ConfigService(env.storage)
+
+# Create auth middleware
+auth_middleware = AuthMiddleware(env.users)
+
+# Create services
+config_service = ConfigService(env.storage, env.users)
 repos_service = RepositoriesService(env.storage)
 observations_service = ObservationsService(env.observations)
-app.include_router(config_service.router, prefix="/api/v1")
-app.include_router(repos_service.router, prefix="/api/v1")
-app.include_router(observations_service.router, prefix="/api/v1")
+
+# Include routers with authentication
+app.include_router(
+    config_service.router,
+    prefix="/api/v1",
+    dependencies=[Depends(auth_middleware.verify_token)]
+)
+app.include_router(
+    repos_service.router,
+    prefix="/api/v1",
+    dependencies=[Depends(auth_middleware.verify_token)]
+)
+app.include_router(
+    observations_service.router,
+    prefix="/api/v1",
+    dependencies=[Depends(auth_middleware.verify_token)]
+)
 
 origins = [
     "http://localhost:5173",
@@ -68,13 +88,15 @@ async def start_fastapi_server():
     _log.info(s_("Starting FastAPI server...", port=port))
     await uvicorn_server.serve()
 
-
-if __name__ == "__main__":
+def start_all():
     async def start():
         await start_fastapi_server()
 
-
     asyncio.run(start())
+
+
+if __name__ == "__main__":
+    start_all()
 
 
 def _get_git_root() -> str:

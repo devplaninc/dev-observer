@@ -1,4 +1,5 @@
 import datetime
+import uuid
 from typing import Optional, MutableSequence
 
 from google.protobuf import json_format
@@ -32,53 +33,68 @@ class PostgresqlStorageProvider(StorageProvider):
 
     async def delete_github_repo(self, repo_id: str):
         async with AsyncSession(self._engine) as session:
-            await session.execute(delete(GitRepoEntity).where(GitRepoEntity.id == repo_id))
+            async with session.begin():
+                await session.execute(delete(GitRepoEntity).where(GitRepoEntity.id == repo_id))
 
     async def add_github_repo(self, repo: GitHubRepository) -> GitHubRepository:
+        repo_id = repo.id
+        if not repo_id or len(repo_id) == 0:
+            repo_id = f"{uuid.uuid4()}"
         async with AsyncSession(self._engine) as session:
-            ent = GitRepoEntity(json_data=pb_to_json(repo))
-            session.add(ent)
-        return await self.get_github_repo(ent.id)
+            async with session.begin():
+                ent = GitRepoEntity(id=repo_id, json_data=pb_to_json(repo))
+                session.add(ent)
+        return await self.get_github_repo(repo_id)
 
     async def next_processing_item(self) -> Optional[ProcessingItem]:
+        next_processing_time = self._clock.now()
+        if next_processing_time.tzinfo is not None:
+            next_processing_time = next_processing_time.replace(tzinfo=None)
+
         async with AsyncSession(self._engine) as session:
             res = await session.execute(
                 select(ProcessingItemEntity)
                 .where(
                     ProcessingItemEntity.next_processing != None,
-                    ProcessingItemEntity.next_processing < self._clock.now(),
+                    ProcessingItemEntity.next_processing < next_processing_time,
                 )
                 .order_by(ProcessingItemEntity.next_processing)
             )
             item = res.first()
-        return _to_optional_item(item)
+            return _to_optional_item(item)
 
     async def set_next_processing_time(self, key: ProcessingItemKey, next_time: Optional[datetime.datetime]):
         key_str = json_format.MessageToJson(key, indent=None, sort_keys=True)
         async with AsyncSession(self._engine) as session:
-            await session.execute(
-                update(ProcessingItemEntity)
-                .where(ProcessingItemEntity.key == key_str)
-                .values(next_processing=next_time)
-            )
+            async with session.begin():
+                await session.execute(
+                    update(ProcessingItemEntity)
+                    .where(ProcessingItemEntity.key == key_str)
+                    .values(next_processing=next_time)
+                )
 
     async def get_global_config(self) -> GlobalConfig:
         async with AsyncSession(self._engine) as session:
-            ent = await session.get(GlobalConfigEntity, "global_config")
-            return parse_json_pb(ent.json_data, GlobalConfig())
+            async with session.begin():
+                ent = await session.get(GlobalConfigEntity, "global_config")
+                if ent is None:
+                    session.add(GlobalConfigEntity(id="global_config", json_data="{}"))
+                    return GlobalConfig()
+                return parse_json_pb(ent.json_data, GlobalConfig())
 
     async def set_global_config(self, config: GlobalConfig) -> GlobalConfig:
         async with AsyncSession(self._engine) as session:
-            await session.execute(
-                update(GlobalConfigEntity)
-                .where(GlobalConfigEntity.id=="global_config")
-                .values(json_data=pb_to_json(config))
-            )
+            async with session.begin():
+                await session.execute(
+                    update(GlobalConfigEntity)
+                    .where(GlobalConfigEntity.id == "global_config")
+                    .values(json_data=pb_to_json(config))
+                )
         return await self.get_global_config()
 
 
 def _to_optional_repo(ent: Optional[GitRepoEntity]) -> Optional[GitHubRepository]:
-    return None if ent is None else parse_json_pb(ent.json_data, GitHubRepository())
+    return None if ent is None else _to_repo(ent)
 
 
 def _to_repo(ent: GitRepoEntity) -> GitHubRepository:
