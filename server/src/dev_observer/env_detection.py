@@ -9,6 +9,7 @@ from dev_observer.analysis.stub import StubAnalysisProvider
 from dev_observer.log import s_
 from dev_observer.observations.local import LocalObservationsProvider
 from dev_observer.observations.provider import ObservationsProvider
+from dev_observer.observations.s3 import S3ObservationsProvider
 from dev_observer.processors.periodic import PeriodicProcessor
 from dev_observer.processors.repos import ReposProcessor
 from dev_observer.prompts.langfuse import LangfusePromptsProvider
@@ -99,7 +100,23 @@ def detect_observer(settings: Settings) -> ObservationsProvider:
         raise ValueError("Observations settings are not defined")
     match o.provider:
         case "local":
+            if o.local is None:
+                raise ValueError("Missing local config for local observations provider")
             return LocalObservationsProvider(root_dir=o.local.dir)
+        case "s3":
+            if o.s3 is None:
+                raise ValueError("Missing S3 config for S3 observations provider")
+            try:
+                return S3ObservationsProvider(
+                    endpoint=o.s3.endpoint,
+                    access_key=o.s3.access_key,
+                    secret_key=o.s3.secret_key,
+                    bucket=o.s3.bucket,
+                    region=o.s3.region
+                )
+            except ValueError as e:
+                # Re-raise with more context
+                raise ValueError(f"Failed to initialize S3 observations provider: {str(e)}") from e
     raise ValueError(f"Unsupported observations provider: {o.provider}")
 
 

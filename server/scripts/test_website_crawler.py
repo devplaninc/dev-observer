@@ -19,7 +19,6 @@ import os
 import sys
 from typing import List
 
-from dev_observer.observations.local import LocalObservationsProvider
 from dev_observer.website.cloner import normalize_domain, normalize_name
 
 # Add the src directory to the Python path
@@ -61,7 +60,8 @@ async def main():
     """Run the test script."""
     parser = argparse.ArgumentParser(description="Test the website crawler.")
     parser.add_argument("url", help="The URL of the website to crawl.")
-    parser.add_argument("--output-dir", help="The directory to store the crawled data. If not provided, a temporary directory will be used.")
+    parser.add_argument("--output-dir",
+                        help="The directory to store the crawled data. If not provided, a temporary directory will be used.")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging.")
     args = parser.parse_args()
 
@@ -73,8 +73,8 @@ async def main():
     tokenizer = TiktokenTokenizerProvider(encoding="cl100k_base")  # Using the OpenAI encoding
     analysis = StubAnalysisProvider()
     prompts = StubPromptsProvider()
-    # observations = MemoryObservationsProvider()
-    observations = LocalObservationsProvider(root_dir="__obs")
+    observations = MemoryObservationsProvider()
+    # observations = LocalObservationsProvider(root_dir="__obs")
 
     # Create processor
     processor = WebsitesProcessor(

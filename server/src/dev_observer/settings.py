@@ -49,10 +49,19 @@ class LocalObservations(BaseModel):
     dir: str
 
 
+class S3Observations(BaseModel):
+    endpoint: str
+    access_key: str
+    secret_key: str
+    bucket: str
+    region: str
+
+
 class Observations(BaseModel):
-    provider: Literal["local"] = "local"
+    provider: Literal["local", "s3"] = "local"
 
     local: Optional[LocalObservations] = None
+    s3: Optional[S3Observations] = None
 
 
 class SettingsProps(BaseModel):
