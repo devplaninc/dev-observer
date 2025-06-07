@@ -16,6 +16,7 @@ export interface GlobalConfig {
 
 export interface AnalysisConfig {
   repoAnalyzers: Analyzer[];
+  siteAnalyzers: Analyzer[];
 }
 
 export interface UserManagementStatus {
@@ -84,13 +85,16 @@ export const GlobalConfig: MessageFns<GlobalConfig> = {
 };
 
 function createBaseAnalysisConfig(): AnalysisConfig {
-  return { repoAnalyzers: [] };
+  return { repoAnalyzers: [], siteAnalyzers: [] };
 }
 
 export const AnalysisConfig: MessageFns<AnalysisConfig> = {
   encode(message: AnalysisConfig, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     for (const v of message.repoAnalyzers) {
       Analyzer.encode(v!, writer.uint32(10).fork()).join();
+    }
+    for (const v of message.siteAnalyzers) {
+      Analyzer.encode(v!, writer.uint32(18).fork()).join();
     }
     return writer;
   },
@@ -110,6 +114,14 @@ export const AnalysisConfig: MessageFns<AnalysisConfig> = {
           message.repoAnalyzers.push(Analyzer.decode(reader, reader.uint32()));
           continue;
         }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.siteAnalyzers.push(Analyzer.decode(reader, reader.uint32()));
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -124,6 +136,9 @@ export const AnalysisConfig: MessageFns<AnalysisConfig> = {
       repoAnalyzers: gt.Array.isArray(object?.repoAnalyzers)
         ? object.repoAnalyzers.map((e: any) => Analyzer.fromJSON(e))
         : [],
+      siteAnalyzers: gt.Array.isArray(object?.siteAnalyzers)
+        ? object.siteAnalyzers.map((e: any) => Analyzer.fromJSON(e))
+        : [],
     };
   },
 
@@ -131,6 +146,9 @@ export const AnalysisConfig: MessageFns<AnalysisConfig> = {
     const obj: any = {};
     if (message.repoAnalyzers?.length) {
       obj.repoAnalyzers = message.repoAnalyzers.map((e) => Analyzer.toJSON(e));
+    }
+    if (message.siteAnalyzers?.length) {
+      obj.siteAnalyzers = message.siteAnalyzers.map((e) => Analyzer.toJSON(e));
     }
     return obj;
   },
@@ -141,6 +159,7 @@ export const AnalysisConfig: MessageFns<AnalysisConfig> = {
   fromPartial(object: DeepPartial<AnalysisConfig>): AnalysisConfig {
     const message = createBaseAnalysisConfig();
     message.repoAnalyzers = object.repoAnalyzers?.map((e) => Analyzer.fromPartial(e)) || [];
+    message.siteAnalyzers = object.siteAnalyzers?.map((e) => Analyzer.fromPartial(e)) || [];
     return message;
   },
 };
