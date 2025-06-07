@@ -1,9 +1,12 @@
+import logging
 from typing import List
 
 from dev_observer.analysis.provider import AnalysisProvider
 from dev_observer.flatten.flatten import FlattenResult
+from dev_observer.log import s_
 from dev_observer.prompts.provider import PromptsProvider
 
+_log = logging.getLogger(__name__)
 
 class TokenizedAnalyzer:
     prompts_prefix: str
@@ -45,5 +48,6 @@ class TokenizedAnalyzer:
         prompt = await self.prompts.get_formatted(prompt_name, {
             "content": content,
         })
+        _log.debug(s_("Analyzing file", path=path, content_len=len(content)))
         result = await self.analysis.analyze(prompt)
         return result.analysis

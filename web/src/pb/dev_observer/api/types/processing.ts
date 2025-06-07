@@ -11,7 +11,7 @@ import { Timestamp } from "../../../google/protobuf/timestamp";
 export const protobufPackage = "dev_observer.api.types.processing";
 
 export interface ProcessingItemKey {
-  entity?: { $case: "githubRepoId"; value: string } | undefined;
+  entity?: { $case: "githubRepoId"; value: string } | { $case: "websiteUrl"; value: string } | undefined;
 }
 
 export interface ProcessingItem {
@@ -32,6 +32,9 @@ export const ProcessingItemKey: MessageFns<ProcessingItemKey> = {
       case "githubRepoId":
         writer.uint32(802).string(message.entity.value);
         break;
+      case "websiteUrl":
+        writer.uint32(810).string(message.entity.value);
+        break;
     }
     return writer;
   },
@@ -51,6 +54,14 @@ export const ProcessingItemKey: MessageFns<ProcessingItemKey> = {
           message.entity = { $case: "githubRepoId", value: reader.string() };
           continue;
         }
+        case 101: {
+          if (tag !== 810) {
+            break;
+          }
+
+          message.entity = { $case: "websiteUrl", value: reader.string() };
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -62,7 +73,11 @@ export const ProcessingItemKey: MessageFns<ProcessingItemKey> = {
 
   fromJSON(object: any): ProcessingItemKey {
     return {
-      entity: isSet(object.githubRepoId) ? { $case: "githubRepoId", value: gt.String(object.githubRepoId) } : undefined,
+      entity: isSet(object.githubRepoId)
+        ? { $case: "githubRepoId", value: gt.String(object.githubRepoId) }
+        : isSet(object.websiteUrl)
+        ? { $case: "websiteUrl", value: gt.String(object.websiteUrl) }
+        : undefined,
     };
   },
 
@@ -70,6 +85,8 @@ export const ProcessingItemKey: MessageFns<ProcessingItemKey> = {
     const obj: any = {};
     if (message.entity?.$case === "githubRepoId") {
       obj.githubRepoId = message.entity.value;
+    } else if (message.entity?.$case === "websiteUrl") {
+      obj.websiteUrl = message.entity.value;
     }
     return obj;
   },
@@ -83,6 +100,12 @@ export const ProcessingItemKey: MessageFns<ProcessingItemKey> = {
       case "githubRepoId": {
         if (object.entity?.value !== undefined && object.entity?.value !== null) {
           message.entity = { $case: "githubRepoId", value: object.entity.value };
+        }
+        break;
+      }
+      case "websiteUrl": {
+        if (object.entity?.value !== undefined && object.entity?.value !== null) {
+          message.entity = { $case: "websiteUrl", value: object.entity.value };
         }
         break;
       }

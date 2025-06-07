@@ -13,6 +13,15 @@ class DataclassJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if dataclasses.is_dataclass(obj):
             return dataclasses.asdict(obj)
+        # Handle Protocol Buffer message objects
+        if hasattr(obj, 'DESCRIPTOR') and hasattr(obj, 'SerializeToDict'):
+            return obj.SerializeToDict()
+        # Handle Protocol Buffer message objects (alternative method)
+        if hasattr(obj, 'DESCRIPTOR') and hasattr(obj, 'ListFields'):
+            result = {}
+            for field, value in obj.ListFields():
+                result[field.name] = value
+            return result
         return super().default(obj)
 
 
@@ -44,4 +53,3 @@ class StructuredMessage:
         return encoder.encode(self)
 
 s_ = StructuredMessage
-

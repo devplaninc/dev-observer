@@ -6,10 +6,12 @@ from typing import ClassVar as _ClassVar, Mapping as _Mapping, Optional as _Opti
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class ProcessingItemKey(_message.Message):
-    __slots__ = ("github_repo_id",)
+    __slots__ = ("github_repo_id", "website_url")
     GITHUB_REPO_ID_FIELD_NUMBER: _ClassVar[int]
+    WEBSITE_URL_FIELD_NUMBER: _ClassVar[int]
     github_repo_id: str
-    def __init__(self, github_repo_id: _Optional[str] = ...) -> None: ...
+    website_url: str
+    def __init__(self, github_repo_id: _Optional[str] = ..., website_url: _Optional[str] = ...) -> None: ...
 
 class ProcessingItem(_message.Message):
     __slots__ = ("key", "next_processing", "last_processed", "last_error", "no_processing")

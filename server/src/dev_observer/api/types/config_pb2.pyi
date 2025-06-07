@@ -13,10 +13,12 @@ class GlobalConfig(_message.Message):
     def __init__(self, analysis: _Optional[_Union[AnalysisConfig, _Mapping]] = ...) -> None: ...
 
 class AnalysisConfig(_message.Message):
-    __slots__ = ("repo_analyzers",)
+    __slots__ = ("repo_analyzers", "site_analyzers")
     REPO_ANALYZERS_FIELD_NUMBER: _ClassVar[int]
+    SITE_ANALYZERS_FIELD_NUMBER: _ClassVar[int]
     repo_analyzers: _containers.RepeatedCompositeFieldContainer[_observations_pb2.Analyzer]
-    def __init__(self, repo_analyzers: _Optional[_Iterable[_Union[_observations_pb2.Analyzer, _Mapping]]] = ...) -> None: ...
+    site_analyzers: _containers.RepeatedCompositeFieldContainer[_observations_pb2.Analyzer]
+    def __init__(self, repo_analyzers: _Optional[_Iterable[_Union[_observations_pb2.Analyzer, _Mapping]]] = ..., site_analyzers: _Optional[_Iterable[_Union[_observations_pb2.Analyzer, _Mapping]]] = ...) -> None: ...
 
 class UserManagementStatus(_message.Message):
     __slots__ = ("enabled", "public_api_key")
