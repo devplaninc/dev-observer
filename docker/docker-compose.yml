@@ -3,15 +3,36 @@ services:
     image: envoyproxy/envoy:${ENVOY_IMAGE_TAG:-v1.25-latest}
     ports:
       - "${ENVOY_PORT:-8099}:8080"
+      - "443:8443"
     volumes:
       - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml
+      - ./envoy/certs:/etc/envoy/certs
+      - ./envoy/init-certs.sh:/usr/local/bin/init-certs.sh
     environment:
       - ENVOY_LOG_LEVEL=${ENVOY_LOG_LEVEL:-info}
+      - ENABLE_SSL=${ENABLE_SSL:-false}
+    entrypoint: /usr/local/bin/init-certs.sh
     networks:
       - dev-observer-network
     depends_on:
       - web
       - server
+
+  cert-manager:
+    image: certbot/certbot:latest
+    profiles:
+      - ssl
+    volumes:
+      - ./envoy/certs:/etc/letsencrypt
+      - ./cert-manager/webroot:/var/www/certbot
+      - ./cert-manager/update-certs.sh:/usr/local/bin/update-certs.sh
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
+      - EMAIL=${CERT_EMAIL:-info@devplan.com}
+      - CERT_NAME=envoy-cert
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /var/www/certbot --email $${EMAIL} -d $${DOMAIN_NAME} --agree-tos --non-interactive --cert-name $${CERT_NAME} || true; if [ -d \"/etc/letsencrypt/live/$${CERT_NAME}\" ]; then /usr/local/bin/update-certs.sh; fi; sleep 12h & wait $${!}; done;'"
+    networks:
+      - dev-observer-network
 
   web:
     image: ghcr.io/devplaninc/dev-observer-web:${WEB_IMAGE_TAG:-latest}

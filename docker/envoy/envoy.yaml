@@ -1,6 +1,10 @@
+node:
+  id: "dev-observer-envoy"
+  cluster: "dev-observer"
+
 static_resources:
   listeners:
-    - name: listener_0
+    - name: listener_http
       address:
         socket_address:
           address: 0.0.0.0
@@ -25,15 +29,71 @@ static_resources:
                     - name: dev_observer_service
                       domains: ["*"]
                       routes:
+                        # Route for ACME HTTP-01 challenge
+                        - match:
+                            prefix: "/.well-known/acme-challenge/"
+                          route:
+                            prefix_rewrite: "/.well-known/acme-challenge/"
+                            cluster: cert_manager_service
+                        # Route for API
                         - match:
                             prefix: "/api"
                           route:
                             cluster: server_service
+                        # Route for everything else
                         - match:
                             prefix: "/"
                           route:
                             cluster: web_service
-                      
+
+    # HTTPS listener (requires SSL certificates from cert-manager)
+    - name: listener_https
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8443
+      filter_chains:
+        - transport_socket:
+            name: envoy.transport_sockets.tls
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+              common_tls_context:
+                tls_certificate_sds_secret_configs:
+                  - name: "envoy_cert"
+                    sds_config:
+                      path_config_source:
+                        path: "/etc/envoy/certs/sds_envoy_cert.json"
+                      resource_api_version: V3
+          filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_https
+                access_log:
+                  - name: envoy.access_loggers.stdout
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+                http_filters:
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+                route_config:
+                  name: https_route
+                  virtual_hosts:
+                    - name: dev_observer_service_https
+                      domains: ["*"]
+                      routes:
+                        # Route for API
+                        - match:
+                            prefix: "/api"
+                          route:
+                            cluster: server_service
+                        # Route for everything else
+                        - match:
+                            prefix: "/"
+                          route:
+                            cluster: web_service
+
   clusters:
     - name: server_service
       connect_timeout: 0.25s
@@ -61,6 +121,21 @@ static_resources:
                     socket_address:
                       address: web
                       port_value: 3000
+    - name: cert_manager_service
+      connect_timeout: 0.25s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: cert_manager_service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: localhost
+                      port_value: 80
+                  health_check_config:
+                    port_value: 80
 
 admin:
   address:
