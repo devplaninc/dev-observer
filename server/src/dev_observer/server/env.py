@@ -1,4 +1,5 @@
 import dataclasses
+from typing import List
 
 from dev_observer.observations.provider import ObservationsProvider
 from dev_observer.processors.periodic import PeriodicProcessor
@@ -14,3 +15,4 @@ class ServerEnv:
     repos_processor: ReposProcessor
     periodic_processor: PeriodicProcessor
     users: UsersProvider
+    api_keys: List[str]

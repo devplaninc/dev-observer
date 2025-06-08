@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -13,9 +13,11 @@ security = HTTPBearer(auto_error=False)
 
 class AuthMiddleware:
     _users: UsersProvider
+    _api_keys: List[str]
 
-    def __init__(self, users: UsersProvider):
+    def __init__(self, users: UsersProvider, api_keys: List[str]):
         self._users = users
+        self._api_keys = api_keys
 
     async def verify_token(
             self,
@@ -25,6 +27,11 @@ class AuthMiddleware:
         if request.url.path == "/api/v1/config/users/status":
             return
         if not self._users.user_management_enabled():
+            return
+
+        # Check if API keys are configured and match the provided token
+        if len(self._api_keys) > 0 and credentials and credentials.credentials in self._api_keys:
+            _log.debug("Request authenticated via API key")
             return
 
         if not credentials:

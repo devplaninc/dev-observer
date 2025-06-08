@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Tuple, Literal, ClassVar
+from typing import Optional, Tuple, Literal, ClassVar, List
 
 from dev_observer.log import s_
 from pydantic import BaseModel
@@ -98,6 +98,9 @@ class Clerk(BaseModel):
     secret_key: str
 
 
+class ApiKeys(BaseModel):
+    keys: Optional[List[str]] = None
+
 class UserManagement(BaseModel):
     provider: Literal["clerk", "none"] = "none"
     clerk: Optional[Clerk] = None
@@ -113,6 +116,7 @@ class Settings(BaseSettings):
     tokenizer: Optional[Tokenizer] = None
     storage: Optional[Storage] = None
     users_management: Optional[UserManagement] = None
+    api_keys: Optional[ApiKeys] = None
 
     def __init__(self) -> None:
         toml_file = Settings.model_config.get("toml_file", None)

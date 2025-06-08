@@ -42,7 +42,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # Create auth middleware
-auth_middleware = AuthMiddleware(env.users)
+auth_middleware = AuthMiddleware(env.users, env.api_keys)
 
 # Create services
 config_service = ConfigService(env.storage, env.users)

@@ -28,7 +28,10 @@ db_url="postgresql+asyncpg://postgres:test_password@localhost:54322/dev_observer
 provider="clerk"
 
 [users_management.clerk]
-public_key="pk_test_bGVnYWwtYW50LTI3LmNsZXJrLmFjY291bnRzLmRldiQ"
+public_key="pk_test_cHJvdmVuLWRvZS0yNi5jbGVyay5hY2NvdW50cy5kZXYk"
+
+[api_keys]
+keys=["test-api-key"]
 
 [observations.local]
 dir = "scripts/dev/_local_data_"
