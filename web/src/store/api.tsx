@@ -33,12 +33,10 @@ export async function fetchWithAuth<T>(
   const headers = new Headers(options.headers);
   if (useBoundStore.getState().usersStatus?.enabled) {
     const token = await getSessionToken();
-    console.log("CLERK token", token);
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }
   }
-  console.log("CLERK headers", headers);
   return fetch(url, {...options, headers,})
     .then(res => res.ok ? res.json() : Promise.reject(new Error(res.statusText)))
     .then(js => response.fromJSON(js))

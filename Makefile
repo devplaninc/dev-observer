@@ -35,7 +35,7 @@ migration-apply:
 dev-server:
 	@cd server && uv run scripts/dev/main.py
 
-dev-web:
+dev-web: npm-install
 	@cd web && npm run dev
 
 local-compose:

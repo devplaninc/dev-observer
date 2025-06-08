@@ -165,13 +165,22 @@ def detect_server_env(settings: Settings) -> ServerEnv:
     storage = detect_storage_provider(settings)
     bg_storage = detect_storage_provider(settings)
     repos_processor = ReposProcessor(analysis, repository, prompts, observations, tokenizer)
-    users = detect_users_provider(settings),
+    users = detect_users_provider(settings)
+
+    # Extract API key from settings if available
+    api_keys = None
+    if settings.api_keys:
+        api_keys = settings.api_keys.keys
+        if api_keys:
+            _log.info(s_("API key authentication enabled"))
+
     env = ServerEnv(
         observations=observations,
         storage=storage,
         repos_processor=repos_processor,
         periodic_processor=PeriodicProcessor(bg_storage, repos_processor),
-        users=detect_users_provider(settings),
+        users=users,
+        api_keys=api_keys or [],
     )
     _log.debug(s_("Detected environment",
                   repository=repository,
