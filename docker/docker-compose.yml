@@ -3,6 +3,7 @@ services:
     image: envoyproxy/envoy:${ENVOY_IMAGE_TAG:-v1.25-latest}
     ports:
       - "${ENVOY_PORT:-8099}:8080"
+      - "${ENVOY_CERT_PORT:-18085}:8085"
       - "443:8443"
     volumes:
       - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml

@@ -4,6 +4,37 @@ node:
 
 static_resources:
   listeners:
+    - name: listener_verification
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8085
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_http
+                access_log:
+                  - name: envoy.access_loggers.stdout
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+                http_filters:
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: dev_observer_service
+                      domains: [ "*" ]
+                      routes:
+                        # Route for ACME HTTP-01 challenge
+                        - match:
+                            prefix: "/.well-known/acme-challenge/"
+                          route:
+                            prefix_rewrite: "/.well-known/acme-challenge/"
+                            cluster: cert_manager_service
     - name: listener_http
       address:
         socket_address:
@@ -29,12 +60,6 @@ static_resources:
                     - name: dev_observer_service
                       domains: ["*"]
                       routes:
-                        # Route for ACME HTTP-01 challenge
-                        - match:
-                            prefix: "/.well-known/acme-challenge/"
-                          route:
-                            prefix_rewrite: "/.well-known/acme-challenge/"
-                            cluster: cert_manager_service
                         # Route for API
                         - match:
                             prefix: "/api"
