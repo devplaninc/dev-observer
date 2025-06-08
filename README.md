@@ -1,6 +1,15 @@
 # dev-observer
 Observer of all the important stuff.
 
+## Setup:
+
+Create file [server/.env.local.secrets](server/.env.local.secrets) and add following there:
+```
+DEV_OBSERVER__GIT__GITHUB__PERSONAL_TOKEN=<Github personal token, use `gh auth token` to get>
+GOOGLE_API_KEY=<GOOGLE_API_TOKEN to use for google-genai>
+DEV_OBSERVER__USERS_MANAGEMENT__CLERK__SECRET_KEY=<get key from Clerk>
+```
+
 ## Docker Images
 
 This repository provides Docker images for both the web frontend and server backend components. These images are built and published to GitHub Packages using GitHub Actions.
@@ -151,14 +160,95 @@ To stop the services:
 docker-compose down
 ```
 
+### SSL Support
+
+The Docker Compose setup includes support for SSL termination at the Envoy proxy level. When enabled, Envoy will terminate SSL connections and forward plain HTTP requests to the web and server services. This feature uses Let's Encrypt for automatic certificate issuance and renewal.
+
+#### How It Works
+
+1. When `ENABLE_SSL=true` and the `ssl` profile is included, the cert-manager service is started alongside Envoy
+2. The cert-manager service obtains SSL certificates from Let's Encrypt using the HTTP-01 challenge
+3. Envoy is configured to route HTTP-01 challenge requests to the cert-manager service
+4. Certificates are automatically renewed before they expire
+5. Envoy loads certificates dynamically using SDS (Secret Discovery Service)
+
+#### Enabling SSL
+
+To enable SSL, you need to do two things:
+
+1. Set the `ENABLE_SSL` environment variable to `true` in your environment file:
+
+```bash
+# In .env.local, .env.beta, or .env.prod
+ENABLE_SSL=true
+DOMAIN_NAME=your-domain.com
+```
+
+2. Include the `ssl` profile when starting the services:
+
+```bash
+docker-compose --env-file .env.beta --profile ssl up
+```
+
+Both steps are required for SSL to work properly:
+- The `ENABLE_SSL=true` setting is passed to Envoy (but note that the HTTPS listener is always active in the Envoy configuration)
+- The `--profile ssl` option starts the cert-manager service that obtains and manages SSL certificates
+
+Without the cert-manager service running, the HTTPS listener in Envoy will not have access to the required SSL certificates and will not be able to handle HTTPS traffic properly.
+
+The cert-manager service will obtain SSL certificates from Let's Encrypt and configure Envoy to use them for SSL termination.
+
+#### Requirements for SSL
+
+- Port 80 must be accessible from the internet for the HTTP-01 challenge
+- Port 443 must be accessible for HTTPS connections
+- The `DOMAIN_NAME` must resolve to the server's IP address
+- The `CERT_EMAIL` must be a valid email address for Let's Encrypt notifications
+
+#### Troubleshooting SSL
+
+If you encounter issues with SSL:
+
+1. Check the cert-manager logs for certificate issuance errors:
+   ```bash
+   docker-compose logs cert-manager
+   ```
+
+2. Verify that ports 80 and 443 are accessible from the internet:
+   ```bash
+   curl -v http://your-domain.com/.well-known/acme-challenge/test
+   ```
+
+3. Check the Envoy logs for certificate loading errors:
+   ```bash
+   docker-compose logs envoy
+   ```
+
+4. Verify that the SDS configuration file exists:
+   ```bash
+   docker-compose exec envoy ls -la /etc/envoy/certs/sds_envoy_cert.json
+   ```
+
+5. If you see an error about missing SDS configuration file:
+   ```
+   error initializing configuration '/etc/envoy/envoy.yaml': paths must refer to an existing path in the system: '/etc/envoy/certs/sds_envoy_cert.json' does not exist
+   ```
+   This means the SDS configuration file wasn't created properly. Try restarting the services with:
+   ```bash
+   docker-compose down
+   docker-compose --env-file .env.beta --profile ssl up
+   ```
+
 ### Testing
 
-You can test the setup by sending HTTP requests to the Envoy proxy:
+You can test the setup by sending HTTP/HTTPS requests to the Envoy proxy:
 
-- Web service: `http://localhost:8080/`
-- Server API: `http://localhost:8080/api/`
+- Web service (HTTP): `http://localhost:8080/`
+- Web service (HTTPS, if SSL enabled): `https://your-domain.com/`
+- Server API (HTTP): `http://localhost:8080/api/`
+- Server API (HTTPS, if SSL enabled): `https://your-domain.com/api/`
 
-Replace `localhost` with your server's hostname and `8080` with the configured `ENVOY_PORT` if different.
+Replace `localhost` with your server's hostname, `8080` with the configured `ENVOY_PORT` if different, and `your-domain.com` with your actual domain name.
 
 
 ## TODO:

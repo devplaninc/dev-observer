@@ -8,3 +8,4 @@ server/.env.*
 !.windsurf/rules/devplan_*.md
 **/_local_data_/
 /.bin/
+/docker/envoy/certs/sds_envoy_cert.json
