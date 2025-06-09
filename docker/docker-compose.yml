@@ -12,6 +12,7 @@ services:
     environment:
       - ENVOY_LOG_LEVEL=${ENVOY_LOG_LEVEL:-info}
       - ENABLE_SSL=${ENABLE_SSL:-false}
+      - CERT_NAME=envoy-cert
     entrypoint: /usr/local/bin/init-certs.sh
     networks:
       - dev-observer-network
