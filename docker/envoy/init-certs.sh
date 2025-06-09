@@ -12,9 +12,14 @@ CERTS_FOLDER="${LETSENCRYPT_DIR}/live/${CERT_NAME}"
 # Create the certs directory if it doesn't exist
 mkdir -p ${ENVOY_CERTS_DIR}
 
-echo "SDS configuration file updated at ${SDS_CONFIG_FILE}"
+echo "Checking SDS config at ${SDS_CONFIG_FILE}"
 
-if [ "$ENABLE_SSL" = "true" ] && [ -d "$CERTS_FOLDER" ]; then
+cert_exists=false
+[ -d "$CERTS_FOLDER" ] && cert_exists=true
+
+echo "ENABLE_SSL=$ENABLE_SSL, cert_exists=$cert_exists"
+
+if [ "$ENABLE_SSL" = "true" ] && [ "$cert_exists" = true ]; then
   cat > ${SDS_CONFIG_FILE} << EOF
 {
   "resources": [
