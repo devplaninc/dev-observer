@@ -7,7 +7,7 @@ set -e
 # Configuration
 ENVOY_CERTS_DIR=/etc/envoy/certs
 SDS_CONFIG_FILE=${ENVOY_CERTS_DIR}/sds_envoy_cert.json
-CERTS_FOLDER="${LETSENCRYPT_DIR}/live/${CERT_NAME}"
+CERTS_FOLDER="${ENVOY_CERTS_DIR}/live/${CERT_NAME}"
 
 # Create the certs directory if it doesn't exist
 mkdir -p ${ENVOY_CERTS_DIR}
