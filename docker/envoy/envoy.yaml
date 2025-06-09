@@ -26,15 +26,14 @@ static_resources:
                 route_config:
                   name: local_route
                   virtual_hosts:
-                    - name: dev_observer_service
+                    - name: acme_challenge_service
                       domains: [ "*" ]
                       routes:
-                        # Route for ACME HTTP-01 challenge
                         - match:
                             prefix: "/.well-known/acme-challenge/"
                           route:
                             prefix_rewrite: "/.well-known/acme-challenge/"
-                            cluster: cert_manager_service
+                            cluster: acme_challenge
     - name: listener_http
       address:
         socket_address:
@@ -146,21 +145,19 @@ static_resources:
                     socket_address:
                       address: web
                       port_value: 3000
-    - name: cert_manager_service
+    - name: acme_challenge
       connect_timeout: 0.25s
       type: STRICT_DNS
       lb_policy: ROUND_ROBIN
       load_assignment:
-        cluster_name: cert_manager_service
+        cluster_name: acme_challenge
         endpoints:
           - lb_endpoints:
               - endpoint:
                   address:
                     socket_address:
-                      address: localhost
+                      address: acme-challenge
                       port_value: 80
-                  health_check_config:
-                    port_value: 80
 
 admin:
   address:

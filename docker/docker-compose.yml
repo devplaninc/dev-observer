@@ -18,6 +18,7 @@ services:
     depends_on:
       - web
       - server
+      - acme-challenge
 
   cert-manager:
     image: certbot/certbot:latest
@@ -31,7 +32,18 @@ services:
       - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
       - EMAIL=${CERT_EMAIL:-info@devplan.com}
       - CERT_NAME=envoy-cert
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /var/www/certbot --email $${EMAIL} -d $${DOMAIN_NAME} --agree-tos --non-interactive --cert-name $${CERT_NAME} || true; if [ -d \"/etc/letsencrypt/live/$${CERT_NAME}\" ]; then /usr/local/bin/update-certs.sh; fi; sleep 12h & wait $${!}; done;'"
+    entrypoint: |
+      /bin/sh -c '
+      trap exit TERM
+      while :
+      do
+        certbot certonly --webroot -w /var/www/certbot --email $${EMAIL} -d $${DOMAIN_NAME} --agree-tos --non-interactive --cert-name $${CERT_NAME} || true
+        if [ -d "/etc/letsencrypt/live/$${CERT_NAME}" ]; then
+          /usr/local/bin/update-certs.sh
+        fi
+        sleep 12h & wait $${!}
+      done
+      '
     networks:
       - dev-observer-network
 
@@ -56,6 +68,13 @@ services:
       - LOG_LEVEL=${SERVER_LOG_LEVEL:-info}
       - DEV_OBSERVER_CONFIG_FILE=/etc/dev-observer-server/config.toml
       - DEV_OBSERVER__GIT__GITHUB__PERSONAL_TOKEN=${DEV_OBSERVER__GIT__GITHUB__PERSONAL_TOKEN}
+    networks:
+      - dev-observer-network
+
+  acme-challenge:
+    image: nginx:alpine
+    volumes:
+      - ./cert-manager/webroot:/usr/share/nginx/html/.well-known/acme-challenge:ro
     networks:
       - dev-observer-network
 
