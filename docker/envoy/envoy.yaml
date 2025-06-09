@@ -32,7 +32,6 @@ static_resources:
                         - match:
                             prefix: "/.well-known/acme-challenge/"
                           route:
-                            prefix_rewrite: "/.well-known/acme-challenge/"
                             cluster: acme_challenge
     - name: listener_http
       address:
