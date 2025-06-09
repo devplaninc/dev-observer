@@ -50,8 +50,6 @@ services:
 
   web:
     image: ghcr.io/devplaninc/dev-observer-web:${WEB_IMAGE_TAG:-latest}
-    expose:
-      - "${WEB_PORT:-5173}"
     environment:
       - NODE_ENV=${NODE_ENV:-development}
       - LOG_LEVEL=${WEB_LOG_LEVEL:-info}
@@ -60,8 +58,6 @@ services:
 
   server:
     image: ghcr.io/devplaninc/dev-observer-server:${SERVER_IMAGE_TAG:-latest}
-    expose:
-      - "${SERVER_PORT:-8090}"
     volumes:
       - ./compose_env/${SERVER_CONFIG_FILE}:/etc/dev-observer-server/config.toml
     environment:

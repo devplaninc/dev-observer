@@ -25,10 +25,11 @@ dir = "scripts/dev/_local_data_/__storage"
 db_url="postgresql+asyncpg://postgres:test_password@localhost:54322/dev_observer"
 
 [users_management]
-provider="clerk"
+provider="none"
+#provider="clerk"
 
-[users_management.clerk]
-public_key="pk_test_cHJvdmVuLWRvZS0yNi5jbGVyay5hY2NvdW50cy5kZXYk"
+#[users_management.clerk]
+#public_key="<PUBLIC CLERK KEY GOES HERE>"
 
 [api_keys]
 keys=["test-api-key"]
