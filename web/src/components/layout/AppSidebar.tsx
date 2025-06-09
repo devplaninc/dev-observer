@@ -1,5 +1,4 @@
 import * as React from "react"
-import {useMemo} from "react"
 import {ShieldUser, SquareTerminal,} from "lucide-react"
 
 import {NavSecondary} from "@/components/nav-secondary"
@@ -88,14 +87,11 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
 
 function SidebarRepositories() {
   const {repositories, error} = useRepositories()
-  const reps = useMemo(
-    () => repositories?.map(r => ({name: r.name, url: `/repositories/${r.id}`})) ?? [],
-    [repositories])
   if (!repositories) {
     if (error) {
       return <ErrorAlert err={error}/>
     }
     return <Loader/>
   }
-  return <NavRepositories repositories={reps}/>
+  return <NavRepositories repositories={repositories}/>
 }

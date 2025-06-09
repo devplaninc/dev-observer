@@ -40,48 +40,50 @@ jobs:
           tags: |
             type=raw,value=${{ github.event.inputs.version }}
 
-      # Build and push web image
-      - name: Build and push web image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./docker/web/Dockerfile
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            ghcr.io/devplaninc/dev-observer-web:${{ github.event.inputs.version }},
-            ghcr.io/devplaninc/dev-observer-web:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      # Build and push images in parallel
+      - name: Build and push images in parallel
+        run: |
+          # Build and push web image in background
+          docker buildx build \
+            --context=. \
+            -f ./docker/web/Dockerfile \
+            --push \
+            --platform linux/amd64,linux/arm64 \
+            -t ghcr.io/devplaninc/dev-observer-web:${{ github.event.inputs.version }} \
+            -t ghcr.io/devplaninc/dev-observer-web:latest \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            . &
 
-      # Build and push server image
-      - name: Build and push server image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./docker/server/Dockerfile
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            ghcr.io/devplaninc/dev-observer-server:${{ github.event.inputs.version }},
-            ghcr.io/devplaninc/dev-observer-server:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Build and push server image in background
+          docker buildx build \
+            --context=. \
+            -f ./docker/server/Dockerfile \
+            --push \
+            --platform linux/amd64,linux/arm64 \
+            -t ghcr.io/devplaninc/dev-observer-server:${{ github.event.inputs.version }} \
+            -t ghcr.io/devplaninc/dev-observer-server:latest \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            . &
+
+          # Wait for all background jobs to complete
+          wait
 
       # Verify images are publicly accessible
       - name: Verify images are publicly accessible
         run: |
           # Wait a moment for images to be available
           sleep 10
-          
+
           # Log out from GitHub Container Registry to simulate non-authenticated pull
           docker logout ghcr.io
-          
+
           # Try to pull the images without authentication
           echo "Pulling web image..."
           docker pull ghcr.io/devplaninc/dev-observer-web:${{ github.event.inputs.version }}
-          
+
           echo "Pulling server image..."
           docker pull ghcr.io/devplaninc/dev-observer-server:${{ github.event.inputs.version }}
-          
+
           echo "Images are publicly accessible!"
