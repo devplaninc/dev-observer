@@ -9,8 +9,10 @@ _log = logging.getLogger(__name__)
 
 
 class Github(BaseModel):
-    auth_type: Literal["token"]
+    auth_type: Literal["token", "app"]
     personal_token: Optional[str] = None
+    app_id: Optional[str] = None
+    private_key: Optional[str] = None
 
 
 class Git(BaseModel):

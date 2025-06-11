@@ -1,6 +1,7 @@
 import datetime
 from typing import Optional
 
+from sqlalchemy import DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -12,6 +13,7 @@ class GitRepoEntity(Base):
     __tablename__ = "git_repo"
 
     id: Mapped[str] = mapped_column(primary_key=True)
+    full_name: Mapped[str] = mapped_column(index=True)
     json_data: Mapped[str]
 
     def __repr__(self):
@@ -20,6 +22,7 @@ class GitRepoEntity(Base):
 
 class GlobalConfigEntity(Base):
     __tablename__ = "global_config"
+
     id: Mapped[str] = mapped_column(primary_key=True)
     json_data: Mapped[str]
 
@@ -31,8 +34,8 @@ class ProcessingItemEntity(Base):
     __tablename__ = "processing_item"
     key: Mapped[str] = mapped_column(primary_key=True)
     json_data: Mapped[str]
-    next_processing: Mapped[Optional[datetime.datetime]]
-    last_processed: Mapped[Optional[datetime.datetime]]
+    next_processing: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(timezone=True))
+    last_processed: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(timezone=True))
     last_error: Mapped[Optional[str]]
     no_processing: Mapped[bool] = mapped_column(default=False)
 

@@ -1,8 +1,6 @@
 import logging
 from typing import Optional, Tuple
 
-from github import Auth
-
 from dev_observer.analysis.langgraph_provider import LanggraphAnalysisProvider
 from dev_observer.analysis.provider import AnalysisProvider
 from dev_observer.analysis.stub import StubAnalysisProvider
@@ -16,8 +14,9 @@ from dev_observer.prompts.langfuse import LangfusePromptsProvider
 from dev_observer.prompts.local import LocalPromptsProvider, PromptTemplateParser, TomlPromptTemplateParser, \
     JSONPromptTemplateParser
 from dev_observer.prompts.provider import PromptsProvider
+from dev_observer.repository.auth.github_token import GithubTokenAuthProvider
 from dev_observer.repository.copying import CopyingGitRepositoryProvider
-from dev_observer.repository.github import GithubProvider
+from dev_observer.repository.github import GithubProvider, GithubAuthProvider
 from dev_observer.repository.provider import GitRepositoryProvider
 from dev_observer.server.env import ServerEnv
 from dev_observer.settings import Settings, LocalPrompts, Github
@@ -47,13 +46,18 @@ def detect_git_provider(settings: Settings) -> GitRepositoryProvider:
     raise ValueError(f"Unsupported git provider: {git_sett.provider}")
 
 
-def detect_github_auth(gh: Optional[Github]) -> Auth:
+def detect_github_auth(gh: Optional[Github]) -> GithubAuthProvider:
     if gh is None:
         raise ValueError(f"Github settings are not defined")
     _log.debug(s_("Detected github auth type.", auth_type=gh.auth_type))
     match gh.auth_type:
         case "token":
-            return Auth.Token(gh.personal_token)
+            return GithubTokenAuthProvider(gh.personal_token)
+        case "app":
+            from dev_observer.repository.auth import GithubAppAuthProvider
+            if not gh.app_id or not gh.private_key:
+                raise ValueError("GitHub App authentication requires app_id and private_key")
+            return GithubAppAuthProvider(gh.app_id, gh.private_key)
     raise ValueError(f"Unsupported auth type: {gh.auth_type}")
 
 
@@ -158,13 +162,13 @@ def detect_users_provider(settings: Settings) -> UsersProvider:
 
 def detect_server_env(settings: Settings) -> ServerEnv:
     analysis = detect_analysis_provider(settings)
-    repository = detect_git_provider(settings)
     prompts = detect_prompts_provider(settings)
     observations = detect_observer(settings)
     tokenizer = detect_tokenizer(settings)
     storage = detect_storage_provider(settings)
     bg_storage = detect_storage_provider(settings)
-    repos_processor = ReposProcessor(analysis, repository, prompts, observations, tokenizer)
+    bg_repository = detect_git_provider(settings)
+    bg_repos_processor = ReposProcessor(analysis, bg_repository, prompts, observations, tokenizer)
     users = detect_users_provider(settings)
 
     # Extract API key from settings if available
@@ -177,13 +181,13 @@ def detect_server_env(settings: Settings) -> ServerEnv:
     env = ServerEnv(
         observations=observations,
         storage=storage,
-        repos_processor=repos_processor,
-        periodic_processor=PeriodicProcessor(bg_storage, repos_processor),
+        repos_processor=bg_repos_processor,
+        periodic_processor=PeriodicProcessor(bg_storage, bg_repos_processor),
         users=users,
         api_keys=api_keys or [],
     )
     _log.debug(s_("Detected environment",
-                  repository=repository,
+                  bg_repository=bg_repository,
                   analysis=analysis,
                   prompts=prompts,
                   observations=observations,

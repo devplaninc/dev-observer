@@ -3,6 +3,7 @@ import uuid
 from typing import Optional, MutableSequence
 
 from google.protobuf import json_format
+from markdown_it.common.entities import entities
 from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSession
 
@@ -31,6 +32,12 @@ class PostgresqlStorageProvider(StorageProvider):
         async with AsyncSession(self._engine) as session:
             return _to_optional_repo(await session.get(GitRepoEntity, repo_id))
 
+    async def get_github_repo_by_full_name(self, full_name: str) -> Optional[GitHubRepository]:
+        async with AsyncSession(self._engine) as session:
+            res = await session.execute(select(GitRepoEntity).where(GitRepoEntity.full_name == full_name))
+            ent = res.first()
+            return _to_optional_repo(ent[0] if ent is not None else None)
+
     async def delete_github_repo(self, repo_id: str):
         async with AsyncSession(self._engine) as session:
             async with session.begin():
@@ -42,15 +49,16 @@ class PostgresqlStorageProvider(StorageProvider):
             repo_id = f"{uuid.uuid4()}"
         async with AsyncSession(self._engine) as session:
             async with session.begin():
-                ent = GitRepoEntity(id=repo_id, json_data=pb_to_json(repo))
+                ent = GitRepoEntity(
+                    id=repo_id,
+                    full_name=repo.full_name,
+                    json_data=pb_to_json(repo),
+                )
                 session.add(ent)
         return await self.get_github_repo(repo_id)
 
     async def next_processing_item(self) -> Optional[ProcessingItem]:
         next_processing_time = self._clock.now()
-        if next_processing_time.tzinfo is not None:
-            next_processing_time = next_processing_time.replace(tzinfo=None)
-
         async with AsyncSession(self._engine) as session:
             res = await session.execute(
                 select(ProcessingItemEntity)
@@ -61,26 +69,31 @@ class PostgresqlStorageProvider(StorageProvider):
                 .order_by(ProcessingItemEntity.next_processing)
             )
             item = res.first()
-            return _to_optional_item(item)
+            return _to_optional_item(item[0] if item is not None else None)
 
     async def set_next_processing_time(self, key: ProcessingItemKey, next_time: Optional[datetime.datetime]):
         key_str = json_format.MessageToJson(key, indent=None, sort_keys=True)
         async with AsyncSession(self._engine) as session:
             async with session.begin():
-                await session.execute(
-                    update(ProcessingItemEntity)
-                    .where(ProcessingItemEntity.key == key_str)
-                    .values(next_processing=next_time)
-                )
+                existing = await session.get(ProcessingItemEntity, key_str)
+                if existing is not None:
+                    await session.execute(
+                        update(ProcessingItemEntity)
+                        .where(ProcessingItemEntity.key == key_str)
+                        .values(next_processing=next_time)
+                    )
+                else:
+                    session.add(ProcessingItemEntity(key=key_str, next_processing=next_time, json_data="{}"))
 
     async def get_global_config(self) -> GlobalConfig:
         async with AsyncSession(self._engine) as session:
             async with session.begin():
-                ent = await session.get(GlobalConfigEntity, "global_config")
+                all_configs = await session.execute(select(GlobalConfigEntity))
+                ent = all_configs.first()
                 if ent is None:
                     session.add(GlobalConfigEntity(id="global_config", json_data="{}"))
                     return GlobalConfig()
-                return parse_json_pb(ent.json_data, GlobalConfig())
+                return parse_json_pb(ent[0].json_data, GlobalConfig())
 
     async def set_global_config(self, config: GlobalConfig) -> GlobalConfig:
         async with AsyncSession(self._engine) as session:
@@ -109,9 +122,17 @@ def _to_optional_item(ent: Optional[ProcessingItemEntity]) -> Optional[Processin
 
 def _to_item(ent: ProcessingItemEntity) -> ProcessingItem:
     data = parse_json_pb(ent.json_data, ProcessingItem())
-    data.next_processing = ent.next_processing
-    data.last_processed = ent.last_processed
-    data.last_error = ent.last_error
+
+    if ent.next_processing is None:
+        data.ClearField("next_processing")
+    else:
+        data.next_processing = ent.next_processing
+
+    if ent.last_processed is None:
+        data.ClearField("last_processed")
+    else:
+        data.last_processed = ent.last_processed
+    data.last_error = ent.last_error if ent.last_error else ""
     data.no_processing = ent.no_processing
-    data.key = parse_json_pb(ent.key, ProcessingItemKey())
+    data.key.CopyFrom(parse_json_pb(ent.key, ProcessingItemKey()))
     return data

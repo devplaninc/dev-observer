@@ -13,9 +13,9 @@ class RepositoryInfo:
 
 class GitRepositoryProvider(Protocol):
     @abstractmethod
-    def get_repo(self, url: str) -> RepositoryInfo:
+    async def get_repo(self, url: str) -> RepositoryInfo:
         ...
 
     @abstractmethod
-    def clone(self, repo: RepositoryInfo, dest: str):
+    async def clone(self, repo: RepositoryInfo, dest: str):
         ...
