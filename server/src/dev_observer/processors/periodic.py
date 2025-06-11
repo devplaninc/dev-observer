@@ -83,7 +83,7 @@ class PeriodicProcessor:
         if len(requests) == 0:
             _log.debug(s_("No analyzers configured, skipping", repo=repo))
             return
-        await self._repos_processor.process(ObservedRepo(url=repo.url), requests)
+        await self._repos_processor.process(ObservedRepo(url=repo.url, github_repo=repo), requests)
         _log.debug(s_("Github repo processed", repo=repo))
 
     async def _process_website(self, website_url: str):

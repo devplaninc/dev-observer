@@ -1,6 +1,8 @@
 import dataclasses
+from typing import Optional
 
 from dev_observer.analysis.provider import AnalysisProvider
+from dev_observer.api.types.repo_pb2 import GitHubRepository
 from dev_observer.flatten.flatten import flatten_repository, FlattenResult
 from dev_observer.observations.provider import ObservationsProvider
 from dev_observer.processors.flattening import FlatteningProcessor
@@ -12,6 +14,7 @@ from dev_observer.tokenizer.provider import TokenizerProvider
 @dataclasses.dataclass
 class ObservedRepo:
     url: str
+    github_repo: Optional[GitHubRepository] = None
 
 
 class ReposProcessor(FlatteningProcessor[ObservedRepo]):
@@ -31,4 +34,5 @@ class ReposProcessor(FlatteningProcessor[ObservedRepo]):
         self.tokenizer = tokenizer
 
     async def get_flatten(self, repo: ObservedRepo) -> FlattenResult:
-        return flatten_repository(repo.url, self.repository, self.tokenizer).flatten_result
+        res = await flatten_repository(repo.url, self.repository, self.tokenizer)
+        return res.flatten_result

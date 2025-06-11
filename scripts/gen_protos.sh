@@ -14,6 +14,7 @@ uv --directory "$root"/server run python -m grpc_tools.protoc \
   --python_out=./src/ \
   --grpc_python_out=./src/ \
   --pyi_out=./src/ \
+  --experimental_allow_proto3_optional \
   ${PROTO_FILES}
 
 find "${root}"/server/src/dev_observer/api/ -type d -exec touch {}/__init__.py \;

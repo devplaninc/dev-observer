@@ -1,14 +1,17 @@
 [git]
-provider="copying"
+provider="github"
 
 [git.github]
-auth_type = "token"
+auth_type = "app"
 
 [analysis]
 provider="stub"
 
 [tokenizer]
-provider="stub"
+provider="tiktoken"
+
+[tokenizer.tiktoken]
+encoding="cl100k_base"
 
 [prompts]
 provider = "local"
@@ -16,20 +19,21 @@ provider = "local"
 dir = "scripts/dev/prompts"
 
 [storage]
-provider = "local"
-#provider = "postgresql"
-[storage.local]
-dir = "scripts/dev/_local_data_/__storage"
+#provider = "local"
+provider = "postgresql"
 
 [storage.postgresql]
 db_url="postgresql+asyncpg://postgres:test_password@localhost:54322/dev_observer"
 
-[users_management]
-provider="none"
-#provider="clerk"
+#[storage.local]
+#dir = "scripts/dev/_local_data_/__storage"
 
-#[users_management.clerk]
-#public_key="<PUBLIC CLERK KEY GOES HERE>"
+[users_management]
+#provider="none"
+provider="clerk"
+
+[users_management.clerk]
+public_key="pk_test_cHJvdmVuLWRvZS0yNi5jbGVyay5hY2NvdW50cy5kZXYk"
 
 [api_keys]
 keys=["test-api-key"]

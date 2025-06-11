@@ -35,6 +35,12 @@ class SingleBlobStorageProvider(abc.ABC, StorageProvider):
                 return r
         return None
 
+    async def get_github_repo_by_full_name(self, full_name: str) -> Optional[GitHubRepository]:
+        for r in self._get().github_repos:
+            if r.full_name == full_name:
+                return r
+        return None
+
     async def delete_github_repo(self, repo_id: str):
         def up(d: LocalStorageData):
             new_repos = [r for r in d.github_repos if r.id != repo_id]

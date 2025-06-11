@@ -13,6 +13,9 @@ class StorageProvider(Protocol):
     async def get_github_repo(self, repo_id: str) -> Optional[GitHubRepository]:
         ...
 
+    async def get_github_repo_by_full_name(self, full_name: str) -> Optional[GitHubRepository]:
+        ...
+
     async def delete_github_repo(self, repo_id: str):
         ...
 

@@ -12,7 +12,7 @@ class CopyingGitRepositoryProvider(GitRepositoryProvider):
         self._shallow = shallow
 
 
-    def get_repo(self, url: str) -> RepositoryInfo:
+    async def get_repo(self, url: str) -> RepositoryInfo:
         parsed = parse_github_url(url)
         return RepositoryInfo(
             owner=parsed.owner,
@@ -22,7 +22,7 @@ class CopyingGitRepositoryProvider(GitRepositoryProvider):
             size_kb=500,
         )
 
-    def clone(self, repo: RepositoryInfo, dest: str):
+    async def clone(self, repo: RepositoryInfo, dest: str):
         repo_root = _get_git_root()
         if self._shallow:
             subprocess.run(

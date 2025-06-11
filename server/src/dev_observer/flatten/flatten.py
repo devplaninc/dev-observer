@@ -111,14 +111,14 @@ class FlattenRepoResult:
     flatten_result: FlattenResult
     repo: RepositoryInfo
 
-def flatten_repository(
+async def flatten_repository(
         url: str,
         provider: GitRepositoryProvider,
         tokenizer: TokenizerProvider,
         max_size_kb: int = 100_000,
         max_tokens_per_file: int = 100_000,
 ) -> FlattenRepoResult:
-    clone_result = clone_repository(url, provider, max_size_kb)
+    clone_result = await clone_repository(url, provider, max_size_kb)
     repo_path = clone_result.path
     combined_file_path: Optional[str] = None
 
