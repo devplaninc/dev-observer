@@ -18,6 +18,7 @@ COPY server/ ./
 # Install dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir uv && \
+    pip install --no-cache-dir google-cloud-logging && \
     uv pip install --system .
 
 # Production stage

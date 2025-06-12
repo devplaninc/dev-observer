@@ -8,22 +8,62 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
+import google.cloud.logging as google_logging # Added
 import dev_observer.log
+from dev_observer.log import StackdriverEncoder # Added
 from dev_observer.env_detection import detect_server_env
 from dev_observer.server.env import ServerEnv
 from dev_observer.server.middleware.auth import AuthMiddleware
 from dev_observer.server.services.config import ConfigService
 from dev_observer.server.services.observations import ObservationsService
 from dev_observer.server.services.repositories import RepositoriesService
-from dev_observer.settings import Settings
+from dev_observer.settings import Settings # Already here
+# import os # Already here
+# import logging # Already here
 
-dev_observer.log.encoder = dev_observer.log.PlainTextEncoder()
-logging.basicConfig(level=logging.DEBUG)
+# Logging configuration will be set up after settings are loaded
 from dev_observer.log import s_
 
 _log = logging.getLogger(__name__)
 Settings.model_config["toml_file"] = os.environ.get("DEV_OBSERVER_CONFIG_FILE", None)
-env: ServerEnv = detect_server_env(Settings())
+
+# Initialize settings once
+settings = Settings()
+
+# Configure logging provider
+# The dev_observer.log.encoder is already set based on LOGGING_PROVIDER in log.py
+# Here, we initialize the Google Cloud Logging client if 'stackdriver' is chosen.
+
+# Determine the effective logging provider
+effective_logging_provider = os.environ.get("LOGGING_PROVIDER", "json").lower()
+if settings.logging and settings.logging.provider:
+    effective_logging_provider = settings.logging.provider.lower()
+
+if effective_logging_provider == "stackdriver":
+    try:
+        # Ensure that the encoder in log.py is StackdriverEncoder if we are here.
+        # This should be guaranteed by the logic in log.py
+        if not isinstance(dev_observer.log.encoder, StackdriverEncoder):
+            _log.warning(s_("Logging provider is stackdriver, but StackdriverEncoder is not set in log.py. Forcing it."))
+            dev_observer.log.encoder = StackdriverEncoder()
+
+        gcp_logging_client = google_logging.Client()
+        # Set up Google Cloud Logging python handler
+        gcp_logging_client.setup_logging(
+            log_level=logging.INFO # TODO: Make this configurable from settings
+        )
+        _log.info(s_("Stackdriver logging client initialized and handlers configured."))
+    except Exception as e:
+        # Fallback to basic logging if Stackdriver setup fails
+        logging.basicConfig(level=logging.INFO)
+        _log.error(s_("Failed to initialize Stackdriver logging. Falling back to basicConfig.", error=str(e)))
+else:
+    # For other providers like 'json' or 'plaintext', basicConfig is a reasonable default.
+    # The actual formatting is handled by the encoder set in dev_observer.log.py
+    logging.basicConfig(level=logging.INFO) # TODO: Make this configurable
+    _log.info(s_(f"Logging provider: {effective_logging_provider}. Using basicConfig with configured encoder."))
+
+env: ServerEnv = detect_server_env(settings)
 
 
 def start_bg_processing():

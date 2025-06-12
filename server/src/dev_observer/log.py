@@ -1,5 +1,6 @@
 import dataclasses
 import json
+import os # Added import
 from abc import abstractmethod
 from typing import Protocol
 
@@ -39,7 +40,41 @@ class PlainTextEncoder(Encoder):
         return f"{msg.message} {extra}"
 
 
-encoder: Encoder = JSONEncoder()
+class StackdriverEncoder(Encoder):
+    SEVERITY_MAP = {
+        "DEBUG": "DEBUG",
+        "INFO": "INFO",
+        "WARNING": "WARNING",
+        "ERROR": "ERROR",
+        "CRITICAL": "CRITICAL",
+    }
+    DEFAULT_SEVERITY = "INFO"
+
+    def encode(self, msg: "StructuredMessage") -> dict:
+        severity = self.SEVERITY_MAP.get(
+            str(msg.kwargs.get("level", "")).upper(), self.DEFAULT_SEVERITY
+        )
+
+        # Create a copy of kwargs to avoid modifying the original
+        kwargs_copy = msg.kwargs.copy()
+        # Remove 'level' from kwargs_copy if it exists, as it's handled separately
+        if "level" in kwargs_copy:
+            del kwargs_copy["level"]
+
+        stackdriver_msg = {
+            "severity": severity,
+            "message": msg.message,
+            **kwargs_copy,
+        }
+        return json.dumps(stackdriver_msg, cls=DataclassJSONEncoder)
+
+
+# Modify encoder initialization based on environment variable
+provider = os.getenv('LOGGING_PROVIDER', 'json').lower()
+if provider == 'stackdriver':
+    encoder: Encoder = StackdriverEncoder()
+else:
+    encoder: Encoder = JSONEncoder()
 
 class StructuredMessage:
     message: str

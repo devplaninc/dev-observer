@@ -108,6 +108,10 @@ class UserManagement(BaseModel):
     clerk: Optional[Clerk] = None
 
 
+class LoggingSettings(BaseModel):
+    provider: Optional[Literal["json", "plaintext", "stackdriver"]] = "json"
+
+
 class Settings(BaseSettings):
     props: ClassVar[SettingsProps] = SettingsProps()
 
@@ -119,6 +123,7 @@ class Settings(BaseSettings):
     storage: Optional[Storage] = None
     users_management: Optional[UserManagement] = None
     api_keys: Optional[ApiKeys] = None
+    logging: Optional[LoggingSettings] = None
 
     def __init__(self) -> None:
         toml_file = Settings.model_config.get("toml_file", None)
