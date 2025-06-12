@@ -59,7 +59,7 @@ services:
   server:
     image: ghcr.io/devplaninc/dev-observer-server:${SERVER_IMAGE_TAG:-latest}
     volumes:
-      - ./compose_env/${SERVER_CONFIG_FILE}:/etc/dev-observer-server/config.toml
+      - ${SERVER_CONFIG_PATH:-./compose_env/${SERVER_CONFIG_FILE}}:/etc/dev-observer-server/config.toml
     environment:
       - PYTHON_ENV=${PYTHON_ENV:-development}
       - LOG_LEVEL=${SERVER_LOG_LEVEL:-info}
