@@ -7,7 +7,7 @@ services:
       - "443:8443"
     volumes:
       - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml
-      - ./envoy/certs:/etc/envoy/certs
+      - ${CERTS_PATH:-./envoy/certs}:/etc/envoy/certs
       - ./envoy/init-certs.sh:/usr/local/bin/init-certs.sh
     environment:
       - ENVOY_LOG_LEVEL=${ENVOY_LOG_LEVEL:-info}
@@ -26,7 +26,7 @@ services:
     profiles:
       - ssl
     volumes:
-      - ./envoy/certs:/etc/letsencrypt
+      - ${CERTS_PATH:-./envoy/certs}:/etc/letsencrypt
       - ./cert-manager/webroot:/var/www/certbot
       - ./cert-manager/update-certs.sh:/usr/local/bin/update-certs.sh
     environment:
