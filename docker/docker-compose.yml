@@ -64,11 +64,13 @@ services:
     volumes:
       - ${SERVER_CONFIG_PATH:-./compose_env/${SERVER_CONFIG_FILE:-}}:/etc/dev-observer-server/config.toml
       - ${SERVER_SECRETS_PATH:-./compose_env/.empty_secrets}:/etc/dev-observer-server/.env.secrets
+      - ${SERVER_ENV_PATH:-./compose_env/.empty_env}:/etc/dev-observer-server/.env
     environment:
       - PYTHON_ENV=${PYTHON_ENV:-development}
       - LOG_LEVEL=${SERVER_LOG_LEVEL:-info}
       - DEV_OBSERVER_CONFIG_FILE=/etc/dev-observer-server/config.toml
       - DEV_OBSERVER_SECRETS_FILE=/etc/dev-observer-server/.env.secrets
+      - DEV_OBSERVER_ENV_FILE=/etc/dev-observer-server/.env
     networks:
       - dev-observer-network
 

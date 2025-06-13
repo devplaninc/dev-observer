@@ -9,15 +9,16 @@ working_dir="$(pwd)"
 certs_path="$working_dir"/certs
 mkdir -p "$certs_path"
 
-# Remove any old lines to avoid duplicates
-sed -i '/^SERVER_CONFIG_PATH=/d' .env
-sed -i '/^SERVER_SECRETS_PATH=/d' .env
-sed -i '/^CERTS_PATH=/d' .env
+rm -f .env.__combined__
+cat .env .env."${env_name}" > .env.__combined__
 
-cat <<EOF >> .env
+cat <<EOF >> .env.__combined__
+
 SERVER_CONFIG_PATH=${working_dir}/observer_config.toml
 SERVER_SECRETS_PATH=${working_dir}/.env.${env_name}.secrets
+SERVER_ENV_PATH=${working_dir}/.env.__combined__
 CERTS_PATH=${certs_path}
+
 EOF
 
 rm -rf dev-observer
@@ -42,8 +43,7 @@ docker ps
 
 docker compose \
   --profile ssl \
-  --env-file "$working_dir"/.env \
-  --env-file "$working_dir"/.env."${env_name}" \
+  --env-file "$working_dir"/.env.__combined__ \
   --env-file "$working_dir"/.env."${env_name}".secrets \
   up -d --wait --wait-timeout 120
 
