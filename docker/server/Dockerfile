@@ -25,10 +25,16 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    ca-certificates \
+    build-essential \
     git \
-    && rm -rf /var/lib/apt/lists/*
-
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g repomix \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy only necessary files from build stage
 COPY --from=build /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
