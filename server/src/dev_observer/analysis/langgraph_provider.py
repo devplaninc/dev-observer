@@ -7,6 +7,7 @@ from langchain.chat_models import init_chat_model
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
 from langchain_core.runnables import RunnableConfig
+from langfuse.callback import CallbackHandler
 from langgraph.constants import END
 from langgraph.graph.state import CompiledStateGraph, StateGraph
 from langgraph.store.memory import InMemoryStore
@@ -50,6 +51,8 @@ class LanggraphAnalysisProvider(AnalysisProvider):
         g = await _get_graph()
         info = AnalysisInfo(prompt=prompt)
         config = info.append(ensure_config())
+        callbacks = [CallbackHandler()]
+        config["callbacks"] = callbacks
         result = await g.ainvoke({}, config, output_keys=["response"])
         analysis = result.get("response", "")
         _log.debug(s_("Content analyzed", anaysis_len=len(analysis)))
