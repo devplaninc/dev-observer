@@ -9,3 +9,4 @@ server/.env.*
 **/_local_data_/
 /.bin/
 /docker/envoy/certs/sds_envoy_cert.json
+/server/local_configs/
