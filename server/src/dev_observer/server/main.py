@@ -5,6 +5,7 @@ import subprocess
 import threading
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,6 +17,10 @@ from dev_observer.server.services.config import ConfigService
 from dev_observer.server.services.observations import ObservationsService
 from dev_observer.server.services.repositories import RepositoriesService
 from dev_observer.settings import Settings
+
+secrets_file = os.environ.get("DEV_OBSERVER_SECRETS_FILE", None)
+if secrets_file is not None and len(secrets_file.strip()) > 0 and os.path.exists(secrets_file) and os.path.isfile(secrets_file):
+    load_dotenv(secrets_file)
 
 dev_observer.log.encoder = dev_observer.log.PlainTextEncoder()
 logging.basicConfig(level=logging.DEBUG)

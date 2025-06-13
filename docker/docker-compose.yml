@@ -64,6 +64,7 @@ services:
       - PYTHON_ENV=${PYTHON_ENV:-development}
       - LOG_LEVEL=${SERVER_LOG_LEVEL:-info}
       - DEV_OBSERVER_CONFIG_FILE=/etc/dev-observer-server/config.toml
+      - DEV_OBSERVER_SECRETS_FILE=${SERVER_SECRETS_PATH:-}
       - DEV_OBSERVER__GIT__GITHUB__PERSONAL_TOKEN=${DEV_OBSERVER__GIT__GITHUB__PERSONAL_TOKEN}
     networks:
       - dev-observer-network
