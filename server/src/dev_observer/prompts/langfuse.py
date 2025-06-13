@@ -5,7 +5,7 @@ from google.protobuf import json_format
 from langfuse import Langfuse
 from langfuse.model import ChatPromptClient
 
-from dev_observer.api.types.ai_pb2 import PromptConfig
+from dev_observer.api.types.ai_pb2 import PromptConfig, SystemMessage, UserMessage
 from dev_observer.log import s_
 from dev_observer.prompts.provider import PromptsProvider, FormattedPrompt
 
@@ -35,7 +35,12 @@ class LangfusePromptsProvider(PromptsProvider):
                 system = p.get("content")
             if p.get("role") == "user":
                 user = p.get("content")
-        return FormattedPrompt(system=system, user=user, config=config, langfuse_prompt=prompt)
+        return FormattedPrompt(
+            system=SystemMessage(text=system),
+            user=UserMessage(text=user),
+            config=config,
+            langfuse_prompt=prompt,
+        )
 
     def _fetch_prompt(self, name: str) -> ChatPromptClient:
         label = self._default_label
