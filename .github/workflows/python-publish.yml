@@ -1,0 +1,89 @@
+name: Publish Python Package to PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Semantic version tag (e.g., 1.0.0)'
+        required: true
+        type: string
+      is_dev_version:
+        description: 'Publish as development version'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build-and-publish:
+    name: Build and Publish Python Package
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/dev-observer
+    defaults:
+      run:
+        working-directory: ./server
+    permissions:
+      contents: write  # Needed for creating GitHub releases
+      id-token: write  # IMPORTANT: this is needed for trusted publishing
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.cargo/bin:$PATH"
+          uv --version
+
+      - name: Install dependencies
+        run: |
+          uv pip install --system build twine
+
+      - name: Set version in pyproject.toml
+        run: |
+          if [ "${{ github.event.inputs.is_dev_version }}" == "true" ]; then
+            # For dev versions, append .devYYYYMMDD.HHMMSS to the version
+            DEV_SUFFIX=".dev$(date +'%Y%m%d%H%M%S')"
+            VERSION="${{ github.event.inputs.version }}${DEV_SUFFIX}"
+            echo "Setting development version: $VERSION"
+          else
+            VERSION="${{ github.event.inputs.version }}"
+            echo "Setting release version: $VERSION"
+          fi
+
+          # Update version in pyproject.toml
+          sed -i "s/^version = \".*\"/version = \"$VERSION\"/" pyproject.toml
+
+          # Store version for later steps
+          echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Build package
+        run: uv build
+
+      - name: Verify package
+        run: python -m twine check dist/*
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: server/dist/
+          verbose: true
+          print-hash: true
+
+      - name: Create GitHub Release
+        if: ${{ github.event.inputs.is_dev_version != 'true' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          name: v${{ env.PACKAGE_VERSION }}
+          tag_name: v${{ env.PACKAGE_VERSION }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
