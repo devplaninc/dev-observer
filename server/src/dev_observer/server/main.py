@@ -22,6 +22,10 @@ secrets_file = os.environ.get("DEV_OBSERVER_SECRETS_FILE", None)
 if secrets_file is not None and len(secrets_file.strip()) > 0 and os.path.exists(secrets_file) and os.path.isfile(secrets_file):
     load_dotenv(secrets_file)
 
+env_file = os.environ.get("DEV_OBSERVER_ENV_FILE", None)
+if env_file is not None and len(env_file.strip()) > 0 and os.path.exists(env_file) and os.path.isfile(env_file):
+    load_dotenv(env_file)
+
 dev_observer.log.encoder = dev_observer.log.PlainTextEncoder()
 logging.basicConfig(level=logging.DEBUG)
 from dev_observer.log import s_
