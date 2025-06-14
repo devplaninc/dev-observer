@@ -3,12 +3,14 @@ on: workflow_dispatch
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+    environment:
+      name: npm
     permissions:
       contents: read
       id-token: write
     defaults:
       run:
-        working-directory: ./web/packages/dev-observer-api
+        working-directory: ./web/packages/api
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

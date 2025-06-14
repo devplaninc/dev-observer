@@ -4,6 +4,11 @@
   "description": "API for dev-observer",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devplaninc/dev-observer.git",
+    "directory": "web/packages/api"
+  },
   "scripts": {
     "clean": "rm -rf dist",
     "build": "tsc -p tsconfig.build.json",
