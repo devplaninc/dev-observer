@@ -39,7 +39,7 @@ local-server:
 	@cd server && uv run scripts/local/main.py
 
 dev-web: npm-install
-	@cd web && npm run dev
+	@cd web/apps/dev-observer && npm run dev
 
 local-compose:
 	@scripts/compose-up.sh

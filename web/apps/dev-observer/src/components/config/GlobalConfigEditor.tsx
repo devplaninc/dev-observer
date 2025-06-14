@@ -1,0 +1,185 @@
+import {useFieldArray, useForm} from "react-hook-form";
+import {z} from "zod";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {GlobalConfig} from "@devplaninc/devplan-observer-api";
+import {useCallback} from "react";
+import {useBoundStore} from "@/store/use-bound-store.tsx";
+import {toast} from "sonner";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form.tsx";
+import {Input} from "@/components/ui/input.tsx";
+import {Button} from "@/components/ui/button.tsx";
+import {Analyzer} from "@devplaninc/devplan-observer-api";
+import {useGlobalConfig} from "@/hooks/use-config.tsx";
+import {ErrorAlert} from "@/components/ErrorAlert.tsx";
+import {Loader} from "@/components/Loader.tsx";
+import {Separator} from "@/components/ui/separator.tsx";
+
+const analyzerSchema = z.object({
+  name: z.string().min(2),
+  promptPrefix: z.string().min(2),
+  fileName: z.string().min(2),
+})
+
+const analysisConfigSchema = z.object({
+  repoAnalyzers: z.array(analyzerSchema),
+  siteAnalyzers: z.array(analyzerSchema),
+})
+
+const globalConfigSchema = z.object({
+  analysis: analysisConfigSchema,
+})
+
+export type globalConfigType = z.infer<typeof globalConfigSchema>
+
+export function GlobalConfigEditor() {
+  const {config, error} = useGlobalConfig()
+  if (!config) {
+    if (error) {
+      return <ErrorAlert err={error}/>
+    }
+    return <Loader/>
+  }
+  return <GlobalConfigEditorForm config={config}/>
+}
+
+function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
+  const {updateGlobalConfig} = useBoundStore()
+  const form = useForm<globalConfigType>({
+    resolver: zodResolver(globalConfigSchema),
+    defaultValues: config,
+  });
+  const onSubmit = useCallback((values: globalConfigType) => {
+      updateGlobalConfig(values)
+        .then(() => toast.success("Config updated"))
+        .catch(e => {
+          toast.error(`Failed to update config: ${e}`)
+          throw e
+        })
+    }
+    , [updateGlobalConfig])
+  const {fields: repoAnalyzers, remove: removeRepoAnalyzer, append: appendRepoAnalyzer}
+    = useFieldArray({name: "analysis.repoAnalyzers", control: form.control});
+  const {fields: siteAnalyzers, remove: removeSiteAnalyzer, append: appendSiteAnalyzer}
+    = useFieldArray({name: "analysis.siteAnalyzers", control: form.control});
+  return <Form {...form}>
+    {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <div className="space-y-4">
+        <h2 className="font-semibold text-lg">Repo Analyzers:</h2>
+        {repoAnalyzers.map((f, i) => (
+          <div key={f.id} className="border rounded-md p-4 space-y-4">
+            <FormField
+              control={form.control}
+              name={`analysis.repoAnalyzers.${i}.name`}
+              render={({field}) => (
+                <FormItem className="flex items-center gap-4">
+                  <FormLabel className="w-[100px]">Name:</FormLabel>
+                  <FormControl className="w-[200px]">
+                    <Input placeholder="Analyzer name" {...field}/>
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={`analysis.repoAnalyzers.${i}.promptPrefix`}
+              render={({field}) => (
+                <FormItem className="flex items-center gap-4">
+                  <FormLabel className="w-[100px]">Prompt Prefix:</FormLabel>
+                  <FormControl className="w-[200px]">
+                    <Input placeholder="Analyzer prompt prefix" {...field}/>
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={`analysis.repoAnalyzers.${i}.fileName`}
+              render={({field}) => (
+                <FormItem className="flex items-center gap-4">
+                  <FormLabel className="w-[100px]">File Name:</FormLabel>
+                  <FormControl className="w-[200px]">
+                    <Input placeholder="Analyzer file name" {...field}/>
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+
+            <Button onClick={() => removeRepoAnalyzer(i)}>Remove</Button>
+          </div>
+        ))}
+        <Button onClick={(e) => {
+          e.preventDefault()
+          appendRepoAnalyzer(Analyzer.create({name: '', promptPrefix: '', fileName: "analysis.md"}))
+        }
+        }>
+          Add Analyzer
+        </Button>
+      </div>
+      <Separator />
+
+      <div className="space-y-4">
+        <h2 className="font-semibold text-lg">Site Analyzers:</h2>
+        {siteAnalyzers.map((f, i) => (
+          <div key={f.id} className="border rounded-md p-4 space-y-4">
+            <FormField
+              control={form.control}
+              name={`analysis.siteAnalyzers.${i}.name`}
+              render={({field}) => (
+                <FormItem className="flex items-center gap-4">
+                  <FormLabel className="w-[100px]">Name:</FormLabel>
+                  <FormControl className="w-[200px]">
+                    <Input placeholder="Analyzer name" {...field}/>
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={`analysis.siteAnalyzers.${i}.promptPrefix`}
+              render={({field}) => (
+                <FormItem className="flex items-center gap-4">
+                  <FormLabel className="w-[100px]">Prompt Prefix:</FormLabel>
+                  <FormControl className="w-[200px]">
+                    <Input placeholder="Analyzer prompt prefix" {...field}/>
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={`analysis.siteAnalyzers.${i}.fileName`}
+              render={({field}) => (
+                <FormItem className="flex items-center gap-4">
+                  <FormLabel className="w-[100px]">File Name:</FormLabel>
+                  <FormControl className="w-[200px]">
+                    <Input placeholder="Analyzer file name" {...field}/>
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+
+            <Button onClick={() => removeSiteAnalyzer(i)}>Remove</Button>
+          </div>
+        ))}
+        <Button onClick={(e) => {
+          e.preventDefault()
+          appendSiteAnalyzer(Analyzer.create({name: '', promptPrefix: '', fileName: "analysis.md"}))
+        }
+        }>
+          Add Analyzer
+        </Button>
+      </div>
+
+      <Button role="submit">
+        Submit
+      </Button>
+    </form>
+  </Form>
+}

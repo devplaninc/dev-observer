@@ -1,0 +1,30 @@
+{
+  "name": "@devplaninc/devplan-observer-api",
+  "version": "0.0.1",
+  "description": "API for dev-observer",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint 'src/**/*.{ts,tsx}'"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "eslint": "^9.25.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "type": "module",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

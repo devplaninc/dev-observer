@@ -3,6 +3,7 @@
 **/*.secrets*
 server/.env.*
 **/node_modules
+/web/**/dist/
 
 **/devplan_current_feature.md*
 !.windsurf/rules/devplan_*.md
