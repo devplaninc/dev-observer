@@ -1,7 +1,7 @@
 import type {StateCreator} from "zustand";
 import {observationAPI, observationsAPI} from "@/store/apiPaths.tsx";
-import type {Observation, ObservationKey} from "@devplaninc/devplan-observer-api";
-import {GetObservationResponse, GetObservationsResponse} from "@devplaninc/devplan-observer-api";
+import type {Observation, ObservationKey} from "@devplan/observer-api";
+import {GetObservationResponse, GetObservationsResponse} from "@devplan/observer-api";
 import {fetchWithAuth} from "@/store/api.tsx";
 
 export interface ObservationsState {

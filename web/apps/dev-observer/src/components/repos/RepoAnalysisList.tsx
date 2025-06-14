@@ -1,11 +1,11 @@
-import type {GitHubRepository} from "@devplaninc/devplan-observer-api";
+import type {GitHubRepository} from "@devplan/observer-api";
 import {useBoundStore} from "@/store/use-bound-store.tsx";
 import {useShallow} from "zustand/react/shallow";
 import {Loader} from "@/components/Loader.tsx";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion.tsx";
 import {Markdown} from "@/components/text/Markdown.tsx";
-import type {ObservationKey} from "@devplaninc/devplan-observer-api";
+import type {ObservationKey} from "@devplan/observer-api";
 import {useObservation} from "@/hooks/useObservationQueries.ts";
 import {ErrorAlert} from "@/components/ErrorAlert.tsx";
 

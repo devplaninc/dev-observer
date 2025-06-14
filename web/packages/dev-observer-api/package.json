@@ -1,5 +1,5 @@
 {
-  "name": "@devplaninc/devplan-observer-api",
+  "name": "@devplan/observer-api",
   "version": "0.0.1",
   "description": "API for dev-observer",
   "main": "dist/index.js",

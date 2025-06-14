@@ -1,14 +1,14 @@
 import {useFieldArray, useForm} from "react-hook-form";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {GlobalConfig} from "@devplaninc/devplan-observer-api";
+import {GlobalConfig} from "@devplan/observer-api";
 import {useCallback} from "react";
 import {useBoundStore} from "@/store/use-bound-store.tsx";
 import {toast} from "sonner";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {Analyzer} from "@devplaninc/devplan-observer-api";
+import {Analyzer} from "@devplan/observer-api";
 import {useGlobalConfig} from "@/hooks/use-config.tsx";
 import {ErrorAlert} from "@/components/ErrorAlert.tsx";
 import {Loader} from "@/components/Loader.tsx";

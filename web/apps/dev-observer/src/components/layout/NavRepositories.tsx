@@ -8,7 +8,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx"
 import {Link} from "react-router";
-import type {GitHubRepository} from "@devplaninc/devplan-observer-api";
+import type {GitHubRepository} from "@devplan/observer-api";
 
 export function NavRepositories({repositories}: { repositories: GitHubRepository[] }) {
   // const { isMobile } = useSidebar()

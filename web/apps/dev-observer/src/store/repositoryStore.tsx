@@ -6,8 +6,8 @@ import {
   DeleteRepositoryResponse,
   GetRepositoryResponse,
   ListGithubRepositoriesResponse
-} from "@devplaninc/devplan-observer-api";
-import type {GitHubRepository} from "@devplaninc/devplan-observer-api";
+} from "@devplan/observer-api";
+import type {GitHubRepository} from "@devplan/observer-api";
 import {fetchWithAuth, VoidParser} from "@/store/api.tsx";
 
 export interface RepositoryState {
