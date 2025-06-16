@@ -17,6 +17,7 @@ from pydantic import BaseModel
 from dev_observer.analysis.provider import AnalysisProvider, AnalysisResult
 from dev_observer.api.types.ai_pb2 import ModelConfig
 from dev_observer.log import s_
+from dev_observer.prompts.langfuse import LangfuseAuthProps
 from dev_observer.prompts.provider import FormattedPrompt
 
 _log = logging.getLogger(__name__)
@@ -47,12 +48,23 @@ class AnalysisInfo:
 
 
 class LanggraphAnalysisProvider(AnalysisProvider):
+    _lf_callback: Optional[CallbackHandler] = None
+
+    def __init__(self, langfuse_auth: Optional[LangfuseAuthProps] = None):
+        if langfuse_auth is not None:
+            self._lf_callback = CallbackHandler(
+                public_key=langfuse_auth.public_key,
+                secret_key=langfuse_auth.secret_key,
+                host=langfuse_auth.host,
+            )
+
     async def analyze(self, prompt: FormattedPrompt) -> AnalysisResult:
         g = await _get_graph()
         info = AnalysisInfo(prompt=prompt)
         config = info.append(ensure_config())
-        callbacks = [CallbackHandler()]
-        config["callbacks"] = callbacks
+        if self._lf_callback is not None:
+            callbacks = [self._lf_callback]
+            config["callbacks"] = callbacks
         result = await g.ainvoke({}, config, output_keys=["response"])
         analysis = result.get("response", "")
         _log.debug(s_("Content analyzed", anaysis_len=len(analysis)))

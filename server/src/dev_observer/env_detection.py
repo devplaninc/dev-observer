@@ -10,7 +10,7 @@ from dev_observer.observations.provider import ObservationsProvider
 from dev_observer.observations.s3 import S3ObservationsProvider
 from dev_observer.processors.periodic import PeriodicProcessor
 from dev_observer.processors.repos import ReposProcessor
-from dev_observer.prompts.langfuse import LangfusePromptsProvider
+from dev_observer.prompts.langfuse import LangfusePromptsProvider, LangfuseAuthProps
 from dev_observer.prompts.local import LocalPromptsProvider, PromptTemplateParser, TomlPromptTemplateParser, \
     JSONPromptTemplateParser
 from dev_observer.prompts.provider import PromptsProvider
@@ -19,7 +19,7 @@ from dev_observer.repository.copying import CopyingGitRepositoryProvider
 from dev_observer.repository.github import GithubProvider, GithubAuthProvider
 from dev_observer.repository.provider import GitRepositoryProvider
 from dev_observer.server.env import ServerEnv
-from dev_observer.settings import Settings, LocalPrompts, Github
+from dev_observer.settings import Settings, LocalPrompts, Github, LangfusePrompts
 from dev_observer.storage.local import LocalStorageProvider
 from dev_observer.storage.memory import MemoryStorageProvider
 from dev_observer.storage.postgresql.provider import PostgresqlStorageProvider
@@ -67,7 +67,10 @@ def detect_analysis_provider(settings: Settings) -> AnalysisProvider:
         raise ValueError("Analysis settings are not defined")
     match a.provider:
         case "langgraph":
-            return LanggraphAnalysisProvider()
+            lf_auth: Optional[LangfuseAuthProps] = None
+            if settings.prompts is not None and settings.prompts.langfuse is not None:
+                lf_auth = _get_lf_auth(settings.prompts.langfuse)
+            return LanggraphAnalysisProvider(lf_auth)
         case "stub":
             return StubAnalysisProvider()
     raise ValueError(f"Unsupported analysis provider: {a.provider}")
@@ -82,11 +85,18 @@ def detect_prompts_provider(settings: Settings) -> PromptsProvider:
             lf = p.langfuse
             if lf is None:
                 raise ValueError("Missing langfuse config for langfuse prompts provider")
-            return LangfusePromptsProvider(lf.auth.secret_key, lf.auth.public_key, lf.host, lf.default_label)
+            return LangfusePromptsProvider(_get_lf_auth(lf), lf.default_label)
         case "local":
             parser, ext = detect_prompts_parser(p.local)
             return LocalPromptsProvider(p.local.dir, ext, parser)
     raise ValueError(f"Unsupported prompts provider: {p.provider}")
+
+def _get_lf_auth(lf: LangfusePrompts) -> LangfuseAuthProps:
+    return LangfuseAuthProps(
+        secret_key=lf.auth.secret_key,
+        public_key=lf.auth.public_key,
+        host=lf.host,
+    )
 
 
 def detect_prompts_parser(loc: LocalPrompts) -> Tuple[PromptTemplateParser, str]:

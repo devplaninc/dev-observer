@@ -1,3 +1,4 @@
+import dataclasses
 import logging
 from typing import Optional, Dict
 
@@ -11,14 +12,20 @@ from dev_observer.prompts.provider import PromptsProvider, FormattedPrompt
 
 _log = logging.getLogger(__name__)
 
+@dataclasses.dataclass
+class LangfuseAuthProps:
+    secret_key: str
+    public_key: str
+    host: str
+
 
 class LangfusePromptsProvider(PromptsProvider):
     _langfuse: Langfuse
     _default_label: Optional[str] = None
 
-    def __init__(self, secret_key: str, public_key: str, host: str, default_label: Optional[str] = None):
+    def __init__(self, auth: LangfuseAuthProps, default_label: Optional[str] = None):
         self._default_label = default_label
-        self._langfuse = Langfuse(secret_key=secret_key, public_key=public_key, host=host)
+        self._langfuse = Langfuse(secret_key=auth.secret_key, public_key=auth.public_key, host=auth.host)
 
     async def get_formatted(self, name: str, params: Optional[Dict[str, str]] = None) -> FormattedPrompt:
         label = self._default_label
