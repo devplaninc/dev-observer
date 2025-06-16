@@ -52,9 +52,16 @@ class LanggraphAnalysisProvider(AnalysisProvider):
 
     def __init__(self, langfuse_auth: Optional[LangfuseAuthProps] = None):
         if langfuse_auth is not None:
+            public_key = langfuse_auth.public_key
+            secret_key = langfuse_auth.secret_key
+            _log.info(s_("Initializing Langfuse CallbackHandler",
+                         host=langfuse_auth.host,
+                         public_key=public_key,
+                         secret_key=f"{secret_key[:5]}****",
+                         ))
             self._lf_callback = CallbackHandler(
-                public_key=langfuse_auth.public_key,
-                secret_key=langfuse_auth.secret_key,
+                public_key=public_key,
+                secret_key=secret_key,
                 host=langfuse_auth.host,
             )
 
