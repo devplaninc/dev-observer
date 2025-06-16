@@ -11,3 +11,4 @@ server/.env.*
 /.bin/
 /docker/envoy/certs/sds_envoy_cert.json
 /server/local_configs/
+**/*.tsbuildinfo

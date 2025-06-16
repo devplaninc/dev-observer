@@ -7,12 +7,22 @@ FROM node:20-slim AS build
 WORKDIR /app
 
 ENV VITE_KEEP_OWN_DOMAIN=true
-# Copy package files and install dependencies
+
+# Copy the workspace root package files
 COPY web/package.json web/package-lock.json ./
+
+# Copy all workspace packages
+COPY web/packages ./packages
+COPY web/apps ./apps
+
+# Install dependencies at the workspace root
 RUN npm ci
 
-COPY web/ ./
+WORKDIR /app/packages/api
+RUN npm run build
 
+# Build the specific app
+WORKDIR /app/apps/dev-observer
 RUN npm run build
 
 # Production stage
@@ -25,7 +35,7 @@ ENV VITE_KEEP_OWN_DOMAIN=true
 RUN npm install -g serve
 
 # Copy built files from build stage
-COPY --from=build /app/dist /app/dist
+COPY --from=build /app/apps/dev-observer/dist /app/dist
 
 # Expose port for the application
 EXPOSE 3000
