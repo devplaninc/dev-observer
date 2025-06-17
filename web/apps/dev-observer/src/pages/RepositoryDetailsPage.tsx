@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from "react";
+import React, {type ReactNode, useCallback, useState} from "react";
 import {useNavigate, useParams} from "react-router";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Button} from "@/components/ui/button.tsx";
@@ -57,22 +57,12 @@ const RepositoryDetailsPage: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">URL</h3>
-                  <p className="break-all">{repository.url}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Full Name</h3>
-                  <p className="break-all">{repository.fullName}</p>
-                </div>
-                {repository.description && <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Description</h3>
-                  <p className="break-all">{repository.description}</p>
-                </div>}
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">ID</h3>
-                  <p>{repository.id}</p>
-                </div>
+                <RepoProp name="URL" value={repository.url}/>
+                <RepoProp name="Full Name" value={repository.fullName}/>
+                <RepoProp name="Description" value={repository.description}/>
+                <RepoProp name="ID" value={repository.id}/>
+                <RepoProp name="Installation id" value={repository.properties?.appInfo?.installationId}/>
+                <RepoProp name="Size Kb" value={repository.properties?.meta?.sizeKb}/>
                 <div className="flex gap-2 items-center">
                   <DeleteRepoButton repoId={id!}/>
                   <Button onClick={rescan}>Rescan</Button>
@@ -97,6 +87,13 @@ const RepositoryDetailsPage: React.FC = () => {
     </div>
   );
 };
+
+function RepoProp({name, value}: { name: ReactNode, value: ReactNode }) {
+  return <div className="flex gap-2 items-center">
+    <h3 className="text-sm font-medium text-muted-foreground">{name}:</h3>
+    <p className="break-all">{value}</p>
+  </div>
+}
 
 function DeleteRepoButton({repoId}: { repoId: string }) {
   const {deleteRepository} = useBoundStore()
