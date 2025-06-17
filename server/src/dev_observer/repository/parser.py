@@ -11,7 +11,11 @@ class ParsedRepoUrl:
 
 
 def parse_github_url(github_url: str) -> ParsedRepoUrl:
-    github_url = github_url.rstrip('/').rstrip('.git')
+    # Remove trailing slash if present
+    github_url = github_url.rstrip('/')
+    # Remove .git extension if present
+    if github_url.endswith('.git'):
+        github_url = github_url[:-4]
 
     if github_url.startswith('git@github.com:'):
         parts = github_url.split(':')
