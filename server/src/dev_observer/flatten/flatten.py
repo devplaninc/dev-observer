@@ -7,14 +7,14 @@ import string
 import subprocess
 from typing import List, Callable, Optional
 
+from dev_observer.api.types.config_pb2 import GlobalConfig, RepoAnalysisConfig
 from dev_observer.log import s_
-from dev_observer.repository.types import ObservedRepo
 from dev_observer.repository.cloner import clone_repository
 from dev_observer.repository.provider import GitRepositoryProvider, RepositoryInfo
+from dev_observer.repository.types import ObservedRepo
 from dev_observer.tokenizer.provider import TokenizerProvider
 
 _log = logging.getLogger(__name__)
-_ignore = "**/*.o,**/*.obj,**/*.exe,**/*.dll,**/*.so,**/*.dylib,**/*.a,**/*.class,**/*.jar,**/*.pyc,**/*.pyo,**/*.pyd,**/*.wasm,**/*.bin,**/*.lock,**/*.zip,**/*.tar,**/*.gz,**/*.rar,**/*.7z,**/*.egg,**/*.whl,**/*.deb,**/*.rpm,**/*.png,**/*.jpg,**/*.jpeg,**/*.gif,**/*.svg,**/*.ico,**/*.mp3,**/*.mp4,**/*.mov,**/*.webm,**/*.wav,**/*.ttf,**/*.woff,**/*.woff2,**/*.eot,**/*.otf,**/*.pdf,**/*.ai,**/*.psd,**/*.sketch,**/*.csv,**/*.tsv,**/*.json,**/*.xml,**/*.log,**/*.db,**/*.sqlite,**/*.h5,**/*.parquet,**/*.min.js,**/*.map,**/*.min.css,**/*.bundle.js,**/.DS_Store,**/*.swp,**/*.swo,**/*.iml,**/*.pb.go,**/*_pb2.py*"
 
 
 @dataclasses.dataclass
@@ -34,19 +34,35 @@ class FlattenResult:
     clean_up: Callable[[], bool]
 
 
-def combine_repository(repo_path: str) -> CombineResult:
+def combine_repository(repo_path: str, info: RepositoryInfo, config: GlobalConfig) -> CombineResult:
+    flatten_config = config.repo_analysis.flatten if config.repo_analysis.HasField("flatten") \
+        else RepoAnalysisConfig.Flatten()
     suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
     folder_path = os.path.join(repo_path, f"devplan_tmp_repomix_{suffix}")
     os.makedirs(folder_path)
     output_file = os.path.join(folder_path, "full.md")
-    _log.debug(s_("Executing repomix...", output_file=output_file))
+
+    large_threshold_kb = (flatten_config.large_repo_threshold_mb or 500) * 1024
+    is_large = info.size_kb > large_threshold_kb
+    _log.info(s_("Starting repo flatten", is_large=is_large))
+
+    compress = flatten_config.compress or (is_large and flatten_config.compress_large)
+    ignore = flatten_config.ignore_pattern if not is_large else flatten_config.large_repo_ignore_pattern
+    if is_large and len(flatten_config.large_repo_ignore_pattern) > 0:
+        ignore = ",".join([ignore, flatten_config.large_repo_ignore_pattern])
+
     # Run repomix to combine the repository into a single file
+    cmd = ["repomix",
+           "--output", output_file,
+           "--ignore", ignore,
+           "--style", flatten_config.out_style if len(flatten_config.out_style) > 0 else "markdown"]
+    if compress:
+        cmd.append("--compress")
+    cmd.append(repo_path)
+
+    _log.debug(s_("Executing repomix...", output_file=output_file, cmd=cmd))
     result = subprocess.run(
-        ["repomix",
-         "--output", output_file,
-         "--ignore", _ignore,
-         "--style", "markdown",
-         repo_path],
+        cmd,
         capture_output=True,
         text=True,
         check=False
@@ -75,11 +91,13 @@ def _tokenize_file(
         file_path: str,
         out_dir: str,
         tokenizer: TokenizerProvider,
-        max_tokens_per_file: int = 100_000,
+        config: GlobalConfig,
 ) -> TokenizeResult:
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
-
+    max_tokens_per_file = 100_000
+    if config.repo_analysis.HasField("flatten"):
+        max_tokens_per_file = config.repo_analysis.flatten.max_tokens_per_chunk
     if max_tokens_per_file <= 0:
         raise ValueError("max_tokens_per_file must be greater than 0")
 
@@ -112,14 +130,14 @@ class FlattenRepoResult:
     flatten_result: FlattenResult
     repo: RepositoryInfo
 
+
 async def flatten_repository(
         repo: ObservedRepo,
         provider: GitRepositoryProvider,
         tokenizer: TokenizerProvider,
-        max_size_kb: int = 100_000,
-        max_tokens_per_file: int = 100_000,
+        config: GlobalConfig,
 ) -> FlattenRepoResult:
-    clone_result = await clone_repository(repo, provider, max_size_kb)
+    clone_result = await clone_repository(repo, provider, config)
     repo_path = clone_result.path
     combined_file_path: Optional[str] = None
 
@@ -133,11 +151,11 @@ async def flatten_repository(
             cleaned = True
         return cleaned
 
-    combine_result = combine_repository(repo_path)
+    combine_result = combine_repository(repo_path, clone_result.repo, config)
     combined_file_path = combine_result.file_path
     out_dir = combine_result.output_dir
     _log.debug(s_("Tokenizing..."))
-    tokenize_result = _tokenize_file(combined_file_path, out_dir, tokenizer, max_tokens_per_file)
+    tokenize_result = _tokenize_file(combined_file_path, out_dir, tokenizer, config)
     _log.debug(s_("File tokenized"))
     flatten_result = FlattenResult(
         full_file_path=combined_file_path,

@@ -19,6 +19,7 @@ import os
 import sys
 from typing import List
 
+from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.website.cloner import normalize_domain, normalize_name
 
 # Add the src directory to the Python path
@@ -100,7 +101,7 @@ async def main():
 
     # Process the website
     _log.info(f"Crawling website: {args.url}")
-    await processor.process(ObservedWebsite(url=args.url), requests)
+    await processor.process(ObservedWebsite(url=args.url), requests, GlobalConfig())
 
     # Verify that observations were created
     observation_keys = await observations.list(kind="websites")

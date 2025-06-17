@@ -7,10 +7,12 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class GlobalConfig(_message.Message):
-    __slots__ = ("analysis",)
+    __slots__ = ("analysis", "repo_analysis")
     ANALYSIS_FIELD_NUMBER: _ClassVar[int]
+    REPO_ANALYSIS_FIELD_NUMBER: _ClassVar[int]
     analysis: AnalysisConfig
-    def __init__(self, analysis: _Optional[_Union[AnalysisConfig, _Mapping]] = ...) -> None: ...
+    repo_analysis: RepoAnalysisConfig
+    def __init__(self, analysis: _Optional[_Union[AnalysisConfig, _Mapping]] = ..., repo_analysis: _Optional[_Union[RepoAnalysisConfig, _Mapping]] = ...) -> None: ...
 
 class AnalysisConfig(_message.Message):
     __slots__ = ("repo_analyzers", "site_analyzers")
@@ -27,3 +29,34 @@ class UserManagementStatus(_message.Message):
     enabled: bool
     public_api_key: str
     def __init__(self, enabled: bool = ..., public_api_key: _Optional[str] = ...) -> None: ...
+
+class RepoAnalysisConfig(_message.Message):
+    __slots__ = ("flatten", "processing_interval_sec", "disabled")
+    class Flatten(_message.Message):
+        __slots__ = ("compress", "remove_empty_lines", "out_style", "max_tokens_per_chunk", "max_repo_size_mb", "ignore_pattern", "large_repo_threshold_mb", "large_repo_ignore_pattern", "compress_large")
+        COMPRESS_FIELD_NUMBER: _ClassVar[int]
+        REMOVE_EMPTY_LINES_FIELD_NUMBER: _ClassVar[int]
+        OUT_STYLE_FIELD_NUMBER: _ClassVar[int]
+        MAX_TOKENS_PER_CHUNK_FIELD_NUMBER: _ClassVar[int]
+        MAX_REPO_SIZE_MB_FIELD_NUMBER: _ClassVar[int]
+        IGNORE_PATTERN_FIELD_NUMBER: _ClassVar[int]
+        LARGE_REPO_THRESHOLD_MB_FIELD_NUMBER: _ClassVar[int]
+        LARGE_REPO_IGNORE_PATTERN_FIELD_NUMBER: _ClassVar[int]
+        COMPRESS_LARGE_FIELD_NUMBER: _ClassVar[int]
+        compress: bool
+        remove_empty_lines: bool
+        out_style: str
+        max_tokens_per_chunk: int
+        max_repo_size_mb: int
+        ignore_pattern: str
+        large_repo_threshold_mb: int
+        large_repo_ignore_pattern: str
+        compress_large: bool
+        def __init__(self, compress: bool = ..., remove_empty_lines: bool = ..., out_style: _Optional[str] = ..., max_tokens_per_chunk: _Optional[int] = ..., max_repo_size_mb: _Optional[int] = ..., ignore_pattern: _Optional[str] = ..., large_repo_threshold_mb: _Optional[int] = ..., large_repo_ignore_pattern: _Optional[str] = ..., compress_large: bool = ...) -> None: ...
+    FLATTEN_FIELD_NUMBER: _ClassVar[int]
+    PROCESSING_INTERVAL_SEC_FIELD_NUMBER: _ClassVar[int]
+    DISABLED_FIELD_NUMBER: _ClassVar[int]
+    flatten: RepoAnalysisConfig.Flatten
+    processing_interval_sec: int
+    disabled: bool
+    def __init__(self, flatten: _Optional[_Union[RepoAnalysisConfig.Flatten, _Mapping]] = ..., processing_interval_sec: _Optional[int] = ..., disabled: bool = ...) -> None: ...

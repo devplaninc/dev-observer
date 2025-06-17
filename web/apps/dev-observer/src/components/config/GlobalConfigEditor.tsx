@@ -25,8 +25,27 @@ const analysisConfigSchema = z.object({
   siteAnalyzers: z.array(analyzerSchema),
 })
 
+const repoAnalysisConfigFlattenSchema = z.object({
+  compress: z.boolean(),
+  removeEmptyLines: z.boolean(),
+  outStyle: z.string(),
+  maxTokensPerChunk: z.coerce.number(),
+  maxRepoSizeMb: z.coerce.number(),
+  ignorePattern: z.string(),
+  largeRepoThresholdMb: z.coerce.number(),
+  largeRepoIgnorePattern: z.string(),
+  compressLarge: z.boolean(),
+})
+
+const repoAnalysisConfigSchema = z.object({
+  flatten: repoAnalysisConfigFlattenSchema,
+  processingIntervalSec: z.coerce.number(),
+  disabled: z.boolean(),
+})
+
 const globalConfigSchema = z.object({
   analysis: analysisConfigSchema,
+  repoAnalysis: repoAnalysisConfigSchema,
 })
 
 export type globalConfigType = z.infer<typeof globalConfigSchema>
@@ -175,6 +194,190 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
         }>
           Add Analyzer
         </Button>
+      </div>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <h2 className="font-semibold text-lg">Repository Analysis Configuration:</h2>
+
+        <div className="border rounded-md p-4 space-y-4">
+          <h3 className="font-medium">General Settings</h3>
+
+          <FormField
+            control={form.control}
+            name="repoAnalysis.processingIntervalSec"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Processing Interval (sec):</FormLabel>
+                <FormControl className="w-[200px]">
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="repoAnalysis.disabled"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Disabled:</FormLabel>
+                <FormControl>
+                  <input
+                    type="checkbox"
+                    checked={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="border rounded-md p-4 space-y-4">
+          <h3 className="font-medium">Flatten Settings</h3>
+
+          <FormField
+            control={form.control}
+            name="repoAnalysis.flatten.compress"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Compress:</FormLabel>
+                <FormControl>
+                  <input
+                    type="checkbox"
+                    checked={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="repoAnalysis.flatten.removeEmptyLines"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Remove Empty Lines:</FormLabel>
+                <FormControl>
+                  <input
+                    type="checkbox"
+                    checked={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="repoAnalysis.flatten.outStyle"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Output Style:</FormLabel>
+                <FormControl className="w-[200px]">
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="repoAnalysis.flatten.maxTokensPerChunk"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Max Tokens Per Chunk:</FormLabel>
+                <FormControl className="w-[200px]">
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="repoAnalysis.flatten.maxRepoSizeMb"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Max Repo Size (MB):</FormLabel>
+                <FormControl className="w-[200px]">
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="repoAnalysis.flatten.ignorePattern"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Ignore Pattern:</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="repoAnalysis.flatten.largeRepoIgnorePattern"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Large Repo Ignore Pattern:</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="repoAnalysis.flatten.largeRepoThresholdMb"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Large Repo Threshold (MB):</FormLabel>
+                <FormControl className="w-[200px]">
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="repoAnalysis.flatten.compressLarge"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Compress Large:</FormLabel>
+                <FormControl>
+                  <input
+                    type="checkbox"
+                    checked={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
 
       <Button role="submit">

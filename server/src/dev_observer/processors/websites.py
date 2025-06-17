@@ -1,6 +1,7 @@
 import dataclasses
 
 from dev_observer.analysis.provider import AnalysisProvider
+from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.observations.provider import ObservationsProvider
 from dev_observer.processors.flattening import FlatteningProcessor
 from dev_observer.prompts.provider import PromptsProvider
@@ -33,6 +34,6 @@ class WebsitesProcessor(FlatteningProcessor[ObservedWebsite]):
         self.website_crawler = website_crawler
         self.tokenizer = tokenizer
     
-    async def get_flatten(self, website: ObservedWebsite):
+    async def get_flatten(self, website: ObservedWebsite, config: GlobalConfig):
         result = await flatten_website(website.url, self.website_crawler, self.tokenizer)
         return result.flatten_result

@@ -1,4 +1,5 @@
 from dev_observer.analysis.provider import AnalysisProvider
+from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.flatten.flatten import flatten_repository, FlattenResult
 from dev_observer.observations.provider import ObservationsProvider
 from dev_observer.processors.flattening import FlatteningProcessor
@@ -24,6 +25,6 @@ class ReposProcessor(FlatteningProcessor[ObservedRepo]):
         self.repository = repository
         self.tokenizer = tokenizer
 
-    async def get_flatten(self, repo: ObservedRepo) -> FlattenResult:
-        res = await flatten_repository(repo, self.repository, self.tokenizer)
+    async def get_flatten(self, repo: ObservedRepo, config: GlobalConfig) -> FlattenResult:
+        res = await flatten_repository(repo, self.repository, self.tokenizer, config)
         return res.flatten_result

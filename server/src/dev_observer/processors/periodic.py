@@ -68,13 +68,17 @@ class PeriodicProcessor:
         await self._storage.set_next_processing_time(item.key, None)
 
     async def _process_github_repo(self, repo_id: str):
+        config = await self._storage.get_global_config()
+        if config.HasField("repo_analysis") and config.repo_analysis.disabled:
+            _log.warning(s_("Repo analysis disabled"))
+            return
+
         repo = await self._storage.get_github_repo(repo_id)
         if repo is None:
             _log.error(s_("Github repo not found", repo_id=repo_id))
             raise ValueError(f"Repo with id [{repo_id}] is not found")
         _log.debug(s_("Processing github repo", repo=repo))
         requests: List[ObservationRequest] = []
-        config = await self._storage.get_global_config()
         for analyzer in config.analysis.repo_analyzers:
             key = f"{repo.full_name}/{analyzer.file_name}"
             requests.append(ObservationRequest(
@@ -84,7 +88,7 @@ class PeriodicProcessor:
         if len(requests) == 0:
             _log.debug(s_("No analyzers configured, skipping", repo=repo))
             return
-        await self._repos_processor.process(ObservedRepo(url=repo.url, github_repo=repo), requests)
+        await self._repos_processor.process(ObservedRepo(url=repo.url, github_repo=repo), requests, config)
         _log.debug(s_("Github repo processed", repo=repo))
 
     async def _process_website(self, website_url: str):
@@ -106,5 +110,5 @@ class PeriodicProcessor:
             _log.debug(s_("No analyzers configured, skipping", url=website_url))
             return
 
-        await self._websites_processor.process(ObservedWebsite(url=website_url), requests)
+        await self._websites_processor.process(ObservedWebsite(url=website_url), requests, config)
         _log.debug(s_("Website processed", url=website_url))

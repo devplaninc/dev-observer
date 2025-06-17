@@ -5,6 +5,7 @@ from abc import abstractmethod
 from typing import TypeVar, Generic, List
 
 from dev_observer.analysis.provider import AnalysisProvider
+from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.observations_pb2 import ObservationKey, Observation
 from dev_observer.flatten.flatten import FlattenResult
 from dev_observer.log import s_
@@ -38,8 +39,8 @@ class FlatteningProcessor(abc.ABC, Generic[E]):
         self.prompts = prompts
         self.observations = observations
 
-    async def process(self, entity: E, requests: List[ObservationRequest]):
-        res = await self.get_flatten(entity)
+    async def process(self, entity: E, requests: List[ObservationRequest], config: GlobalConfig):
+        res = await self.get_flatten(entity, config)
         try:
             for request in requests:
                 try:
@@ -54,5 +55,5 @@ class FlatteningProcessor(abc.ABC, Generic[E]):
             res.clean_up()
 
     @abstractmethod
-    async def get_flatten(self, entity: E) -> FlattenResult:
+    async def get_flatten(self, entity: E, config: GlobalConfig) -> FlattenResult:
         pass

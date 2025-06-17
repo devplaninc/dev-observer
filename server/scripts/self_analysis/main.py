@@ -6,7 +6,9 @@ import subprocess
 from dotenv import load_dotenv
 
 import dev_observer.log
+from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.observations_pb2 import ObservationKey
+from dev_observer.api.types.repo_pb2 import GitHubRepository
 from dev_observer.env_detection import detect_server_env
 from dev_observer.processors.flattening import ObservationRequest
 from dev_observer.repository.types import ObservedRepo
@@ -51,7 +53,7 @@ async def main():
             prompt_prefix="self",
             key=ObservationKey(kind="repos", name="analysis.md", key="devplaninc/dev-observer/analysis.md"),
         )
-    ])
+    ], GlobalConfig())
 
 
 if __name__ == "__main__":

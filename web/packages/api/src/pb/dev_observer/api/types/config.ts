@@ -12,6 +12,7 @@ export const protobufPackage = "dev_observer.api.types.config";
 
 export interface GlobalConfig {
   analysis: AnalysisConfig | undefined;
+  repoAnalysis: RepoAnalysisConfig | undefined;
 }
 
 export interface AnalysisConfig {
@@ -24,14 +25,37 @@ export interface UserManagementStatus {
   publicApiKey?: string | undefined;
 }
 
+export interface RepoAnalysisConfig {
+  flatten: RepoAnalysisConfig_Flatten | undefined;
+  processingIntervalSec: number;
+  disabled: boolean;
+}
+
+export interface RepoAnalysisConfig_Flatten {
+  compress: boolean;
+  removeEmptyLines: boolean;
+  outStyle: string;
+  maxTokensPerChunk: number;
+  maxRepoSizeMb: number;
+  ignorePattern: string;
+  /** Threshold in MB for a repo to be considered large */
+  largeRepoThresholdMb: number;
+  /** Additional ignore pattern for large repo */
+  largeRepoIgnorePattern: string;
+  compressLarge: boolean;
+}
+
 function createBaseGlobalConfig(): GlobalConfig {
-  return { analysis: undefined };
+  return { analysis: undefined, repoAnalysis: undefined };
 }
 
 export const GlobalConfig: MessageFns<GlobalConfig> = {
   encode(message: GlobalConfig, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.analysis !== undefined) {
       AnalysisConfig.encode(message.analysis, writer.uint32(10).fork()).join();
+    }
+    if (message.repoAnalysis !== undefined) {
+      RepoAnalysisConfig.encode(message.repoAnalysis, writer.uint32(18).fork()).join();
     }
     return writer;
   },
@@ -51,6 +75,14 @@ export const GlobalConfig: MessageFns<GlobalConfig> = {
           message.analysis = AnalysisConfig.decode(reader, reader.uint32());
           continue;
         }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.repoAnalysis = RepoAnalysisConfig.decode(reader, reader.uint32());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -61,13 +93,19 @@ export const GlobalConfig: MessageFns<GlobalConfig> = {
   },
 
   fromJSON(object: any): GlobalConfig {
-    return { analysis: isSet(object.analysis) ? AnalysisConfig.fromJSON(object.analysis) : undefined };
+    return {
+      analysis: isSet(object.analysis) ? AnalysisConfig.fromJSON(object.analysis) : undefined,
+      repoAnalysis: isSet(object.repoAnalysis) ? RepoAnalysisConfig.fromJSON(object.repoAnalysis) : undefined,
+    };
   },
 
   toJSON(message: GlobalConfig): unknown {
     const obj: any = {};
     if (message.analysis !== undefined) {
       obj.analysis = AnalysisConfig.toJSON(message.analysis);
+    }
+    if (message.repoAnalysis !== undefined) {
+      obj.repoAnalysis = RepoAnalysisConfig.toJSON(message.repoAnalysis);
     }
     return obj;
   },
@@ -79,6 +117,9 @@ export const GlobalConfig: MessageFns<GlobalConfig> = {
     const message = createBaseGlobalConfig();
     message.analysis = (object.analysis !== undefined && object.analysis !== null)
       ? AnalysisConfig.fromPartial(object.analysis)
+      : undefined;
+    message.repoAnalysis = (object.repoAnalysis !== undefined && object.repoAnalysis !== null)
+      ? RepoAnalysisConfig.fromPartial(object.repoAnalysis)
       : undefined;
     return message;
   },
@@ -236,6 +277,298 @@ export const UserManagementStatus: MessageFns<UserManagementStatus> = {
     const message = createBaseUserManagementStatus();
     message.enabled = object.enabled ?? false;
     message.publicApiKey = object.publicApiKey ?? undefined;
+    return message;
+  },
+};
+
+function createBaseRepoAnalysisConfig(): RepoAnalysisConfig {
+  return { flatten: undefined, processingIntervalSec: 0, disabled: false };
+}
+
+export const RepoAnalysisConfig: MessageFns<RepoAnalysisConfig> = {
+  encode(message: RepoAnalysisConfig, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.flatten !== undefined) {
+      RepoAnalysisConfig_Flatten.encode(message.flatten, writer.uint32(10).fork()).join();
+    }
+    if (message.processingIntervalSec !== 0) {
+      writer.uint32(16).int32(message.processingIntervalSec);
+    }
+    if (message.disabled !== false) {
+      writer.uint32(24).bool(message.disabled);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RepoAnalysisConfig {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRepoAnalysisConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.flatten = RepoAnalysisConfig_Flatten.decode(reader, reader.uint32());
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.processingIntervalSec = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.disabled = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RepoAnalysisConfig {
+    return {
+      flatten: isSet(object.flatten) ? RepoAnalysisConfig_Flatten.fromJSON(object.flatten) : undefined,
+      processingIntervalSec: isSet(object.processingIntervalSec) ? gt.Number(object.processingIntervalSec) : 0,
+      disabled: isSet(object.disabled) ? gt.Boolean(object.disabled) : false,
+    };
+  },
+
+  toJSON(message: RepoAnalysisConfig): unknown {
+    const obj: any = {};
+    if (message.flatten !== undefined) {
+      obj.flatten = RepoAnalysisConfig_Flatten.toJSON(message.flatten);
+    }
+    if (message.processingIntervalSec !== 0) {
+      obj.processingIntervalSec = Math.round(message.processingIntervalSec);
+    }
+    if (message.disabled !== false) {
+      obj.disabled = message.disabled;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<RepoAnalysisConfig>): RepoAnalysisConfig {
+    return RepoAnalysisConfig.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<RepoAnalysisConfig>): RepoAnalysisConfig {
+    const message = createBaseRepoAnalysisConfig();
+    message.flatten = (object.flatten !== undefined && object.flatten !== null)
+      ? RepoAnalysisConfig_Flatten.fromPartial(object.flatten)
+      : undefined;
+    message.processingIntervalSec = object.processingIntervalSec ?? 0;
+    message.disabled = object.disabled ?? false;
+    return message;
+  },
+};
+
+function createBaseRepoAnalysisConfig_Flatten(): RepoAnalysisConfig_Flatten {
+  return {
+    compress: false,
+    removeEmptyLines: false,
+    outStyle: "",
+    maxTokensPerChunk: 0,
+    maxRepoSizeMb: 0,
+    ignorePattern: "",
+    largeRepoThresholdMb: 0,
+    largeRepoIgnorePattern: "",
+    compressLarge: false,
+  };
+}
+
+export const RepoAnalysisConfig_Flatten: MessageFns<RepoAnalysisConfig_Flatten> = {
+  encode(message: RepoAnalysisConfig_Flatten, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.compress !== false) {
+      writer.uint32(8).bool(message.compress);
+    }
+    if (message.removeEmptyLines !== false) {
+      writer.uint32(16).bool(message.removeEmptyLines);
+    }
+    if (message.outStyle !== "") {
+      writer.uint32(26).string(message.outStyle);
+    }
+    if (message.maxTokensPerChunk !== 0) {
+      writer.uint32(32).int32(message.maxTokensPerChunk);
+    }
+    if (message.maxRepoSizeMb !== 0) {
+      writer.uint32(40).int32(message.maxRepoSizeMb);
+    }
+    if (message.ignorePattern !== "") {
+      writer.uint32(50).string(message.ignorePattern);
+    }
+    if (message.largeRepoThresholdMb !== 0) {
+      writer.uint32(56).int32(message.largeRepoThresholdMb);
+    }
+    if (message.largeRepoIgnorePattern !== "") {
+      writer.uint32(66).string(message.largeRepoIgnorePattern);
+    }
+    if (message.compressLarge !== false) {
+      writer.uint32(72).bool(message.compressLarge);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RepoAnalysisConfig_Flatten {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRepoAnalysisConfig_Flatten();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.compress = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.removeEmptyLines = reader.bool();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.outStyle = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.maxTokensPerChunk = reader.int32();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.maxRepoSizeMb = reader.int32();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.ignorePattern = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.largeRepoThresholdMb = reader.int32();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.largeRepoIgnorePattern = reader.string();
+          continue;
+        }
+        case 9: {
+          if (tag !== 72) {
+            break;
+          }
+
+          message.compressLarge = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RepoAnalysisConfig_Flatten {
+    return {
+      compress: isSet(object.compress) ? gt.Boolean(object.compress) : false,
+      removeEmptyLines: isSet(object.removeEmptyLines) ? gt.Boolean(object.removeEmptyLines) : false,
+      outStyle: isSet(object.outStyle) ? gt.String(object.outStyle) : "",
+      maxTokensPerChunk: isSet(object.maxTokensPerChunk) ? gt.Number(object.maxTokensPerChunk) : 0,
+      maxRepoSizeMb: isSet(object.maxRepoSizeMb) ? gt.Number(object.maxRepoSizeMb) : 0,
+      ignorePattern: isSet(object.ignorePattern) ? gt.String(object.ignorePattern) : "",
+      largeRepoThresholdMb: isSet(object.largeRepoThresholdMb) ? gt.Number(object.largeRepoThresholdMb) : 0,
+      largeRepoIgnorePattern: isSet(object.largeRepoIgnorePattern) ? gt.String(object.largeRepoIgnorePattern) : "",
+      compressLarge: isSet(object.compressLarge) ? gt.Boolean(object.compressLarge) : false,
+    };
+  },
+
+  toJSON(message: RepoAnalysisConfig_Flatten): unknown {
+    const obj: any = {};
+    if (message.compress !== false) {
+      obj.compress = message.compress;
+    }
+    if (message.removeEmptyLines !== false) {
+      obj.removeEmptyLines = message.removeEmptyLines;
+    }
+    if (message.outStyle !== "") {
+      obj.outStyle = message.outStyle;
+    }
+    if (message.maxTokensPerChunk !== 0) {
+      obj.maxTokensPerChunk = Math.round(message.maxTokensPerChunk);
+    }
+    if (message.maxRepoSizeMb !== 0) {
+      obj.maxRepoSizeMb = Math.round(message.maxRepoSizeMb);
+    }
+    if (message.ignorePattern !== "") {
+      obj.ignorePattern = message.ignorePattern;
+    }
+    if (message.largeRepoThresholdMb !== 0) {
+      obj.largeRepoThresholdMb = Math.round(message.largeRepoThresholdMb);
+    }
+    if (message.largeRepoIgnorePattern !== "") {
+      obj.largeRepoIgnorePattern = message.largeRepoIgnorePattern;
+    }
+    if (message.compressLarge !== false) {
+      obj.compressLarge = message.compressLarge;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<RepoAnalysisConfig_Flatten>): RepoAnalysisConfig_Flatten {
+    return RepoAnalysisConfig_Flatten.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<RepoAnalysisConfig_Flatten>): RepoAnalysisConfig_Flatten {
+    const message = createBaseRepoAnalysisConfig_Flatten();
+    message.compress = object.compress ?? false;
+    message.removeEmptyLines = object.removeEmptyLines ?? false;
+    message.outStyle = object.outStyle ?? "";
+    message.maxTokensPerChunk = object.maxTokensPerChunk ?? 0;
+    message.maxRepoSizeMb = object.maxRepoSizeMb ?? 0;
+    message.ignorePattern = object.ignorePattern ?? "";
+    message.largeRepoThresholdMb = object.largeRepoThresholdMb ?? 0;
+    message.largeRepoIgnorePattern = object.largeRepoIgnorePattern ?? "";
+    message.compressLarge = object.compressLarge ?? false;
     return message;
   },
 };

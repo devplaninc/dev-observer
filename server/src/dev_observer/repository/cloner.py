@@ -2,6 +2,7 @@ import dataclasses
 import logging
 import tempfile
 
+from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.log import s_
 from dev_observer.repository.types import ObservedRepo
 from dev_observer.repository.provider import GitRepositoryProvider, RepositoryInfo
@@ -19,8 +20,11 @@ class CloneResult:
 async def clone_repository(
         repo: ObservedRepo,
         provider: GitRepositoryProvider,
-        max_size_kb: int = 100_000,  # Default max size: 100MB
+        config: GlobalConfig,
 ) -> CloneResult:
+    max_size_kb = 100_000
+    if config.repo_analysis.HasField("flatten"):
+        max_size_kb = config.repo_analysis.flatten.max_repo_size_mb * 1024
     info = await provider.get_repo(repo)
     if info.size_kb > max_size_kb:
         raise ValueError(

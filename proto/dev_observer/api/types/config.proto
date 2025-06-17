@@ -6,6 +6,7 @@ import "dev_observer/api/types/observations.proto";
 
 message GlobalConfig {
   AnalysisConfig analysis = 1;
+  RepoAnalysisConfig repo_analysis = 2;
 }
 
 message AnalysisConfig {
@@ -16,4 +17,24 @@ message AnalysisConfig {
 message UserManagementStatus {
   bool enabled = 1;
   optional string public_api_key = 2;
+}
+
+message RepoAnalysisConfig {
+  Flatten flatten = 1;
+  int32 processing_interval_sec = 2;
+  bool disabled = 3;
+
+  message Flatten {
+    bool compress = 1;
+    bool remove_empty_lines = 2;
+    string out_style = 3;
+    int32 max_tokens_per_chunk = 4;
+    int32 max_repo_size_mb = 5;
+    string ignore_pattern = 6;
+    // Threshold in MB for a repo to be considered large
+    int32 large_repo_threshold_mb = 7;
+    // Additional ignore pattern for large repo
+    string large_repo_ignore_pattern = 8;
+    bool compress_large = 9;
+  }
 }
