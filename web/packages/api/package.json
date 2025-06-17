@@ -1,9 +1,16 @@
 {
   "name": "@devplan/observer-api",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "API for dev-observer",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/devplaninc/dev-observer.git",
@@ -25,13 +32,6 @@
   "files": [
     "dist"
   ],
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "type": "module",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
