@@ -35,7 +35,7 @@ class TokenizedAnalyzer:
             s = await self._analyze_file(p, f"{self.prompts_prefix}_analyze_chunk")
             summaries.append(s)
 
-        summary = "\n\n".join(summaries)
+        summary = "\n\n-------\n\n".join(summaries)
         prompt = await self.prompts.get_formatted(f"{self.prompts_prefix}_analyze_combined_chunks", {
             "content": summary,
         })

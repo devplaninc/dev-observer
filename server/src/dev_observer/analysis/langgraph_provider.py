@@ -113,6 +113,10 @@ class AnalysisNodes:
         if prompt_config is None or prompt_config.model is None:
             raise ValueError("Missing model in prompt config")
 
+        prompt_name: Optional[str] = None
+        if prompt.langfuse_prompt is not None:
+            prompt_name = prompt.langfuse_prompt.name
+
         messages: List[BaseMessage] = []
         if prompt.system is not None:
             messages.append(SystemMessage(content=prompt.system.text))
@@ -127,9 +131,9 @@ class AnalysisNodes:
             messages.append(HumanMessage(content=contents))
 
         model = _model_from_config(prompt_config.model)
-        _log.debug(s_("Calling model", prompt_config=prompt_config))
+        _log.debug(s_("Calling model", prompt_config=prompt_config, prompt_name=prompt_name))
         response = await model.ainvoke(messages)
-        _log.debug(s_("Model replied", prompt_config=prompt_config))
+        _log.debug(s_("Model replied", prompt_config=prompt_config, prompt_name=prompt_name))
         return {"response": f"{response.content}"}
 
 
