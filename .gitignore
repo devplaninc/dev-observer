@@ -12,3 +12,4 @@ server/.env.*
 /docker/envoy/certs/sds_envoy_cert.json
 /server/local_configs/
 **/*.tsbuildinfo
+**/.rollup.cache/
