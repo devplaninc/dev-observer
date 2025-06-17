@@ -20,9 +20,9 @@ export {
 
 export {LocalStorageData} from './pb/dev_observer/api/storage/local';
 
-export * from './client/api';
-export * from './client/base';
-export * from './client/config';
-export * from './client/directFetcher';
-export * from './client/observations';
-export * from './client/repositories';
+export { ApiClient } from './client/api';
+export { ParseableMessage, VoidParser, BaseClient } from './client/base';
+export { ConfigClient } from './client/config';
+export { S3ObservationsFetcherProps, FetchResult, S3ObservationsFetcher } from './client/directFetcher';
+export { ObservationsClient } from './client/observations';
+export { RepositoriesClient } from './client/repositories';
