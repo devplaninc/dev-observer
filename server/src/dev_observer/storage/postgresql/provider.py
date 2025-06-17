@@ -3,7 +3,6 @@ import uuid
 from typing import Optional, MutableSequence
 
 from google.protobuf import json_format
-from markdown_it.common.entities import entities
 from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSession
 
@@ -49,13 +48,19 @@ class PostgresqlStorageProvider(StorageProvider):
             repo_id = f"{uuid.uuid4()}"
         async with AsyncSession(self._engine) as session:
             async with session.begin():
-                ent = GitRepoEntity(
+                existing = await session.execute(
+                    select(GitRepoEntity).where(GitRepoEntity.full_name == repo.full_name)
+                )
+                ent = existing.first()
+                if ent is not None:
+                    return _to_repo(ent[0])
+                r = GitRepoEntity(
                     id=repo_id,
                     full_name=repo.full_name,
                     json_data=pb_to_json(repo),
                 )
-                session.add(ent)
-        return await self.get_github_repo(repo_id)
+                session.add(r)
+                return _to_optional_repo(await session.get(GitRepoEntity, repo_id))
 
     async def next_processing_item(self) -> Optional[ProcessingItem]:
         next_processing_time = self._clock.now()
