@@ -19,7 +19,7 @@ from dev_observer.repository.copying import CopyingGitRepositoryProvider
 from dev_observer.repository.github import GithubProvider, GithubAuthProvider
 from dev_observer.repository.provider import GitRepositoryProvider
 from dev_observer.server.env import ServerEnv
-from dev_observer.settings import Settings, LocalPrompts, Github, LangfusePrompts
+from dev_observer.settings import Settings, LocalPrompts, Github, LangfusePrompts, LanggraphAnalysis
 from dev_observer.storage.local import LocalStorageProvider
 from dev_observer.storage.memory import MemoryStorageProvider
 from dev_observer.storage.postgresql.provider import PostgresqlStorageProvider
@@ -67,10 +67,11 @@ def detect_analysis_provider(settings: Settings) -> AnalysisProvider:
         raise ValueError("Analysis settings are not defined")
     match a.provider:
         case "langgraph":
+            lg = a.langgrpah if a.langgrpah is not None else LanggraphAnalysis()
             lf_auth: Optional[LangfuseAuthProps] = None
             if settings.prompts is not None and settings.prompts.langfuse is not None:
                 lf_auth = _get_lf_auth(settings.prompts.langfuse)
-            return LanggraphAnalysisProvider(lf_auth)
+            return LanggraphAnalysisProvider(lf_auth, mask=lg.mask_traces)
         case "stub":
             return StubAnalysisProvider()
     raise ValueError(f"Unsupported analysis provider: {a.provider}")

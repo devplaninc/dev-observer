@@ -47,12 +47,16 @@ class AnalysisInfo:
             raise ValueError("No analysis info in metadata")
         return info
 
+def _masking_function(data):
+    return "[REDACTED]"
 
 class LanggraphAnalysisProvider(AnalysisProvider):
     _lf_auth: Optional[LangfuseAuthProps] = None
+    _mask: bool
 
-    def __init__(self, langfuse_auth: Optional[LangfuseAuthProps] = None):
+    def __init__(self, langfuse_auth: Optional[LangfuseAuthProps] = None, mask: bool = True):
         self._lf_auth = langfuse_auth
+        self._mask = mask
 
     async def analyze(self, prompt: FormattedPrompt, session_id: Optional[str] = None) -> AnalysisResult:
         g = await _get_graph()
@@ -68,6 +72,7 @@ class LanggraphAnalysisProvider(AnalysisProvider):
                           session_id=session_id,
                           ))
             callbacks = [CallbackHandler(
+                mask=_masking_function if self._mask else None,
                 public_key=public_key,
                 secret_key=secret_key,
                 host=self._lf_auth.host,

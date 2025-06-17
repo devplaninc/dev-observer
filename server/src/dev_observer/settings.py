@@ -43,8 +43,14 @@ class Prompts(BaseModel):
     local: Optional[LocalPrompts] = None
 
 
+class LanggraphAnalysis(BaseModel):
+    mask_traces: bool = True
+
+
 class Analysis(BaseModel):
     provider: Literal["langgraph", "stub"] = "langgraph"
+
+    langgrpah: Optional[LanggraphAnalysis] = None
 
 
 class LocalObservations(BaseModel):
