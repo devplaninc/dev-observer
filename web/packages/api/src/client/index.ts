@@ -51,3 +51,4 @@ export * from './base';
 export * from './config';
 export * from './observations';
 export * from './repositories';
+export * from './directFetcher';

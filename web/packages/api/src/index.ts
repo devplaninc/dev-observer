@@ -20,5 +20,15 @@ export {
 
 export {LocalStorageData} from './pb/dev_observer/api/storage/local';
 
-// Export API client
-export * from './client';
+export {
+  ApiClient,
+  ConfigClient,
+  BaseClient,
+  VoidParser,
+  ParseableMessage,
+  ObservationsClient,
+  RepositoriesClient,
+  S3ObservationsFetcher,
+  S3ObservationsFetcherProps,
+  FetchResult,
+} from './client';
