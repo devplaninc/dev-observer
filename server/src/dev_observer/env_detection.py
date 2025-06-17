@@ -34,19 +34,19 @@ from dev_observer.users.provider import UsersProvider
 _log = logging.getLogger(__name__)
 
 
-def detect_git_provider(settings: Settings) -> GitRepositoryProvider:
+def detect_git_provider(settings: Settings, storage: StorageProvider) -> GitRepositoryProvider:
     git_sett = settings.git
     if git_sett is None:
         raise ValueError("Git settings are not provided")
     match git_sett.provider:
         case "github":
-            return GithubProvider(detect_github_auth(git_sett.github))
+            return GithubProvider(detect_github_auth(git_sett.github, storage), storage)
         case "copying":
             return CopyingGitRepositoryProvider()
     raise ValueError(f"Unsupported git provider: {git_sett.provider}")
 
 
-def detect_github_auth(gh: Optional[Github]) -> GithubAuthProvider:
+def detect_github_auth(gh: Optional[Github], storage: StorageProvider) -> GithubAuthProvider:
     if gh is None:
         raise ValueError(f"Github settings are not defined")
     _log.debug(s_("Detected github auth type.", auth_type=gh.auth_type))
@@ -57,7 +57,7 @@ def detect_github_auth(gh: Optional[Github]) -> GithubAuthProvider:
             from dev_observer.repository.auth import GithubAppAuthProvider
             if not gh.app_id or not gh.private_key:
                 raise ValueError("GitHub App authentication requires app_id and private_key")
-            return GithubAppAuthProvider(gh.app_id, gh.private_key)
+            return GithubAppAuthProvider(gh.app_id, gh.private_key, storage)
     raise ValueError(f"Unsupported auth type: {gh.auth_type}")
 
 
@@ -177,7 +177,7 @@ def detect_server_env(settings: Settings) -> ServerEnv:
     tokenizer = detect_tokenizer(settings)
     storage = detect_storage_provider(settings)
     bg_storage = detect_storage_provider(settings)
-    bg_repository = detect_git_provider(settings)
+    bg_repository = detect_git_provider(settings, bg_storage)
     bg_repos_processor = ReposProcessor(analysis, bg_repository, prompts, observations, tokenizer)
     users = detect_users_provider(settings)
 

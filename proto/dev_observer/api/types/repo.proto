@@ -2,10 +2,29 @@ syntax = "proto3";
 
 package dev_observer.api.types.repo;
 
+import "google/protobuf/timestamp.proto";
+
 message GitHubRepository {
   string id = 1;
   string name = 2;
   string full_name = 3;
   string url = 4;
   string description = 5;
+  optional GitProperties properties = 6;
+}
+
+message GitProperties {
+  optional GitAppInfo app_info = 1;
+  optional GitMeta meta = 2;
+}
+
+message GitMeta {
+  google.protobuf.Timestamp last_refresh = 1;
+  optional string clone_url = 2;
+  optional int32 size_kb = 3;
+}
+
+message GitAppInfo {
+  google.protobuf.Timestamp last_refresh = 1;
+  optional int32 installation_id = 2;
 }

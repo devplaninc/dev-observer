@@ -22,15 +22,22 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
+from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!dev_observer/api/types/repo.proto\x12\x1b\x64\x65v_observer.api.types.repo\"a\n\x10GitHubRepository\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tfull_name\x18\x03 \x01(\t\x12\x0b\n\x03url\x18\x04 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\tb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!dev_observer/api/types/repo.proto\x12\x1b\x64\x65v_observer.api.types.repo\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb5\x01\n\x10GitHubRepository\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tfull_name\x18\x03 \x01(\t\x12\x0b\n\x03url\x18\x04 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t\x12\x43\n\nproperties\x18\x06 \x01(\x0b\x32*.dev_observer.api.types.repo.GitPropertiesH\x00\x88\x01\x01\x42\r\n\x0b_properties\"\x9e\x01\n\rGitProperties\x12>\n\x08\x61pp_info\x18\x01 \x01(\x0b\x32\'.dev_observer.api.types.repo.GitAppInfoH\x00\x88\x01\x01\x12\x37\n\x04meta\x18\x02 \x01(\x0b\x32$.dev_observer.api.types.repo.GitMetaH\x01\x88\x01\x01\x42\x0b\n\t_app_infoB\x07\n\x05_meta\"\x83\x01\n\x07GitMeta\x12\x30\n\x0clast_refresh\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x16\n\tclone_url\x18\x02 \x01(\tH\x00\x88\x01\x01\x12\x14\n\x07size_kb\x18\x03 \x01(\x05H\x01\x88\x01\x01\x42\x0c\n\n_clone_urlB\n\n\x08_size_kb\"p\n\nGitAppInfo\x12\x30\n\x0clast_refresh\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1c\n\x0finstallation_id\x18\x02 \x01(\x05H\x00\x88\x01\x01\x42\x12\n\x10_installation_idb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'dev_observer.api.types.repo_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_GITHUBREPOSITORY']._serialized_start=66
-  _globals['_GITHUBREPOSITORY']._serialized_end=163
+  _globals['_GITHUBREPOSITORY']._serialized_start=100
+  _globals['_GITHUBREPOSITORY']._serialized_end=281
+  _globals['_GITPROPERTIES']._serialized_start=284
+  _globals['_GITPROPERTIES']._serialized_end=442
+  _globals['_GITMETA']._serialized_start=445
+  _globals['_GITMETA']._serialized_end=576
+  _globals['_GITAPPINFO']._serialized_start=578
+  _globals['_GITAPPINFO']._serialized_end=690
 # @@protoc_insertion_point(module_scope)

@@ -7,7 +7,8 @@ from dev_observer.api.types.observations_pb2 import ObservationKey
 from dev_observer.api.types.processing_pb2 import ProcessingItem
 from dev_observer.log import s_
 from dev_observer.processors.flattening import ObservationRequest
-from dev_observer.processors.repos import ReposProcessor, ObservedRepo
+from dev_observer.processors.repos import ReposProcessor
+from dev_observer.repository.types import ObservedRepo
 from dev_observer.processors.websites import WebsitesProcessor, ObservedWebsite
 from dev_observer.storage.provider import StorageProvider
 from dev_observer.util import Clock, RealClock

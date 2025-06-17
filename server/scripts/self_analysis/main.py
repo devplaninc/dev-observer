@@ -9,7 +9,7 @@ import dev_observer.log
 from dev_observer.api.types.observations_pb2 import ObservationKey
 from dev_observer.env_detection import detect_server_env
 from dev_observer.processors.flattening import ObservationRequest
-from dev_observer.processors.repos import ObservedRepo
+from dev_observer.repository.types import ObservedRepo
 from dev_observer.settings import Settings
 
 dev_observer.log.encoder = dev_observer.log.PlainTextEncoder()
@@ -46,7 +46,7 @@ async def main():
         os.environ["DEV_OBSERVER__TOKENIZER__PROVIDER"] = "stub"
     Settings.model_config["toml_file"] = os.path.join(current_dir, "config.toml")
     env = detect_server_env(Settings())
-    await env.repos_processor.process(ObservedRepo(url=_repo), [
+    await env.repos_processor.process(ObservedRepo(url=_repo, github_repo=GitHubRepository()), [
         ObservationRequest(
             prompt_prefix="self",
             key=ObservationKey(kind="repos", name="analysis.md", key="devplaninc/dev-observer/analysis.md"),

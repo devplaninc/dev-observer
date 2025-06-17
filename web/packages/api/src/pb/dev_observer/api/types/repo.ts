@@ -6,6 +6,7 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
+import { Timestamp } from "../../../google/protobuf/timestamp";
 
 export const protobufPackage = "dev_observer.api.types.repo";
 
@@ -15,10 +16,27 @@ export interface GitHubRepository {
   fullName: string;
   url: string;
   description: string;
+  properties?: GitProperties | undefined;
+}
+
+export interface GitProperties {
+  appInfo?: GitAppInfo | undefined;
+  meta?: GitMeta | undefined;
+}
+
+export interface GitMeta {
+  lastRefresh: Date | undefined;
+  cloneUrl?: string | undefined;
+  sizeKb?: number | undefined;
+}
+
+export interface GitAppInfo {
+  lastRefresh: Date | undefined;
+  installationId?: number | undefined;
 }
 
 function createBaseGitHubRepository(): GitHubRepository {
-  return { id: "", name: "", fullName: "", url: "", description: "" };
+  return { id: "", name: "", fullName: "", url: "", description: "", properties: undefined };
 }
 
 export const GitHubRepository: MessageFns<GitHubRepository> = {
@@ -37,6 +55,9 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
     }
     if (message.description !== "") {
       writer.uint32(42).string(message.description);
+    }
+    if (message.properties !== undefined) {
+      GitProperties.encode(message.properties, writer.uint32(50).fork()).join();
     }
     return writer;
   },
@@ -88,6 +109,14 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
           message.description = reader.string();
           continue;
         }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.properties = GitProperties.decode(reader, reader.uint32());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -104,6 +133,7 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
       fullName: isSet(object.fullName) ? gt.String(object.fullName) : "",
       url: isSet(object.url) ? gt.String(object.url) : "",
       description: isSet(object.description) ? gt.String(object.description) : "",
+      properties: isSet(object.properties) ? GitProperties.fromJSON(object.properties) : undefined,
     };
   },
 
@@ -124,6 +154,9 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
     if (message.description !== "") {
       obj.description = message.description;
     }
+    if (message.properties !== undefined) {
+      obj.properties = GitProperties.toJSON(message.properties);
+    }
     return obj;
   },
 
@@ -137,6 +170,255 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
     message.fullName = object.fullName ?? "";
     message.url = object.url ?? "";
     message.description = object.description ?? "";
+    message.properties = (object.properties !== undefined && object.properties !== null)
+      ? GitProperties.fromPartial(object.properties)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseGitProperties(): GitProperties {
+  return { appInfo: undefined, meta: undefined };
+}
+
+export const GitProperties: MessageFns<GitProperties> = {
+  encode(message: GitProperties, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.appInfo !== undefined) {
+      GitAppInfo.encode(message.appInfo, writer.uint32(10).fork()).join();
+    }
+    if (message.meta !== undefined) {
+      GitMeta.encode(message.meta, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GitProperties {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGitProperties();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.appInfo = GitAppInfo.decode(reader, reader.uint32());
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.meta = GitMeta.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GitProperties {
+    return {
+      appInfo: isSet(object.appInfo) ? GitAppInfo.fromJSON(object.appInfo) : undefined,
+      meta: isSet(object.meta) ? GitMeta.fromJSON(object.meta) : undefined,
+    };
+  },
+
+  toJSON(message: GitProperties): unknown {
+    const obj: any = {};
+    if (message.appInfo !== undefined) {
+      obj.appInfo = GitAppInfo.toJSON(message.appInfo);
+    }
+    if (message.meta !== undefined) {
+      obj.meta = GitMeta.toJSON(message.meta);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GitProperties>): GitProperties {
+    return GitProperties.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GitProperties>): GitProperties {
+    const message = createBaseGitProperties();
+    message.appInfo = (object.appInfo !== undefined && object.appInfo !== null)
+      ? GitAppInfo.fromPartial(object.appInfo)
+      : undefined;
+    message.meta = (object.meta !== undefined && object.meta !== null) ? GitMeta.fromPartial(object.meta) : undefined;
+    return message;
+  },
+};
+
+function createBaseGitMeta(): GitMeta {
+  return { lastRefresh: undefined, cloneUrl: undefined, sizeKb: undefined };
+}
+
+export const GitMeta: MessageFns<GitMeta> = {
+  encode(message: GitMeta, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.lastRefresh !== undefined) {
+      Timestamp.encode(toTimestamp(message.lastRefresh), writer.uint32(10).fork()).join();
+    }
+    if (message.cloneUrl !== undefined) {
+      writer.uint32(18).string(message.cloneUrl);
+    }
+    if (message.sizeKb !== undefined) {
+      writer.uint32(24).int32(message.sizeKb);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GitMeta {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGitMeta();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.lastRefresh = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.cloneUrl = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.sizeKb = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GitMeta {
+    return {
+      lastRefresh: isSet(object.lastRefresh) ? fromJsonTimestamp(object.lastRefresh) : undefined,
+      cloneUrl: isSet(object.cloneUrl) ? gt.String(object.cloneUrl) : undefined,
+      sizeKb: isSet(object.sizeKb) ? gt.Number(object.sizeKb) : undefined,
+    };
+  },
+
+  toJSON(message: GitMeta): unknown {
+    const obj: any = {};
+    if (message.lastRefresh !== undefined) {
+      obj.lastRefresh = message.lastRefresh.toISOString();
+    }
+    if (message.cloneUrl !== undefined) {
+      obj.cloneUrl = message.cloneUrl;
+    }
+    if (message.sizeKb !== undefined) {
+      obj.sizeKb = Math.round(message.sizeKb);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GitMeta>): GitMeta {
+    return GitMeta.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GitMeta>): GitMeta {
+    const message = createBaseGitMeta();
+    message.lastRefresh = object.lastRefresh ?? undefined;
+    message.cloneUrl = object.cloneUrl ?? undefined;
+    message.sizeKb = object.sizeKb ?? undefined;
+    return message;
+  },
+};
+
+function createBaseGitAppInfo(): GitAppInfo {
+  return { lastRefresh: undefined, installationId: undefined };
+}
+
+export const GitAppInfo: MessageFns<GitAppInfo> = {
+  encode(message: GitAppInfo, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.lastRefresh !== undefined) {
+      Timestamp.encode(toTimestamp(message.lastRefresh), writer.uint32(10).fork()).join();
+    }
+    if (message.installationId !== undefined) {
+      writer.uint32(16).int32(message.installationId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GitAppInfo {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGitAppInfo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.lastRefresh = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.installationId = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GitAppInfo {
+    return {
+      lastRefresh: isSet(object.lastRefresh) ? fromJsonTimestamp(object.lastRefresh) : undefined,
+      installationId: isSet(object.installationId) ? gt.Number(object.installationId) : undefined,
+    };
+  },
+
+  toJSON(message: GitAppInfo): unknown {
+    const obj: any = {};
+    if (message.lastRefresh !== undefined) {
+      obj.lastRefresh = message.lastRefresh.toISOString();
+    }
+    if (message.installationId !== undefined) {
+      obj.installationId = Math.round(message.installationId);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GitAppInfo>): GitAppInfo {
+    return GitAppInfo.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GitAppInfo>): GitAppInfo {
+    const message = createBaseGitAppInfo();
+    message.lastRefresh = object.lastRefresh ?? undefined;
+    message.installationId = object.installationId ?? undefined;
     return message;
   },
 };
@@ -168,6 +450,28 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends { $case: string; value: unknown } ? { $case: T["$case"]; value?: DeepPartial<T["value"]> }
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
+
+function toTimestamp(date: Date): Timestamp {
+  const seconds = Math.trunc(date.getTime() / 1_000);
+  const nanos = (date.getTime() % 1_000) * 1_000_000;
+  return { seconds, nanos };
+}
+
+function fromTimestamp(t: Timestamp): Date {
+  let millis = (t.seconds || 0) * 1_000;
+  millis += (t.nanos || 0) / 1_000_000;
+  return new gt.Date(millis);
+}
+
+function fromJsonTimestamp(o: any): Date {
+  if (o instanceof gt.Date) {
+    return o;
+  } else if (typeof o === "string") {
+    return new gt.Date(o);
+  } else {
+    return fromTimestamp(Timestamp.fromJSON(o));
+  }
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

@@ -3,7 +3,7 @@ from typing import Protocol, Optional, MutableSequence
 
 from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
-from dev_observer.api.types.repo_pb2 import GitHubRepository
+from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
 
 
 class StorageProvider(Protocol):
@@ -20,6 +20,9 @@ class StorageProvider(Protocol):
         ...
 
     async def add_github_repo(self, repo: GitHubRepository) -> GitHubRepository:
+        ...
+
+    async def update_repo_properties(self, id: str, properties: GitProperties) -> GitHubRepository:
         ...
 
     async def next_processing_item(self) -> Optional[ProcessingItem]:

@@ -11,7 +11,7 @@ from google.protobuf import timestamp
 from dev_observer.api.storage.local_pb2 import LocalStorageData
 from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
-from dev_observer.api.types.repo_pb2 import GitHubRepository
+from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
 from dev_observer.storage.provider import StorageProvider
 from dev_observer.util import Clock, RealClock
 
@@ -52,6 +52,7 @@ class SingleBlobStorageProvider(abc.ABC, StorageProvider):
     async def add_github_repo(self, repo: GitHubRepository) -> GitHubRepository:
         if not repo.id or len(repo.id) == 0:
             repo.id = f"{uuid.uuid4()}"
+
         def up(d: LocalStorageData):
             if repo.id in [r.id for r in self._get().github_repos]:
                 return
@@ -64,6 +65,17 @@ class SingleBlobStorageProvider(abc.ABC, StorageProvider):
 
         await self._update(up)
         return repo
+
+    async def update_repo_properties(self, id: str, properties: GitProperties) -> GitHubRepository:
+        def up(d: LocalStorageData):
+            for r in d.github_repos:
+                if r.id == id:
+                    r.properties.CopyFrom(properties)
+                    return
+            raise ValueError(f"Repository with id {id} not found")
+
+        await self._update(up)
+        return await self.get_github_repo(id)
 
     async def next_processing_item(self) -> Optional[ProcessingItem]:
         now = self._clock.now()

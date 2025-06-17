@@ -8,6 +8,7 @@ import subprocess
 from typing import List, Callable, Optional
 
 from dev_observer.log import s_
+from dev_observer.repository.types import ObservedRepo
 from dev_observer.repository.cloner import clone_repository
 from dev_observer.repository.provider import GitRepositoryProvider, RepositoryInfo
 from dev_observer.tokenizer.provider import TokenizerProvider
@@ -112,13 +113,13 @@ class FlattenRepoResult:
     repo: RepositoryInfo
 
 async def flatten_repository(
-        url: str,
+        repo: ObservedRepo,
         provider: GitRepositoryProvider,
         tokenizer: TokenizerProvider,
         max_size_kb: int = 100_000,
         max_tokens_per_file: int = 100_000,
 ) -> FlattenRepoResult:
-    clone_result = await clone_repository(url, provider, max_size_kb)
+    clone_result = await clone_repository(repo, provider, max_size_kb)
     repo_path = clone_result.path
     combined_file_path: Optional[str] = None
 

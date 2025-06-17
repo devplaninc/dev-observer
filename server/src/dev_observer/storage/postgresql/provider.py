@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSessio
 
 from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
-from dev_observer.api.types.repo_pb2 import GitHubRepository
+from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
 from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity
 from dev_observer.storage.provider import StorageProvider
 from dev_observer.util import parse_json_pb, pb_to_json, Clock, RealClock
@@ -61,6 +61,24 @@ class PostgresqlStorageProvider(StorageProvider):
                 )
                 session.add(r)
                 return _to_optional_repo(await session.get(GitRepoEntity, repo_id))
+
+    async def update_repo_properties(self, repo_id: str, properties: GitProperties) -> GitHubRepository:
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                existing = await session.execute(
+                    select(GitRepoEntity).where(GitRepoEntity.id == repo_id)
+                )
+                ent = existing.first()
+                if ent is None:
+                    raise ValueError(f"Repository with id {repo_id} not found")
+                updated = _to_repo(ent[0])
+                updated.properties.CopyFrom(properties)
+                await session.execute(
+                    update(GitRepoEntity)
+                    .where(GitRepoEntity.id == repo_id)
+                    .values(json_data=pb_to_json(updated))
+                )
+        return await self.get_github_repo(repo_id)
 
     async def next_processing_item(self) -> Optional[ProcessingItem]:
         next_processing_time = self._clock.now()

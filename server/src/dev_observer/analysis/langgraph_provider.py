@@ -6,6 +6,7 @@ from typing import Optional, List, Union
 from langchain.chat_models import init_chat_model
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableConfig
 from langfuse.callback import CallbackHandler
 from langgraph.constants import END
@@ -48,29 +49,30 @@ class AnalysisInfo:
 
 
 class LanggraphAnalysisProvider(AnalysisProvider):
-    _lf_callback: Optional[CallbackHandler] = None
+    _lf_auth: Optional[LangfuseAuthProps] = None
 
     def __init__(self, langfuse_auth: Optional[LangfuseAuthProps] = None):
-        if langfuse_auth is not None:
-            public_key = langfuse_auth.public_key
-            secret_key = langfuse_auth.secret_key
-            _log.info(s_("Initializing Langfuse CallbackHandler",
-                         host=langfuse_auth.host,
-                         public_key=public_key,
-                         secret_key=f"{secret_key[:5]}****",
-                         ))
-            self._lf_callback = CallbackHandler(
-                public_key=public_key,
-                secret_key=secret_key,
-                host=langfuse_auth.host,
-            )
+        self._lf_auth = langfuse_auth
 
-    async def analyze(self, prompt: FormattedPrompt) -> AnalysisResult:
+    async def analyze(self, prompt: FormattedPrompt, session_id: Optional[str] = None) -> AnalysisResult:
         g = await _get_graph()
         info = AnalysisInfo(prompt=prompt)
         config = info.append(ensure_config())
-        if self._lf_callback is not None:
-            callbacks = [self._lf_callback]
+        if self._lf_auth is not None:
+            public_key = self._lf_auth.public_key
+            secret_key = self._lf_auth.secret_key
+            _log.debug(s_("Initializing Langfuse CallbackHandler",
+                          host=self._lf_auth.host,
+                          public_key=public_key,
+                          secret_key=f"{secret_key[:5]}****",
+                          session_id=session_id,
+                          ))
+            callbacks = [CallbackHandler(
+                public_key=public_key,
+                secret_key=secret_key,
+                host=self._lf_auth.host,
+                session_id=session_id,
+            )]
             config["callbacks"] = callbacks
         result = await g.ainvoke({}, config, output_keys=["response"])
         analysis = result.get("response", "")
@@ -132,7 +134,10 @@ class AnalysisNodes:
 
         model = _model_from_config(prompt_config.model)
         _log.debug(s_("Calling model", prompt_config=prompt_config, prompt_name=prompt_name))
-        response = await model.ainvoke(messages)
+        pt = ChatPromptTemplate.from_messages(messages)
+        pt.metadata = {"langfuse_prompt": prompt.langfuse_prompt}
+        pv = await pt.ainvoke({}, config=config)
+        response = await model.ainvoke(pv, config=config)
         _log.debug(s_("Model replied", prompt_config=prompt_config, prompt_name=prompt_name))
         return {"response": f"{response.content}"}
 
