@@ -11,10 +11,9 @@ export interface S3ObservationsFetcherProps {
 
 export interface FetchResult {
   content: string;
-  metadata?: Record<string, string>;
-  contentType?: string;
-  lastModified?: Date;
-  etag?: string;
+  metadata?: Record<string, string> | undefined;
+  contentType?: string | undefined;
+  etag?: string | undefined;
 }
 
 export class S3ObservationsFetcher {
@@ -47,7 +46,6 @@ export class S3ObservationsFetcher {
         content,
         metadata: response.Metadata,
         contentType: response.ContentType,
-        lastModified: response.LastModified,
         etag: response.ETag,
       };
     } catch (error) {
