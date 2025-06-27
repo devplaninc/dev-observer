@@ -15,12 +15,14 @@ class GlobalConfig(_message.Message):
     def __init__(self, analysis: _Optional[_Union[AnalysisConfig, _Mapping]] = ..., repo_analysis: _Optional[_Union[RepoAnalysisConfig, _Mapping]] = ...) -> None: ...
 
 class AnalysisConfig(_message.Message):
-    __slots__ = ("repo_analyzers", "site_analyzers")
+    __slots__ = ("repo_analyzers", "site_analyzers", "disable_masking")
     REPO_ANALYZERS_FIELD_NUMBER: _ClassVar[int]
     SITE_ANALYZERS_FIELD_NUMBER: _ClassVar[int]
+    DISABLE_MASKING_FIELD_NUMBER: _ClassVar[int]
     repo_analyzers: _containers.RepeatedCompositeFieldContainer[_observations_pb2.Analyzer]
     site_analyzers: _containers.RepeatedCompositeFieldContainer[_observations_pb2.Analyzer]
-    def __init__(self, repo_analyzers: _Optional[_Iterable[_Union[_observations_pb2.Analyzer, _Mapping]]] = ..., site_analyzers: _Optional[_Iterable[_Union[_observations_pb2.Analyzer, _Mapping]]] = ...) -> None: ...
+    disable_masking: bool
+    def __init__(self, repo_analyzers: _Optional[_Iterable[_Union[_observations_pb2.Analyzer, _Mapping]]] = ..., site_analyzers: _Optional[_Iterable[_Union[_observations_pb2.Analyzer, _Mapping]]] = ..., disable_masking: bool = ...) -> None: ...
 
 class UserManagementStatus(_message.Message):
     __slots__ = ("enabled", "public_api_key")

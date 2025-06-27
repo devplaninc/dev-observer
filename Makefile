@@ -1,7 +1,7 @@
 ROOT := $(shell git rev-parse --show-toplevel)
 MAKEFLAGS += -j2
 
-.PHONY: py-install npm-install generate-protos generate test test-py
+.PHONY: py-install npm-install generate-protos generate test test-py build-web-packages
 
 start-local-pg:
 	@scripts/local-pg.sh
@@ -35,11 +35,14 @@ migration-apply:
 dev-server:
 	@cd server && uv run scripts/dev/main.py
 
-local-server:
+local-server: start-local-pg
 	@cd server && uv run scripts/local/main.py
 
-dev-web: npm-install
-	@cd web/apps/dev-observer && npm run dev
+build-web-packages: web/packages/api/package.json
+	@cd web/packages/api && npm run build
+
+dev-web: npm-install build-web-packages
+	@scripts/dev-web.sh
 
 local-compose:
 	@scripts/compose-up.sh

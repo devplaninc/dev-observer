@@ -12,6 +12,7 @@ message GlobalConfig {
 message AnalysisConfig {
   repeated dev_observer.api.types.observations.Analyzer repo_analyzers = 1;
   repeated dev_observer.api.types.observations.Analyzer site_analyzers = 2;
+  bool disable_masking = 3;
 }
 
 message UserManagementStatus {

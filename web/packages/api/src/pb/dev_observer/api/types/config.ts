@@ -18,6 +18,7 @@ export interface GlobalConfig {
 export interface AnalysisConfig {
   repoAnalyzers: Analyzer[];
   siteAnalyzers: Analyzer[];
+  disableMasking: boolean;
 }
 
 export interface UserManagementStatus {
@@ -126,7 +127,7 @@ export const GlobalConfig: MessageFns<GlobalConfig> = {
 };
 
 function createBaseAnalysisConfig(): AnalysisConfig {
-  return { repoAnalyzers: [], siteAnalyzers: [] };
+  return { repoAnalyzers: [], siteAnalyzers: [], disableMasking: false };
 }
 
 export const AnalysisConfig: MessageFns<AnalysisConfig> = {
@@ -136,6 +137,9 @@ export const AnalysisConfig: MessageFns<AnalysisConfig> = {
     }
     for (const v of message.siteAnalyzers) {
       Analyzer.encode(v!, writer.uint32(18).fork()).join();
+    }
+    if (message.disableMasking !== false) {
+      writer.uint32(24).bool(message.disableMasking);
     }
     return writer;
   },
@@ -163,6 +167,14 @@ export const AnalysisConfig: MessageFns<AnalysisConfig> = {
           message.siteAnalyzers.push(Analyzer.decode(reader, reader.uint32()));
           continue;
         }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.disableMasking = reader.bool();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -180,6 +192,7 @@ export const AnalysisConfig: MessageFns<AnalysisConfig> = {
       siteAnalyzers: gt.Array.isArray(object?.siteAnalyzers)
         ? object.siteAnalyzers.map((e: any) => Analyzer.fromJSON(e))
         : [],
+      disableMasking: isSet(object.disableMasking) ? gt.Boolean(object.disableMasking) : false,
     };
   },
 
@@ -191,6 +204,9 @@ export const AnalysisConfig: MessageFns<AnalysisConfig> = {
     if (message.siteAnalyzers?.length) {
       obj.siteAnalyzers = message.siteAnalyzers.map((e) => Analyzer.toJSON(e));
     }
+    if (message.disableMasking !== false) {
+      obj.disableMasking = message.disableMasking;
+    }
     return obj;
   },
 
@@ -201,6 +217,7 @@ export const AnalysisConfig: MessageFns<AnalysisConfig> = {
     const message = createBaseAnalysisConfig();
     message.repoAnalyzers = object.repoAnalyzers?.map((e) => Analyzer.fromPartial(e)) || [];
     message.siteAnalyzers = object.siteAnalyzers?.map((e) => Analyzer.fromPartial(e)) || [];
+    message.disableMasking = object.disableMasking ?? false;
     return message;
   },
 };

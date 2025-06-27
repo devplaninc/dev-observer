@@ -1,18 +1,18 @@
 import {useFieldArray, useForm} from "react-hook-form";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {GlobalConfig} from "@devplan/observer-api";
+import {Analyzer, GlobalConfig} from "@devplan/observer-api";
 import {useCallback} from "react";
 import {useBoundStore} from "@/store/use-bound-store.tsx";
 import {toast} from "sonner";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {Analyzer} from "@devplan/observer-api";
 import {useGlobalConfig} from "@/hooks/use-config.tsx";
 import {ErrorAlert} from "@/components/ErrorAlert.tsx";
 import {Loader} from "@/components/Loader.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
+import {Checkbox} from "@/components/ui/checkbox.tsx";
 
 const analyzerSchema = z.object({
   name: z.string().min(2),
@@ -23,6 +23,7 @@ const analyzerSchema = z.object({
 const analysisConfigSchema = z.object({
   repoAnalyzers: z.array(analyzerSchema),
   siteAnalyzers: z.array(analyzerSchema),
+  disableMasking: z.boolean(),
 })
 
 const repoAnalysisConfigFlattenSchema = z.object({
@@ -68,6 +69,7 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
     defaultValues: config,
   });
   const onSubmit = useCallback((values: globalConfigType) => {
+    console.log("Submitting", {values})
       updateGlobalConfig(values)
         .then(() => toast.success("Config updated"))
         .catch(e => {
@@ -138,7 +140,7 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
           Add Analyzer
         </Button>
       </div>
-      <Separator />
+      <Separator/>
 
       <div className="space-y-4">
         <h2 className="font-semibold text-lg">Site Analyzers:</h2>
@@ -196,7 +198,20 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
         </Button>
       </div>
 
-      <Separator />
+      <Separator/>
+      <FormField
+        control={form.control} name="analysis.disableMasking"
+        render={({field}) => <FormItem>
+          <div className="flex items-center gap-2">
+            <FormControl>
+              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+            </FormControl>
+            <FormLabel>Disable Traces Masking</FormLabel>
+          </div>
+          <FormMessage/>
+        </FormItem>}
+      />
+      <Separator/>
 
       <div className="space-y-4">
         <h2 className="font-semibold text-lg">Repository Analysis Configuration:</h2>
@@ -211,7 +226,7 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
               <FormItem className="flex items-center gap-4">
                 <FormLabel className="w-[200px]">Processing Interval (sec):</FormLabel>
                 <FormControl className="w-[200px]">
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))}/>
                 </FormControl>
                 <FormMessage/>
               </FormItem>
@@ -297,7 +312,7 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
               <FormItem className="flex items-center gap-4">
                 <FormLabel className="w-[200px]">Max Tokens Per Chunk:</FormLabel>
                 <FormControl className="w-[200px]">
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))}/>
                 </FormControl>
                 <FormMessage/>
               </FormItem>
@@ -311,7 +326,7 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
               <FormItem className="flex items-center gap-4">
                 <FormLabel className="w-[200px]">Max Repo Size (MB):</FormLabel>
                 <FormControl className="w-[200px]">
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))}/>
                 </FormControl>
                 <FormMessage/>
               </FormItem>
@@ -325,7 +340,7 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
               <FormItem className="flex items-center gap-4">
                 <FormLabel className="w-[200px]">Ignore Pattern:</FormLabel>
                 <FormControl>
-                  <Input {...field} value={field.value || ""} />
+                  <Input {...field} value={field.value || ""}/>
                 </FormControl>
                 <FormMessage/>
               </FormItem>
@@ -339,7 +354,7 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
               <FormItem className="flex items-center gap-4">
                 <FormLabel className="w-[200px]">Large Repo Ignore Pattern:</FormLabel>
                 <FormControl>
-                  <Input {...field} value={field.value || ""} />
+                  <Input {...field} value={field.value || ""}/>
                 </FormControl>
                 <FormMessage/>
               </FormItem>
@@ -353,7 +368,7 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
               <FormItem className="flex items-center gap-4">
                 <FormLabel className="w-[200px]">Large Repo Threshold (MB):</FormLabel>
                 <FormControl className="w-[200px]">
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))}/>
                 </FormControl>
                 <FormMessage/>
               </FormItem>

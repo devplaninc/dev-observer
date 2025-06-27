@@ -20,6 +20,7 @@ from dev_observer.api.types.ai_pb2 import ModelConfig
 from dev_observer.log import s_
 from dev_observer.prompts.langfuse import LangfuseAuthProps
 from dev_observer.prompts.provider import FormattedPrompt
+from dev_observer.storage.provider import StorageProvider
 
 _log = logging.getLogger(__name__)
 
@@ -53,15 +54,20 @@ def _masking_function(data):
 class LanggraphAnalysisProvider(AnalysisProvider):
     _lf_auth: Optional[LangfuseAuthProps] = None
     _mask: bool
+    _storage: StorageProvider
 
-    def __init__(self, langfuse_auth: Optional[LangfuseAuthProps] = None, mask: bool = True):
+    def __init__(self, storage: StorageProvider, langfuse_auth: Optional[LangfuseAuthProps] = None, mask: bool = True):
         self._lf_auth = langfuse_auth
         self._mask = mask
+        self._storage = storage
 
     async def analyze(self, prompt: FormattedPrompt, session_id: Optional[str] = None) -> AnalysisResult:
         g = await _get_graph()
         info = AnalysisInfo(prompt=prompt)
         config = info.append(ensure_config())
+        global_config = await self._storage.get_global_config()
+        disable_masking = global_config.HasField("analysis") and global_config.analysis.disable_masking
+        should_mask = self._mask and not disable_masking
         if self._lf_auth is not None:
             public_key = self._lf_auth.public_key
             secret_key = self._lf_auth.secret_key
@@ -72,7 +78,7 @@ class LanggraphAnalysisProvider(AnalysisProvider):
                           session_id=session_id,
                           ))
             callbacks = [CallbackHandler(
-                mask=_masking_function if self._mask else None,
+                mask=_masking_function if should_mask else None,
                 public_key=public_key,
                 secret_key=secret_key,
                 host=self._lf_auth.host,

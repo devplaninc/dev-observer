@@ -61,7 +61,7 @@ def detect_github_auth(gh: Optional[Github], storage: StorageProvider) -> Github
     raise ValueError(f"Unsupported auth type: {gh.auth_type}")
 
 
-def detect_analysis_provider(settings: Settings) -> AnalysisProvider:
+def detect_analysis_provider(settings: Settings, storage: StorageProvider) -> AnalysisProvider:
     a = settings.analysis
     if a is None:
         raise ValueError("Analysis settings are not defined")
@@ -71,7 +71,7 @@ def detect_analysis_provider(settings: Settings) -> AnalysisProvider:
             lf_auth: Optional[LangfuseAuthProps] = None
             if settings.prompts is not None and settings.prompts.langfuse is not None:
                 lf_auth = _get_lf_auth(settings.prompts.langfuse)
-            return LanggraphAnalysisProvider(lf_auth, mask=lg.mask_traces)
+            return LanggraphAnalysisProvider(storage, lf_auth, mask=lg.mask_traces)
         case "stub":
             return StubAnalysisProvider()
     raise ValueError(f"Unsupported analysis provider: {a.provider}")
@@ -172,14 +172,14 @@ def detect_users_provider(settings: Settings) -> UsersProvider:
 
 
 def detect_server_env(settings: Settings) -> ServerEnv:
-    analysis = detect_analysis_provider(settings)
     prompts = detect_prompts_provider(settings)
     observations = detect_observer(settings)
     tokenizer = detect_tokenizer(settings)
     storage = detect_storage_provider(settings)
     bg_storage = detect_storage_provider(settings)
+    bg_analysis = detect_analysis_provider(settings, bg_storage)
     bg_repository = detect_git_provider(settings, bg_storage)
-    bg_repos_processor = ReposProcessor(analysis, bg_repository, prompts, observations, tokenizer)
+    bg_repos_processor = ReposProcessor(bg_analysis, bg_repository, prompts, observations, tokenizer)
     users = detect_users_provider(settings)
 
     # Extract API key from settings if available
@@ -199,7 +199,7 @@ def detect_server_env(settings: Settings) -> ServerEnv:
     )
     _log.debug(s_("Detected environment",
                   bg_repository=bg_repository,
-                  analysis=analysis,
+                  analysis=bg_analysis,
                   prompts=prompts,
                   observations=observations,
                   users=users,
