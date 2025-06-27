@@ -47,7 +47,7 @@ def combine_repository(repo_path: str, info: RepositoryInfo, config: GlobalConfi
     _log.info(s_("Starting repo flatten", is_large=is_large))
 
     compress = flatten_config.compress or (is_large and flatten_config.compress_large)
-    ignore = flatten_config.ignore_pattern if not is_large else flatten_config.large_repo_ignore_pattern
+    ignore = flatten_config.ignore_pattern
     if is_large and len(flatten_config.large_repo_ignore_pattern) > 0:
         ignore = ",".join([ignore, flatten_config.large_repo_ignore_pattern])
 

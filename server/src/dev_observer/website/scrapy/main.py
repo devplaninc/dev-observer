@@ -3,6 +3,7 @@ import logging
 import os
 import traceback
 import urllib.parse
+from typing import Any
 
 from scrapy import Request
 from scrapy.crawler import CrawlerProcess
@@ -74,7 +75,7 @@ class WebsiteCrawlSpider(CrawlSpider):
             print(f"Response status: {response.status}")
             print(f"Response headers: {dict(response.headers)}")
 
-    def parse(self, response):
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         """Override parse method to handle start URLs"""
         print(f"PARSE called for {response.url}")
 
