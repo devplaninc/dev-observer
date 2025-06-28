@@ -76,5 +76,7 @@ export const createWebSitesSlice: StateCreator<
     websiteRescanAPI(id),
     RescanWebSiteResponse,
     {method: "POST"},
-  ),
+  ).then(() => {
+    return
+  }),
 }));
