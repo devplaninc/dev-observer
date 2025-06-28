@@ -169,7 +169,7 @@ async def flatten_website(
 
     flatten_result = FlattenResult(
         full_file_path=full_file_path,
-        file_paths=out_files,
+        file_paths=[] if len(out_files) == 1 else out_files,
         total_tokens=total_tokens,
         clean_up=clean_up,
     )

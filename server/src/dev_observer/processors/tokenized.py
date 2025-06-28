@@ -27,9 +27,11 @@ class TokenizedAnalyzer:
     async def analyze_flatten(self, flatten_result: FlattenResult) -> str:
         session_id = f"{date.today().strftime("%Y-%m-%d")}.{flatten_result.full_file_path}"
         if len(flatten_result.file_paths) > 0:
+            _log.debug(s_("Analyzing flatten (multiple)", files=flatten_result.file_paths))
             return await self._analyze_tokenized(
                 flatten_result.file_paths, session_id)
         else:
+            _log.debug(s_("Analyzing flatten (single)", file=flatten_result.full_file_path))
             return await self._analyze_file(
                 flatten_result.full_file_path, f"{self.prompts_prefix}_analyze_full", session_id)
 

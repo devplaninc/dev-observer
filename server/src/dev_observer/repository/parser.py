@@ -44,3 +44,5 @@ def parse_github_url(github_url: str) -> ParsedRepoUrl:
         repo_name = parts[github_index + 2]
 
     return ParsedRepoUrl(owner, repo_name)
+
+

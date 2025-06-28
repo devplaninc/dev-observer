@@ -4,6 +4,15 @@ export {UserManagementStatus, GlobalConfig, AnalysisConfig} from './pb/dev_obser
 export {Analyzer, Observation, ObservationKey,} from './pb/dev_observer/api/types/observations';
 export {ProcessingItem, ProcessingItemKey} from './pb/dev_observer/api/types/processing';
 export {GitHubRepository} from './pb/dev_observer/api/types/repo';
+export {WebSite} from './pb/dev_observer/api/types/sites';
+export {
+  ListWebSitesResponse,
+  GetWebSiteResponse,
+  AddWebSiteResponse,
+  AddWebSiteRequest,
+  DeleteWebSiteResponse,
+  RescanWebSiteResponse
+} from './pb/dev_observer/api/web/sites';
 
 export {
   GetGlobalConfigResponse, GetUserManagementStatusResponse, UpdateGlobalConfigResponse, UpdateGlobalConfigRequest
@@ -20,9 +29,9 @@ export {
 
 export {LocalStorageData} from './pb/dev_observer/api/storage/local';
 
-export { ApiClient } from './client/api';
-export { ParseableMessage, VoidParser, BaseClient } from './client/base';
-export { ConfigClient } from './client/config';
-export { S3ObservationsFetcherProps, FetchResult, S3ObservationsFetcher } from './client/directFetcher';
-export { ObservationsClient } from './client/observations';
-export { RepositoriesClient } from './client/repositories';
+export {ApiClient} from './client/api';
+export {ParseableMessage, VoidParser, BaseClient} from './client/base';
+export {ConfigClient} from './client/config';
+export {S3ObservationsFetcherProps, FetchResult, S3ObservationsFetcher} from './client/directFetcher';
+export {ObservationsClient} from './client/observations';
+export {RepositoriesClient} from './client/repositories';

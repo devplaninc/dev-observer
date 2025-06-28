@@ -9,7 +9,8 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSessio
 from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
 from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
-from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity
+from dev_observer.api.types.sites_pb2 import WebSite
+from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity, WebsiteEntity
 from dev_observer.storage.provider import StorageProvider
 from dev_observer.util import parse_json_pb, pb_to_json, Clock, RealClock
 
@@ -80,6 +81,40 @@ class PostgresqlStorageProvider(StorageProvider):
                 )
         return await self.get_github_repo(repo_id)
 
+    async def get_web_sites(self) -> MutableSequence[WebSite]:
+        async with AsyncSession(self._engine) as session:
+            entities = await session.execute(select(WebsiteEntity))
+            return [_to_web_site(e[0]) for e in entities.all()]
+
+    async def get_web_site(self, site_id: str) -> Optional[WebSite]:
+        async with AsyncSession(self._engine) as session:
+            ent = await session.scalar(select(WebsiteEntity).where(WebsiteEntity.id == site_id))
+            return _to_optional_web_site(ent)
+
+    async def delete_web_site(self, site_id: str):
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                await session.execute(delete(WebsiteEntity).where(WebsiteEntity.id == site_id))
+
+    async def add_web_site(self, site: WebSite) -> WebSite:
+        site_id = site.id
+        if not site_id or len(site_id) == 0:
+            site_id = f"{uuid.uuid4()}"
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                existing = await session.scalar(
+                    select(WebsiteEntity).where(WebsiteEntity.url == site.url)
+                )
+                if existing is not None:
+                    return _to_web_site(existing)
+                s = WebsiteEntity(
+                    id=site_id,
+                    url=site.url,
+                    json_data=pb_to_json(site),
+                )
+                session.add(s)
+                return _to_optional_web_site(await session.get(WebsiteEntity, site_id))
+
     async def next_processing_item(self) -> Optional[ProcessingItem]:
         next_processing_time = self._clock.now()
         async with AsyncSession(self._engine) as session:
@@ -136,6 +171,17 @@ def _to_optional_repo(ent: Optional[GitRepoEntity]) -> Optional[GitHubRepository
 def _to_repo(ent: GitRepoEntity) -> GitHubRepository:
     data = parse_json_pb(ent.json_data, GitHubRepository())
     data.id = ent.id
+    return data
+
+
+def _to_optional_web_site(ent: Optional[WebsiteEntity]) -> Optional[WebSite]:
+    return None if ent is None else _to_web_site(ent)
+
+
+def _to_web_site(ent: WebsiteEntity) -> WebSite:
+    data = parse_json_pb(ent.json_data, WebSite())
+    data.id = ent.id
+    data.url = ent.url
     return data
 
 

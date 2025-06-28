@@ -12,6 +12,7 @@ from dev_observer.api.storage.local_pb2 import LocalStorageData
 from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
 from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
+from dev_observer.api.types.sites_pb2 import WebSite
 from dev_observer.storage.provider import StorageProvider
 from dev_observer.util import Clock, RealClock
 
@@ -76,6 +77,40 @@ class SingleBlobStorageProvider(abc.ABC, StorageProvider):
 
         await self._update(up)
         return await self.get_github_repo(id)
+
+    async def get_web_sites(self) -> MutableSequence[WebSite]:
+        return self._get().web_sites
+
+    async def get_web_site(self, site_id: str) -> Optional[WebSite]:
+        for s in self._get().web_sites:
+            if s.id == site_id:
+                return s
+        return None
+
+    async def delete_web_site(self, site_id: str):
+        def up(d: LocalStorageData):
+            new_sites = [s for s in d.web_sites if s.id != site_id]
+            d.ClearField("web_sites")
+            d.web_sites.extend(new_sites)
+
+        await self._update(up)
+
+    async def add_web_site(self, site: WebSite) -> WebSite:
+        if not site.id or len(site.id) == 0:
+            site.id = f"{uuid.uuid4()}"
+
+        def up(d: LocalStorageData):
+            if site.url in [s.url for s in self._get().web_sites]:
+                return
+            d.web_sites.append(site)
+            if site.url not in [i.key.website_url for i in self._get().processing_items]:
+                d.processing_items.append(ProcessingItem(
+                    key=ProcessingItemKey(website_url=site.url),
+                    next_processing=self._clock.now(),
+                ))
+
+        await self._update(up)
+        return site
 
     async def next_processing_item(self) -> Optional[ProcessingItem]:
         now = self._clock.now()

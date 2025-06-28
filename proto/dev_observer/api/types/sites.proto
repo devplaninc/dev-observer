@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package dev_observer.api.types.sites;
+
+message WebSite {
+  string id = 1;
+  string url = 2;
+}

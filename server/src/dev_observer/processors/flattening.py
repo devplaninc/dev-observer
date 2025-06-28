@@ -41,6 +41,7 @@ class FlatteningProcessor(abc.ABC, Generic[E]):
 
     async def process(self, entity: E, requests: List[ObservationRequest], config: GlobalConfig):
         res = await self.get_flatten(entity, config)
+        _log.debug(s_("Got flatten result", result=res))
         try:
             for request in requests:
                 try:

@@ -146,7 +146,8 @@ class AnalysisNodes:
         model = _model_from_config(prompt_config.model)
         _log.debug(s_("Calling model", prompt_config=prompt_config, prompt_name=prompt_name))
         pt = ChatPromptTemplate.from_messages(messages)
-        pt.metadata = {"langfuse_prompt": prompt.langfuse_prompt}
+        if prompt.langfuse_prompt is not None:
+            pt.metadata = {"langfuse_prompt": prompt.langfuse_prompt}
         pv = await pt.ainvoke({}, config=config)
         response = await model.ainvoke(pv, config=config)
         _log.debug(s_("Model replied", prompt_config=prompt_config, prompt_name=prompt_name))

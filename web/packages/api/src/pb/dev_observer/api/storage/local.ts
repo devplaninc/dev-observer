@@ -9,6 +9,7 @@ import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import { GlobalConfig } from "../types/config";
 import { ProcessingItem } from "../types/processing";
 import { GitHubRepository } from "../types/repo";
+import { WebSite } from "../types/sites";
 
 export const protobufPackage = "dev_observer.api.storage.local";
 
@@ -16,10 +17,11 @@ export interface LocalStorageData {
   githubRepos: GitHubRepository[];
   processingItems: ProcessingItem[];
   globalConfig: GlobalConfig | undefined;
+  webSites: WebSite[];
 }
 
 function createBaseLocalStorageData(): LocalStorageData {
-  return { githubRepos: [], processingItems: [], globalConfig: undefined };
+  return { githubRepos: [], processingItems: [], globalConfig: undefined, webSites: [] };
 }
 
 export const LocalStorageData: MessageFns<LocalStorageData> = {
@@ -32,6 +34,9 @@ export const LocalStorageData: MessageFns<LocalStorageData> = {
     }
     if (message.globalConfig !== undefined) {
       GlobalConfig.encode(message.globalConfig, writer.uint32(26).fork()).join();
+    }
+    for (const v of message.webSites) {
+      WebSite.encode(v!, writer.uint32(34).fork()).join();
     }
     return writer;
   },
@@ -67,6 +72,14 @@ export const LocalStorageData: MessageFns<LocalStorageData> = {
           message.globalConfig = GlobalConfig.decode(reader, reader.uint32());
           continue;
         }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.webSites.push(WebSite.decode(reader, reader.uint32()));
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -85,6 +98,7 @@ export const LocalStorageData: MessageFns<LocalStorageData> = {
         ? object.processingItems.map((e: any) => ProcessingItem.fromJSON(e))
         : [],
       globalConfig: isSet(object.globalConfig) ? GlobalConfig.fromJSON(object.globalConfig) : undefined,
+      webSites: gt.Array.isArray(object?.webSites) ? object.webSites.map((e: any) => WebSite.fromJSON(e)) : [],
     };
   },
 
@@ -99,6 +113,9 @@ export const LocalStorageData: MessageFns<LocalStorageData> = {
     if (message.globalConfig !== undefined) {
       obj.globalConfig = GlobalConfig.toJSON(message.globalConfig);
     }
+    if (message.webSites?.length) {
+      obj.webSites = message.webSites.map((e) => WebSite.toJSON(e));
+    }
     return obj;
   },
 
@@ -112,6 +129,7 @@ export const LocalStorageData: MessageFns<LocalStorageData> = {
     message.globalConfig = (object.globalConfig !== undefined && object.globalConfig !== null)
       ? GlobalConfig.fromPartial(object.globalConfig)
       : undefined;
+    message.webSites = object.webSites?.map((e) => WebSite.fromPartial(e)) || [];
     return message;
   },
 };

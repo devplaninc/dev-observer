@@ -25,15 +25,16 @@ _sym_db = _symbol_database.Default()
 from dev_observer.api.types import processing_pb2 as dev__observer_dot_api_dot_types_dot_processing__pb2
 from dev_observer.api.types import repo_pb2 as dev__observer_dot_api_dot_types_dot_repo__pb2
 from dev_observer.api.types import config_pb2 as dev__observer_dot_api_dot_types_dot_config__pb2
+from dev_observer.api.types import sites_pb2 as dev__observer_dot_api_dot_types_dot_sites__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n$dev_observer/api/storage/local.proto\x12\x1e\x64\x65v_observer.api.storage.local\x1a\'dev_observer/api/types/processing.proto\x1a!dev_observer/api/types/repo.proto\x1a#dev_observer/api/types/config.proto\"\xe8\x01\n\x10LocalStorageData\x12\x43\n\x0cgithub_repos\x18\x01 \x03(\x0b\x32-.dev_observer.api.types.repo.GitHubRepository\x12K\n\x10processing_items\x18\x02 \x03(\x0b\x32\x31.dev_observer.api.types.processing.ProcessingItem\x12\x42\n\rglobal_config\x18\x03 \x01(\x0b\x32+.dev_observer.api.types.config.GlobalConfigb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n$dev_observer/api/storage/local.proto\x12\x1e\x64\x65v_observer.api.storage.local\x1a\'dev_observer/api/types/processing.proto\x1a!dev_observer/api/types/repo.proto\x1a#dev_observer/api/types/config.proto\x1a\"dev_observer/api/types/sites.proto\"\xa2\x02\n\x10LocalStorageData\x12\x43\n\x0cgithub_repos\x18\x01 \x03(\x0b\x32-.dev_observer.api.types.repo.GitHubRepository\x12K\n\x10processing_items\x18\x02 \x03(\x0b\x32\x31.dev_observer.api.types.processing.ProcessingItem\x12\x42\n\rglobal_config\x18\x03 \x01(\x0b\x32+.dev_observer.api.types.config.GlobalConfig\x12\x38\n\tweb_sites\x18\x04 \x03(\x0b\x32%.dev_observer.api.types.sites.WebSiteb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'dev_observer.api.storage.local_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_LOCALSTORAGEDATA']._serialized_start=186
-  _globals['_LOCALSTORAGEDATA']._serialized_end=418
+  _globals['_LOCALSTORAGEDATA']._serialized_start=222
+  _globals['_LOCALSTORAGEDATA']._serialized_end=512
 # @@protoc_insertion_point(module_scope)

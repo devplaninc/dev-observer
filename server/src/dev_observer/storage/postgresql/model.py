@@ -77,3 +77,26 @@ class ProcessingItemEntity(Base):
 
     def __repr__(self):
         return f"ProcessingItemEntity(key={self.key}, json_data={self.json_data}, next_processing={self.next_processing}, last_processed={self.last_processed}, last_error={self.last_error}, no_processing={self.no_processing})"
+
+
+class WebsiteEntity(Base):
+    __tablename__ = "web_site"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    url: Mapped[str] = mapped_column(index=True, unique=True)
+    json_data: Mapped[str]
+
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )
+
+    def __repr__(self):
+        return f"WebsiteEntity(id={self.id}, json_data={self.json_data})"

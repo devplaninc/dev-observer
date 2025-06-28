@@ -113,6 +113,9 @@ class UserManagement(BaseModel):
     provider: Literal["clerk", "none"] = "none"
     clerk: Optional[Clerk] = None
 
+class WebScraping(BaseModel):
+    provider: Literal["scrapy"] = "scrapy"
+
 
 class Settings(BaseSettings):
     props: ClassVar[SettingsProps] = SettingsProps()
@@ -125,6 +128,7 @@ class Settings(BaseSettings):
     storage: Optional[Storage] = None
     users_management: Optional[UserManagement] = None
     api_keys: Optional[ApiKeys] = None
+    web_scraping: Optional[WebScraping] = WebScraping()
 
     def __init__(self) -> None:
         toml_file = Settings.model_config.get("toml_file", None)

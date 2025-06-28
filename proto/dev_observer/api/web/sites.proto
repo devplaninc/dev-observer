@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package dev_observer.api.web.sites;
+
+import "dev_observer/api/types/sites.proto";
+
+message ListWebSitesResponse {
+  repeated dev_observer.api.types.sites.WebSite sites = 1;
+}
+
+message AddWebSiteRequest {
+  string url = 1;
+}
+
+message AddWebSiteResponse {
+  dev_observer.api.types.sites.WebSite site = 1;
+}
+
+message RescanWebSiteResponse{}
+
+message GetWebSiteResponse{
+  dev_observer.api.types.sites.WebSite site = 1;
+}
+
+message DeleteWebSiteResponse{
+  repeated dev_observer.api.types.sites.WebSite sites = 1;
+}
