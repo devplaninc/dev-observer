@@ -35,3 +35,5 @@ export {ConfigClient} from './client/config';
 export {S3ObservationsFetcherProps, FetchResult, S3ObservationsFetcher} from './client/directFetcher';
 export {ObservationsClient} from './client/observations';
 export {RepositoriesClient} from './client/repositories';
+export {WebsitesClient} from './client/websites';
+export {normalizeDomain, normalizeName} from './client/sitesUtils';
