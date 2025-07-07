@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/alert-dialog.tsx";
 import {ErrorAlert} from "@/components/ErrorAlert.tsx";
 import {AnalysisList} from "@/components/analysis/AnalysisList.tsx";
-import {normalizeDomain} from "@/utils/sitesUtils.tsx";
+import {normalizeDomain} from "@devplan/observer-api";
 
 interface WebSiteDetailsProps {
   websiteId: string;
@@ -29,15 +29,19 @@ const WebSiteDetails: React.FC<WebSiteDetailsProps> = ({websiteId}) => {
   const {website, error} = useWebsite(websiteId);
   const {rescanWebSite} = useBoundStore();
   const url = website?.url
-  const domainName = useMemo(()=> url ? normalizeDomain(url) : undefined, [url])
+  const domainName = useMemo(()=> {
+    try {
+      return url ? normalizeDomain(url) : undefined
+    } catch {
+      return undefined
+    }
+  }, [url])
 
   const rescan = useCallback(() => {
     rescanWebSite(websiteId)
       .then(() => toast.success(`Rescan started`))
       .catch(e => toast.error(`Failed to initialize rescan: ${e}`));
   }, [websiteId, rescanWebSite]);
-  const {observationKeys} = useBoundStore();
-  console.log("observationKeys", {domainName, observationKeys})
 
   if (!website) {
     if (error) {
