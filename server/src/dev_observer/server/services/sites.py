@@ -34,7 +34,12 @@ class WebSitesService:
     async def add(self, req: Request):
         request = parse_dict_pb(await req.json(), AddWebSiteRequest())
         _log.debug(s_("Adding website", request=request))
-        site = await self._store.add_web_site(WebSite(url=request.url))
+        add_data = await self._store.add_web_site(WebSite(url=request.url))
+        site = add_data.site
+        if request.scan_if_new and add_data.created:
+            await self._store.set_next_processing_time(
+                ProcessingItemKey(website_url=site.url), self._clock.now(),
+            )
         return pb_to_dict(AddWebSiteResponse(site=site))
 
     async def get(self, site_id: str):

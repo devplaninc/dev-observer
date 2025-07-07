@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from dev_observer.api.types import sites_pb2 as dev__observer_dot_api_dot_types_dot_sites__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n dev_observer/api/web/sites.proto\x12\x1a\x64\x65v_observer.api.web.sites\x1a\"dev_observer/api/types/sites.proto\"L\n\x14ListWebSitesResponse\x12\x34\n\x05sites\x18\x01 \x03(\x0b\x32%.dev_observer.api.types.sites.WebSite\" \n\x11\x41\x64\x64WebSiteRequest\x12\x0b\n\x03url\x18\x01 \x01(\t\"I\n\x12\x41\x64\x64WebSiteResponse\x12\x33\n\x04site\x18\x01 \x01(\x0b\x32%.dev_observer.api.types.sites.WebSite\"\x17\n\x15RescanWebSiteResponse\"I\n\x12GetWebSiteResponse\x12\x33\n\x04site\x18\x01 \x01(\x0b\x32%.dev_observer.api.types.sites.WebSite\"M\n\x15\x44\x65leteWebSiteResponse\x12\x34\n\x05sites\x18\x01 \x03(\x0b\x32%.dev_observer.api.types.sites.WebSiteb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n dev_observer/api/web/sites.proto\x12\x1a\x64\x65v_observer.api.web.sites\x1a\"dev_observer/api/types/sites.proto\"L\n\x14ListWebSitesResponse\x12\x34\n\x05sites\x18\x01 \x03(\x0b\x32%.dev_observer.api.types.sites.WebSite\"5\n\x11\x41\x64\x64WebSiteRequest\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x13\n\x0bscan_if_new\x18\x02 \x01(\x08\"I\n\x12\x41\x64\x64WebSiteResponse\x12\x33\n\x04site\x18\x01 \x01(\x0b\x32%.dev_observer.api.types.sites.WebSite\"\x17\n\x15RescanWebSiteResponse\"I\n\x12GetWebSiteResponse\x12\x33\n\x04site\x18\x01 \x01(\x0b\x32%.dev_observer.api.types.sites.WebSite\"M\n\x15\x44\x65leteWebSiteResponse\x12\x34\n\x05sites\x18\x01 \x03(\x0b\x32%.dev_observer.api.types.sites.WebSiteb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,13 +35,13 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_LISTWEBSITESRESPONSE']._serialized_start=100
   _globals['_LISTWEBSITESRESPONSE']._serialized_end=176
   _globals['_ADDWEBSITEREQUEST']._serialized_start=178
-  _globals['_ADDWEBSITEREQUEST']._serialized_end=210
-  _globals['_ADDWEBSITERESPONSE']._serialized_start=212
-  _globals['_ADDWEBSITERESPONSE']._serialized_end=285
-  _globals['_RESCANWEBSITERESPONSE']._serialized_start=287
-  _globals['_RESCANWEBSITERESPONSE']._serialized_end=310
-  _globals['_GETWEBSITERESPONSE']._serialized_start=312
-  _globals['_GETWEBSITERESPONSE']._serialized_end=385
-  _globals['_DELETEWEBSITERESPONSE']._serialized_start=387
-  _globals['_DELETEWEBSITERESPONSE']._serialized_end=464
+  _globals['_ADDWEBSITEREQUEST']._serialized_end=231
+  _globals['_ADDWEBSITERESPONSE']._serialized_start=233
+  _globals['_ADDWEBSITERESPONSE']._serialized_end=306
+  _globals['_RESCANWEBSITERESPONSE']._serialized_start=308
+  _globals['_RESCANWEBSITERESPONSE']._serialized_end=331
+  _globals['_GETWEBSITERESPONSE']._serialized_start=333
+  _globals['_GETWEBSITERESPONSE']._serialized_end=406
+  _globals['_DELETEWEBSITERESPONSE']._serialized_start=408
+  _globals['_DELETEWEBSITERESPONSE']._serialized_end=485
 # @@protoc_insertion_point(module_scope)

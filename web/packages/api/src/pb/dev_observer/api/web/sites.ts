@@ -16,6 +16,7 @@ export interface ListWebSitesResponse {
 
 export interface AddWebSiteRequest {
   url: string;
+  scanIfNew: boolean;
 }
 
 export interface AddWebSiteResponse {
@@ -92,13 +93,16 @@ export const ListWebSitesResponse: MessageFns<ListWebSitesResponse> = {
 };
 
 function createBaseAddWebSiteRequest(): AddWebSiteRequest {
-  return { url: "" };
+  return { url: "", scanIfNew: false };
 }
 
 export const AddWebSiteRequest: MessageFns<AddWebSiteRequest> = {
   encode(message: AddWebSiteRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.url !== "") {
       writer.uint32(10).string(message.url);
+    }
+    if (message.scanIfNew !== false) {
+      writer.uint32(16).bool(message.scanIfNew);
     }
     return writer;
   },
@@ -118,6 +122,14 @@ export const AddWebSiteRequest: MessageFns<AddWebSiteRequest> = {
           message.url = reader.string();
           continue;
         }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.scanIfNew = reader.bool();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -128,13 +140,19 @@ export const AddWebSiteRequest: MessageFns<AddWebSiteRequest> = {
   },
 
   fromJSON(object: any): AddWebSiteRequest {
-    return { url: isSet(object.url) ? gt.String(object.url) : "" };
+    return {
+      url: isSet(object.url) ? gt.String(object.url) : "",
+      scanIfNew: isSet(object.scanIfNew) ? gt.Boolean(object.scanIfNew) : false,
+    };
   },
 
   toJSON(message: AddWebSiteRequest): unknown {
     const obj: any = {};
     if (message.url !== "") {
       obj.url = message.url;
+    }
+    if (message.scanIfNew !== false) {
+      obj.scanIfNew = message.scanIfNew;
     }
     return obj;
   },
@@ -145,6 +163,7 @@ export const AddWebSiteRequest: MessageFns<AddWebSiteRequest> = {
   fromPartial(object: DeepPartial<AddWebSiteRequest>): AddWebSiteRequest {
     const message = createBaseAddWebSiteRequest();
     message.url = object.url ?? "";
+    message.scanIfNew = object.scanIfNew ?? false;
     return message;
   },
 };

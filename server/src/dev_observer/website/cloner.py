@@ -1,3 +1,4 @@
+import asyncio
 import dataclasses
 import logging
 import os
@@ -47,13 +48,21 @@ class CrawlResult:
 async def crawl_website(
         url: str,
         provider: WebsiteCrawlerProvider,
+        timeout: float = 30.0,  # 30 seconds default timeout
 ) -> CrawlResult:
     name = normalize_name(url)
     domain = normalize_domain(url)
     temp_dir = tempfile.mkdtemp(prefix=f"website_{domain}_{name}_")
-    extra = {"url": url, "dest": temp_dir}
+    extra = {"url": url, "dest": temp_dir, "timeout": timeout}
     _log.debug(s_("Crawling website...", **extra))
-    await provider.crawl(url, temp_dir)
+    try:
+        await asyncio.wait_for(provider.crawl(url, temp_dir), timeout=timeout)
+    except asyncio.TimeoutError:
+        _log.error(s_("Website crawling timed out", **extra))
+        raise
+    except Exception as e:
+        _log.error(s_("Website crawling failed", error=e, **extra))
+        raise
 
     _log.debug(s_("Website crawled.", **extra))
     return CrawlResult(path=temp_dir, url=url)

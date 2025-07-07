@@ -14,8 +14,10 @@ from scrapy.utils.project import get_project_settings
 
 from dev_observer.website.scrapy.clean_html import clean_html_for_llm
 
-logging.getLogger().setLevel(logging.INFO)
-logging.basicConfig(level=logging.INFO)
+logging.getLogger().setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
+
+_log = logging.getLogger(__name__)
 
 class WebsiteCrawlSpider(CrawlSpider):
     """Scrapy spider for crawling websites and saving HTML content."""
@@ -51,12 +53,12 @@ class WebsiteCrawlSpider(CrawlSpider):
             domains.append(f"www.{domain}")
         self.allowed_domains = domains
 
-        print(f"Setting up crawler allowed_domains={self.allowed_domains} output_dir={self.output_dir} start_urls={self.start_urls}")
+        _log.info(f"Setting up crawler allowed_domains={self.allowed_domains} output_dir={self.output_dir} start_urls={self.start_urls}")
 
         super().__init__(*args, **kwargs)
 
     async def start(self):
-        print("Start crawling spider")
+        _log.info("Start crawling spider")
 
         for url in self.start_urls:
             request = Request(
@@ -65,19 +67,20 @@ class WebsiteCrawlSpider(CrawlSpider):
                 dont_filter=True,
                 meta={'dont_cache': True}
             )
-            print(f"Request created url={url}")
+            _log.info(f"Request created url={url}")
             yield request
 
     def handle_error(self, failure):
+        _log.error(f"Error detected: {failure}")
         # Try to get more details
         if hasattr(failure.value, 'response'):
             response = failure.value.response
-            print(f"Response status: {response.status}")
-            print(f"Response headers: {dict(response.headers)}")
+            _log.info(f"Response status: {response.status}")
+            _log.info(f"Response headers: {dict(response.headers)}")
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         """Override parse method to handle start URLs"""
-        print(f"PARSE called for {response.url}")
+        _log.info(f"PARSE called for {response.url}")
 
         # Process the current page
         yield from self.parse_item(response)
@@ -87,7 +90,7 @@ class WebsiteCrawlSpider(CrawlSpider):
 
     def parse_item(self, response: Response):
         try:
-            print(f"PARSE_ITEM called for {response.url}")
+            _log.info(f"PARSE_ITEM called for {response.url}")
             cleaned_html = clean_html_for_llm(response.text)
 
             # Create a file path based on the URL
@@ -114,14 +117,14 @@ class WebsiteCrawlSpider(CrawlSpider):
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(cleaned_html)
 
-            print(f"Saved HTML content path_parts={path_parts} url={response.url}, file={file_path}")
+            _log.info(f"Saved HTML content path_parts={path_parts} url={response.url}, file={file_path}")
 
             yield {
                 'url': response.url,
                 'file': file_path
             }
         except Exception as e:
-            print(f"Error parsing response url={response.url} error={e} trace={traceback.format_exc()}")
+            _log.info(f"Error parsing response url={response.url} error={e} trace={traceback.format_exc()}")
             raise e
 
 
@@ -134,12 +137,12 @@ def main():
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging.")
     args = parser.parse_args()
 
-    if args.verbose == "true":
-        logging.getLogger().setLevel(logging.DEBUG)
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.getLogger().setLevel(logging.INFO)
-        logging.basicConfig(level=logging.INFO)
+    # if args.verbose == "true":
+    #     logging.getLogger().setLevel(logging.DEBUG)
+    #     logging.basicConfig(level=logging.DEBUG)
+    # else:
+    #     logging.getLogger().setLevel(logging.INFO)
+    #     logging.basicConfig(level=logging.INFO)
 
     settings = get_project_settings()
     settings.update({
@@ -148,14 +151,16 @@ def main():
         'ROBOTSTXT_OBEY': True,
         'CONCURRENT_REQUESTS': 3,
         # 'DOWNLOAD_DELAY': 0.5,  # Be polite with requests
+        'DOWNLOAD_TIMEOUT': 10,
+        'CLOSESPIDER_TIMEOUT_NO_ITEM': 12,
         'DEPTH_LIMIT': 2,
         'CLOSESPIDER_PAGECOUNT': 20,
-        'LOG_LEVEL': 'DEBUG' if args.verbose else 'INFO',
+        'LOG_LEVEL': 'DEBUG' if args.verbose else 'DEBUG',
         'REDIRECT_ENABLED': True,
         'REDIRECT_MAX_TIMES': 20,
     })
     process = CrawlerProcess(settings=settings)
-    print(f"Starting crawler args={args}")
+    _log.info(f"Starting crawler args={args}")
     process.crawl(WebsiteCrawlSpider, url=args.url, output_dir=args.output_dir)
     process.start()
 

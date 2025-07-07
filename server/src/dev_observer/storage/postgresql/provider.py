@@ -11,7 +11,7 @@ from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItem
 from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
 from dev_observer.api.types.sites_pb2 import WebSite
 from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity, WebsiteEntity
-from dev_observer.storage.provider import StorageProvider
+from dev_observer.storage.provider import StorageProvider, AddWebSiteData
 from dev_observer.util import parse_json_pb, pb_to_json, Clock, RealClock
 
 
@@ -96,7 +96,7 @@ class PostgresqlStorageProvider(StorageProvider):
             async with session.begin():
                 await session.execute(delete(WebsiteEntity).where(WebsiteEntity.id == site_id))
 
-    async def add_web_site(self, site: WebSite) -> WebSite:
+    async def add_web_site(self, site: WebSite) -> AddWebSiteData:
         site_id = site.id
         if not site_id or len(site_id) == 0:
             site_id = f"{uuid.uuid4()}"
@@ -106,14 +106,17 @@ class PostgresqlStorageProvider(StorageProvider):
                     select(WebsiteEntity).where(WebsiteEntity.url == site.url)
                 )
                 if existing is not None:
-                    return _to_web_site(existing)
+                    return AddWebSiteData(_to_web_site(existing), created=False)
                 s = WebsiteEntity(
                     id=site_id,
                     url=site.url,
                     json_data=pb_to_json(site),
                 )
                 session.add(s)
-                return _to_optional_web_site(await session.get(WebsiteEntity, site_id))
+                return AddWebSiteData(
+                    _to_optional_web_site(await session.get(WebsiteEntity, site_id)),
+                    created=True,
+                )
 
     async def next_processing_item(self) -> Optional[ProcessingItem]:
         next_processing_time = self._clock.now()

@@ -13,10 +13,12 @@ class ListWebSitesResponse(_message.Message):
     def __init__(self, sites: _Optional[_Iterable[_Union[_sites_pb2.WebSite, _Mapping]]] = ...) -> None: ...
 
 class AddWebSiteRequest(_message.Message):
-    __slots__ = ("url",)
+    __slots__ = ("url", "scan_if_new")
     URL_FIELD_NUMBER: _ClassVar[int]
+    SCAN_IF_NEW_FIELD_NUMBER: _ClassVar[int]
     url: str
-    def __init__(self, url: _Optional[str] = ...) -> None: ...
+    scan_if_new: bool
+    def __init__(self, url: _Optional[str] = ..., scan_if_new: bool = ...) -> None: ...
 
 class AddWebSiteResponse(_message.Message):
     __slots__ = ("site",)

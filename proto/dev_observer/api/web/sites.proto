@@ -10,6 +10,7 @@ message ListWebSitesResponse {
 
 message AddWebSiteRequest {
   string url = 1;
+  bool scan_if_new = 2;
 }
 
 message AddWebSiteResponse {

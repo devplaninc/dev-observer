@@ -1,6 +1,6 @@
+import asyncio
 import logging
 import os
-import subprocess
 
 from dev_observer.log import s_
 from dev_observer.website.provider import WebsiteCrawlerProvider
@@ -16,19 +16,53 @@ class ScrapyWebsiteCrawlerProvider(WebsiteCrawlerProvider):
         # Build the absolute path to the scrapy main.py script relative to this file
         script_path = os.path.join(current_file_dir, 'scrapy', 'main.py')
 
-        # Compose the command
         cmd = [
             "python3",
             script_path,
             url,
             "--output-dir",
-            dest
+            dest,
         ]
 
-        # Run the script as subprocess
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        # Run the script asynchronously
+        process = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        extra = {"op": "crawl_site", "url": url, "dest": dest}
 
-        if result.returncode == 0:
-            _log.debug(s_("Crawler ran successfully", url=url, dest=dest, out=result.stdout))
+        stdout_accum = []
+        stderr_accum = []
+        try:
+            async def read_stream(stream, accum, log_fn):
+                while True:
+                    line = await stream.readline()
+                    if not line:
+                        break
+                    decoded = line.decode().rstrip()
+                    accum.append(decoded)
+                    log_fn(decoded)
+
+            await asyncio.gather(
+                read_stream(process.stdout, stdout_accum, lambda msg: None),
+                read_stream(process.stderr, stderr_accum, lambda msg: None)
+            )
+            code = await process.wait()
+        except asyncio.CancelledError as e:
+            _log.error(s_("Crawler cancelled", error=e, **extra,
+                          stdout="\n".join(stdout_accum),
+                          stderr="\n".join(stderr_accum)))
+            process.kill()
+            raise
+        except Exception as e:
+            _log.error(s_("Crawler failed", error=e, **extra,
+                          stdout="\n".join(stdout_accum),
+                          stderr="\n".join(stderr_accum)))
+            raise
+
+        if code == 0:
+            _log.debug(s_("Crawler ran successfully", **extra))
         else:
-            raise RuntimeError(f"Crawler failed: {result.stderr}")
+            full_stderr = "\n".join(stderr_accum)
+            raise RuntimeError(f"Crawler failed: code={code}, stderr={full_stderr}")

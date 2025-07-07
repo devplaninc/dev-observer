@@ -1,6 +1,7 @@
 import type {StateCreator} from "zustand";
 import {baseAPI} from "@/store/apiPaths.tsx";
 import {
+  AddWebSiteRequest,
   AddWebSiteResponse,
   DeleteWebSiteResponse,
   GetWebSiteResponse,
@@ -59,7 +60,7 @@ export const createWebSitesSlice: StateCreator<
   addWebSite: async url => fetchWithAuth(
     websitesAPI(),
     AddWebSiteResponse,
-    {method: "POST", body: JSON.stringify({url})},
+    {method: "POST", body: JSON.stringify(AddWebSiteRequest.toJSON({url, scanIfNew: true}))},
   ).then(({site}) => {
     if (site) {
       set(s => ({...s, websites: {...s.websites, [site.url]: site}}))

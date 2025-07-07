@@ -13,7 +13,7 @@ from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
 from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
 from dev_observer.api.types.sites_pb2 import WebSite
-from dev_observer.storage.provider import StorageProvider
+from dev_observer.storage.provider import StorageProvider, AddWebSiteData
 from dev_observer.util import Clock, RealClock
 
 _log = logging.getLogger(__name__)
@@ -95,9 +95,10 @@ class SingleBlobStorageProvider(abc.ABC, StorageProvider):
 
         await self._update(up)
 
-    async def add_web_site(self, site: WebSite) -> WebSite:
+    async def add_web_site(self, site: WebSite) -> AddWebSiteData:
         if not site.id or len(site.id) == 0:
             site.id = f"{uuid.uuid4()}"
+        initial_id = site.id
 
         def up(d: LocalStorageData):
             if site.url in [s.url for s in self._get().web_sites]:
@@ -110,7 +111,12 @@ class SingleBlobStorageProvider(abc.ABC, StorageProvider):
                 ))
 
         await self._update(up)
-        return site
+        async with _lock:
+            for s in self._get().web_sites:
+                if s.url == site.url:
+                    return AddWebSiteData(s, created=initial_id == s.id)
+
+        raise ValueError(f"Site with url {site.url} not found after creation")
 
     async def next_processing_item(self) -> Optional[ProcessingItem]:
         now = self._clock.now()
