@@ -28,3 +28,26 @@ message GitAppInfo {
   google.protobuf.Timestamp last_refresh = 1;
   optional int32 installation_id = 2;
 }
+
+message GitHubChangeSummary {
+  string id = 1;
+  string repo_id = 2;
+  string commit_sha = 3;
+  string analysis_type = 4;
+  string summary = 5;
+  string changes_data = 6;
+  google.protobuf.Timestamp analysis_period_start = 7;
+  google.protobuf.Timestamp analysis_period_end = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message GitHubChangeAnalysis {
+  repeated string files_changed = 1;
+  repeated string commits = 2;
+  string analysis_summary = 3;
+  repeated string key_changes = 4;
+  repeated string authors = 5;
+  int32 total_additions = 6;
+  int32 total_deletions = 7;
+}

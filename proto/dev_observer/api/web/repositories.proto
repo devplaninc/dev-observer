@@ -25,3 +25,23 @@ message GetRepositoryResponse{
 message DeleteRepositoryResponse{
   repeated dev_observer.api.types.repo.GitHubRepository repos = 1;
 }
+
+message ListGithubChangeSummariesRequest {
+  string repo_id = 1;
+  optional string analysis_type = 2;
+  optional int32 limit = 3;
+  optional int32 offset = 4;
+}
+
+message ListGithubChangeSummariesResponse {
+  repeated dev_observer.api.types.repo.GitHubChangeSummary summaries = 1;
+  int32 total_count = 2;
+}
+
+message GetGithubChangeSummaryRequest {
+  string id = 1;
+}
+
+message GetGithubChangeSummaryResponse {
+  dev_observer.api.types.repo.GitHubChangeSummary summary = 1;
+}

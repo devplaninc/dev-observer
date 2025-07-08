@@ -100,3 +100,31 @@ class WebsiteEntity(Base):
 
     def __repr__(self):
         return f"WebsiteEntity(id={self.id}, json_data={self.json_data})"
+
+
+class GitHubChangeSummaryEntity(Base):
+    __tablename__ = "github_change_summary"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    repo_id: Mapped[str] = mapped_column(index=True)
+    commit_sha: Mapped[str] = mapped_column(index=True)
+    analysis_type: Mapped[str] = mapped_column(index=True)
+    summary: Mapped[str]
+    changes_data: Mapped[str]
+    analysis_period_start: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True))
+    analysis_period_end: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True))
+    
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )
+
+    def __repr__(self):
+        return f"GitHubChangeSummaryEntity(id={self.id}, repo_id={self.repo_id}, commit_sha={self.commit_sha})"

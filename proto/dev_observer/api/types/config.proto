@@ -7,6 +7,7 @@ import "dev_observer/api/types/observations.proto";
 message GlobalConfig {
   AnalysisConfig analysis = 1;
   RepoAnalysisConfig repo_analysis = 2;
+  GitHubAnalysisConfig github_analysis = 3;
 }
 
 message AnalysisConfig {
@@ -38,4 +39,12 @@ message RepoAnalysisConfig {
     string large_repo_ignore_pattern = 8;
     bool compress_large = 9;
   }
+}
+
+message GitHubAnalysisConfig {
+  bool enabled = 1;
+  int32 days_back = 2;
+  string analysis_type = 3;
+  int32 analysis_interval_hours = 4;
+  bool auto_analyze_on_push = 5;
 }

@@ -44,9 +44,18 @@ const repoAnalysisConfigSchema = z.object({
   disabled: z.boolean(),
 })
 
+const githubAnalysisConfigSchema = z.object({
+  enabled: z.boolean(),
+  daysBack: z.coerce.number(),
+  analysisType: z.string(),
+  analysisIntervalHours: z.coerce.number(),
+  autoAnalyzeOnPush: z.boolean(),
+})
+
 const globalConfigSchema = z.object({
   analysis: analysisConfigSchema,
   repoAnalysis: repoAnalysisConfigSchema,
+  githubAnalysis: githubAnalysisConfigSchema,
 })
 
 export type globalConfigType = z.infer<typeof globalConfigSchema>
@@ -386,6 +395,94 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
                     type="checkbox"
                     checked={field.value}
                     onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+
+      <Separator/>
+
+      <div className="space-y-4">
+        <h2 className="font-semibold text-lg">GitHub Analysis Configuration:</h2>
+
+        <div className="border rounded-md p-4 space-y-4">
+          <FormField
+            control={form.control}
+            name="githubAnalysis.enabled"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Enable GitHub Analysis:</FormLabel>
+                <FormControl>
+                  <Checkbox
+                    checked={field.value || false}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="githubAnalysis.daysBack"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Days Back for Analysis:</FormLabel>
+                <FormControl className="w-[200px]">
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="githubAnalysis.analysisType"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Analysis Type:</FormLabel>
+                <FormControl className="w-[200px]">
+                  <select className="w-full p-2 border rounded" {...field}>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="githubAnalysis.analysisIntervalHours"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Analysis Interval (hours):</FormLabel>
+                <FormControl className="w-[200px]">
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="githubAnalysis.autoAnalyzeOnPush"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Auto-analyze on Push:</FormLabel>
+                <FormControl>
+                  <Checkbox
+                    checked={field.value || false}
+                    onCheckedChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage/>

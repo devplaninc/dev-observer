@@ -5,7 +5,11 @@ import {
   ListGithubRepositoriesResponse,
   GetRepositoryResponse,
   DeleteRepositoryResponse,
-  RescanRepositoryResponse
+  RescanRepositoryResponse,
+  ListGithubChangeSummariesRequest,
+  ListGithubChangeSummariesResponse,
+  GetGithubChangeSummaryRequest,
+  GetGithubChangeSummaryResponse
 } from '../pb/dev_observer/api/web/repositories';
 
 /**
@@ -54,5 +58,39 @@ export class RepositoriesClient extends BaseClient {
    */
   async rescan(repoId: string): Promise<RescanRepositoryResponse> {
     return this._post(`/api/v1/repositories/${repoId}/rescan`, RescanRepositoryResponse);
+  }
+
+  /**
+   * List GitHub change summaries for a repository
+   * @param repoId - The repository ID
+   * @param options - Optional query parameters
+   * @returns The list change summaries response
+   */
+  async listChangeSummaries(
+    repoId: string,
+    options?: {
+      analysisType?: string;
+      limit?: number;
+      offset?: number;
+    }
+  ): Promise<ListGithubChangeSummariesResponse> {
+    const params = new URLSearchParams();
+    if (options?.analysisType) params.append('analysis_type', options.analysisType);
+    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.offset) params.append('offset', options.offset.toString());
+    
+    const queryString = params.toString();
+    const url = `/api/v1/repositories/${repoId}/change-summaries${queryString ? `?${queryString}` : ''}`;
+    
+    return this._get(url, ListGithubChangeSummariesResponse);
+  }
+
+  /**
+   * Get a specific GitHub change summary
+   * @param summaryId - The change summary ID
+   * @returns The get change summary response
+   */
+  async getChangeSummary(summaryId: string): Promise<GetGithubChangeSummaryResponse> {
+    return this._get(`/api/v1/repositories/change-summaries/${summaryId}`, GetGithubChangeSummaryResponse);
   }
 }

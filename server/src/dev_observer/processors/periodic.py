@@ -10,6 +10,7 @@ from dev_observer.processors.flattening import ObservationRequest
 from dev_observer.processors.repos import ReposProcessor
 from dev_observer.repository.types import ObservedRepo
 from dev_observer.processors.websites import WebsitesProcessor, ObservedWebsite
+from dev_observer.processors.github_changes import GitHubChangeAnalyzer
 from dev_observer.storage.provider import StorageProvider
 from dev_observer.util import Clock, RealClock
 from dev_observer.website.cloner import normalize_domain, normalize_name
@@ -20,17 +21,20 @@ class PeriodicProcessor:
     _storage: StorageProvider
     _repos_processor: ReposProcessor
     _websites_processor: Optional[WebsitesProcessor]
+    _github_change_analyzer: Optional[GitHubChangeAnalyzer]
     _clock: Clock
 
     def __init__(self,
                  storage: StorageProvider,
                  repos_processor: ReposProcessor,
                  websites_processor: Optional[WebsitesProcessor] = None,
+                 github_change_analyzer: Optional[GitHubChangeAnalyzer] = None,
                  clock: Clock = RealClock(),
                  ):
         self._storage = storage
         self._repos_processor = repos_processor
         self._websites_processor = websites_processor
+        self._github_change_analyzer = github_change_analyzer
         self._clock = clock
 
     async def run(self):
@@ -89,6 +93,23 @@ class PeriodicProcessor:
             _log.debug(s_("No analyzers configured, skipping", repo=repo))
             return
         await self._repos_processor.process(ObservedRepo(url=repo.url, github_repo=repo), requests, config)
+        
+        # Perform GitHub change analysis if enabled
+        if self._github_change_analyzer and config.HasField("github_analysis") and config.github_analysis.enabled:
+            try:
+                observed_repo = ObservedRepo(url=repo.url, github_repo=repo)
+                analysis_result = await self._github_change_analyzer.analyze_recent_changes(
+                    observed_repo, 
+                    days_back=config.github_analysis.days_back or 7,
+                    analysis_type=config.github_analysis.analysis_type or "weekly"
+                )
+                if analysis_result:
+                    _log.info(s_("GitHub change analysis completed", repo=repo, analysis_id=analysis_result.id))
+                else:
+                    _log.debug(s_("No recent changes found for analysis", repo=repo))
+            except Exception as e:
+                _log.error(s_("Failed to analyze GitHub changes", repo=repo), exc_info=e)
+        
         _log.debug(s_("Github repo processed", repo=repo))
 
     async def _process_website(self, website_url: str):
