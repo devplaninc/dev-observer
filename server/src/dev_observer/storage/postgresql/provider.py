@@ -8,9 +8,9 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSessio
 
 from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
-from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
+from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties, GitHubChangeSummary
 from dev_observer.api.types.sites_pb2 import WebSite
-from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity, WebsiteEntity
+from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity, WebsiteEntity, GitHubChangeSummaryEntity
 from dev_observer.storage.provider import StorageProvider, AddWebSiteData
 from dev_observer.util import parse_json_pb, pb_to_json, Clock, RealClock
 
@@ -166,6 +166,47 @@ class PostgresqlStorageProvider(StorageProvider):
                 )
         return await self.get_global_config()
 
+    async def add_github_change_summary(self, summary: GitHubChangeSummary) -> GitHubChangeSummary:
+        summary_id = summary.id
+        if not summary_id or len(summary_id) == 0:
+            summary_id = f"{uuid.uuid4()}"
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                entity = GitHubChangeSummaryEntity(
+                    id=summary_id,
+                    repo_id=summary.repo_id,
+                    commit_sha=summary.commit_sha,
+                    analysis_type=summary.analysis_type,
+                    summary=summary.summary,
+                    changes_data=summary.changes_data,
+                    analysis_period_start=summary.analysis_period_start.ToDatetime(),
+                    analysis_period_end=summary.analysis_period_end.ToDatetime(),
+                )
+                session.add(entity)
+                return _to_optional_github_change_summary(await session.get(GitHubChangeSummaryEntity, summary_id))
+
+    async def get_github_change_summaries(self, repo_id: str, analysis_type: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> tuple[MutableSequence[GitHubChangeSummary], int]:
+        async with AsyncSession(self._engine) as session:
+            query = select(GitHubChangeSummaryEntity).where(GitHubChangeSummaryEntity.repo_id == repo_id)
+            if analysis_type:
+                query = query.where(GitHubChangeSummaryEntity.analysis_type == analysis_type)
+            
+            count_query = query.with_only_columns(GitHubChangeSummaryEntity.id)
+            total_count = len((await session.execute(count_query)).all())
+            
+            query = query.order_by(GitHubChangeSummaryEntity.created_at.desc())
+            if limit:
+                query = query.limit(limit)
+            if offset:
+                query = query.offset(offset)
+            
+            entities = await session.execute(query)
+            return [_to_github_change_summary(e[0]) for e in entities.all()], total_count
+
+    async def get_github_change_summary(self, summary_id: str) -> Optional[GitHubChangeSummary]:
+        async with AsyncSession(self._engine) as session:
+            return _to_optional_github_change_summary(await session.get(GitHubChangeSummaryEntity, summary_id))
+
 
 def _to_optional_repo(ent: Optional[GitRepoEntity]) -> Optional[GitHubRepository]:
     return None if ent is None else _to_repo(ent)
@@ -208,3 +249,22 @@ def _to_item(ent: ProcessingItemEntity) -> ProcessingItem:
     data.no_processing = ent.no_processing
     data.key.CopyFrom(parse_json_pb(ent.key, ProcessingItemKey()))
     return data
+
+
+def _to_optional_github_change_summary(ent: Optional[GitHubChangeSummaryEntity]) -> Optional[GitHubChangeSummary]:
+    return None if ent is None else _to_github_change_summary(ent)
+
+
+def _to_github_change_summary(ent: GitHubChangeSummaryEntity) -> GitHubChangeSummary:
+    summary = GitHubChangeSummary()
+    summary.id = ent.id
+    summary.repo_id = ent.repo_id
+    summary.commit_sha = ent.commit_sha
+    summary.analysis_type = ent.analysis_type
+    summary.summary = ent.summary
+    summary.changes_data = ent.changes_data
+    summary.analysis_period_start.FromDatetime(ent.analysis_period_start)
+    summary.analysis_period_end.FromDatetime(ent.analysis_period_end)
+    summary.created_at.FromDatetime(ent.created_at)
+    summary.updated_at.FromDatetime(ent.updated_at)
+    return summary

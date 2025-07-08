@@ -6,7 +6,9 @@ from starlette.requests import Request
 from dev_observer.api.types.processing_pb2 import ProcessingItemKey
 from dev_observer.api.types.repo_pb2 import GitHubRepository
 from dev_observer.api.web.repositories_pb2 import AddGithubRepositoryRequest, AddGithubRepositoryResponse, \
-    ListGithubRepositoriesResponse, RescanRepositoryResponse, GetRepositoryResponse, DeleteRepositoryResponse
+    ListGithubRepositoriesResponse, RescanRepositoryResponse, GetRepositoryResponse, DeleteRepositoryResponse, \
+    ListGithubChangeSummariesRequest, ListGithubChangeSummariesResponse, GetGithubChangeSummaryRequest, \
+    GetGithubChangeSummaryResponse
 from dev_observer.log import s_
 from dev_observer.repository.parser import parse_github_url
 from dev_observer.storage.provider import StorageProvider
@@ -31,6 +33,8 @@ class RepositoriesService:
         self.router.add_api_route("/repositories/{repo_id}", self.get, methods=["GET"])
         self.router.add_api_route("/repositories/{repo_id}", self.delete, methods=["DELETE"])
         self.router.add_api_route("/repositories/{repo_id}/rescan", self.rescan, methods=["POST"])
+        self.router.add_api_route("/repositories/{repo_id}/change-summaries", self.list_change_summaries, methods=["GET"])
+        self.router.add_api_route("/repositories/change-summaries/{summary_id}", self.get_change_summary, methods=["GET"])
 
     async def add_github_repo(self, req: Request):
         request = parse_dict_pb(await req.json(), AddGithubRepositoryRequest())
@@ -61,3 +65,29 @@ class RepositoriesService:
             ProcessingItemKey(github_repo_id=repo_id), self._clock.now(),
         )
         return pb_to_dict(RescanRepositoryResponse())
+
+    async def list_change_summaries(self, repo_id: str, req: Request):
+        query_params = req.query_params
+        analysis_type = query_params.get("analysis_type")
+        limit = int(query_params.get("limit", 20))
+        offset = int(query_params.get("offset", 0))
+        
+        summaries, total_count = await self._store.get_github_change_summaries(
+            repo_id=repo_id,
+            analysis_type=analysis_type,
+            limit=limit,
+            offset=offset
+        )
+        
+        return pb_to_dict(ListGithubChangeSummariesResponse(
+            summaries=summaries,
+            total_count=total_count
+        ))
+
+    async def get_change_summary(self, summary_id: str):
+        summary = await self._store.get_github_change_summary(summary_id)
+        if summary is None:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Change summary not found")
+        
+        return pb_to_dict(GetGithubChangeSummaryResponse(summary=summary))
