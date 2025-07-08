@@ -22,12 +22,14 @@ class GitHubRepository(_message.Message):
     def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., full_name: _Optional[str] = ..., url: _Optional[str] = ..., description: _Optional[str] = ..., properties: _Optional[_Union[GitProperties, _Mapping]] = ...) -> None: ...
 
 class GitProperties(_message.Message):
-    __slots__ = ("app_info", "meta")
+    __slots__ = ("app_info", "meta", "change_analysis")
     APP_INFO_FIELD_NUMBER: _ClassVar[int]
     META_FIELD_NUMBER: _ClassVar[int]
+    CHANGE_ANALYSIS_FIELD_NUMBER: _ClassVar[int]
     app_info: GitAppInfo
     meta: GitMeta
-    def __init__(self, app_info: _Optional[_Union[GitAppInfo, _Mapping]] = ..., meta: _Optional[_Union[GitMeta, _Mapping]] = ...) -> None: ...
+    change_analysis: ChangeAnalysisConfig
+    def __init__(self, app_info: _Optional[_Union[GitAppInfo, _Mapping]] = ..., meta: _Optional[_Union[GitMeta, _Mapping]] = ..., change_analysis: _Optional[_Union[ChangeAnalysisConfig, _Mapping]] = ...) -> None: ...
 
 class GitMeta(_message.Message):
     __slots__ = ("last_refresh", "clone_url", "size_kb")
@@ -46,3 +48,31 @@ class GitAppInfo(_message.Message):
     last_refresh: _timestamp_pb2.Timestamp
     installation_id: int
     def __init__(self, last_refresh: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., installation_id: _Optional[int] = ...) -> None: ...
+
+class ChangeAnalysisConfig(_message.Message):
+    __slots__ = ("enrolled", "enrolled_at")
+    ENROLLED_FIELD_NUMBER: _ClassVar[int]
+    ENROLLED_AT_FIELD_NUMBER: _ClassVar[int]
+    enrolled: bool
+    enrolled_at: _timestamp_pb2.Timestamp
+    def __init__(self, enrolled: bool = ..., enrolled_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+
+class RepoChangeAnalysis(_message.Message):
+    __slots__ = ("id", "repo_id", "status", "observation_key", "error_message", "analyzed_at", "created_at", "updated_at")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    REPO_ID_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    OBSERVATION_KEY_FIELD_NUMBER: _ClassVar[int]
+    ERROR_MESSAGE_FIELD_NUMBER: _ClassVar[int]
+    ANALYZED_AT_FIELD_NUMBER: _ClassVar[int]
+    CREATED_AT_FIELD_NUMBER: _ClassVar[int]
+    UPDATED_AT_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    repo_id: str
+    status: str
+    observation_key: str
+    error_message: str
+    analyzed_at: _timestamp_pb2.Timestamp
+    created_at: _timestamp_pb2.Timestamp
+    updated_at: _timestamp_pb2.Timestamp
+    def __init__(self, id: _Optional[str] = ..., repo_id: _Optional[str] = ..., status: _Optional[str] = ..., observation_key: _Optional[str] = ..., error_message: _Optional[str] = ..., analyzed_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., created_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., updated_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...

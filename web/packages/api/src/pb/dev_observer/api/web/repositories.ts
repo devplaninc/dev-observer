@@ -6,7 +6,7 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import { GitHubRepository } from "../types/repo";
+import { GitHubRepository, RepoChangeAnalysis } from "../types/repo";
 
 export const protobufPackage = "dev_observer.api.web.repositories";
 
@@ -31,6 +31,41 @@ export interface GetRepositoryResponse {
 
 export interface DeleteRepositoryResponse {
   repos: GitHubRepository[];
+}
+
+export interface EnrollRepositoryForChangeAnalysisRequest {
+  repoId: string;
+}
+
+export interface EnrollRepositoryForChangeAnalysisResponse {
+  repo: GitHubRepository | undefined;
+}
+
+export interface UnenrollRepositoryFromChangeAnalysisRequest {
+  repoId: string;
+}
+
+export interface UnenrollRepositoryFromChangeAnalysisResponse {
+  repo: GitHubRepository | undefined;
+}
+
+export interface GetChangeAnalysesRequest {
+  repoId: string;
+  dateFrom?: string | undefined;
+  dateTo?: string | undefined;
+  status?: string | undefined;
+}
+
+export interface GetChangeAnalysesResponse {
+  analyses: RepoChangeAnalysis[];
+}
+
+export interface GetChangeAnalysisRequest {
+  analysisId: string;
+}
+
+export interface GetChangeAnalysisResponse {
+  analysis: RepoChangeAnalysis | undefined;
 }
 
 function createBaseListGithubRepositoriesResponse(): ListGithubRepositoriesResponse {
@@ -366,6 +401,544 @@ export const DeleteRepositoryResponse: MessageFns<DeleteRepositoryResponse> = {
   fromPartial(object: DeepPartial<DeleteRepositoryResponse>): DeleteRepositoryResponse {
     const message = createBaseDeleteRepositoryResponse();
     message.repos = object.repos?.map((e) => GitHubRepository.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseEnrollRepositoryForChangeAnalysisRequest(): EnrollRepositoryForChangeAnalysisRequest {
+  return { repoId: "" };
+}
+
+export const EnrollRepositoryForChangeAnalysisRequest: MessageFns<EnrollRepositoryForChangeAnalysisRequest> = {
+  encode(message: EnrollRepositoryForChangeAnalysisRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.repoId !== "") {
+      writer.uint32(10).string(message.repoId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): EnrollRepositoryForChangeAnalysisRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEnrollRepositoryForChangeAnalysisRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.repoId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EnrollRepositoryForChangeAnalysisRequest {
+    return { repoId: isSet(object.repoId) ? gt.String(object.repoId) : "" };
+  },
+
+  toJSON(message: EnrollRepositoryForChangeAnalysisRequest): unknown {
+    const obj: any = {};
+    if (message.repoId !== "") {
+      obj.repoId = message.repoId;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<EnrollRepositoryForChangeAnalysisRequest>): EnrollRepositoryForChangeAnalysisRequest {
+    return EnrollRepositoryForChangeAnalysisRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<EnrollRepositoryForChangeAnalysisRequest>): EnrollRepositoryForChangeAnalysisRequest {
+    const message = createBaseEnrollRepositoryForChangeAnalysisRequest();
+    message.repoId = object.repoId ?? "";
+    return message;
+  },
+};
+
+function createBaseEnrollRepositoryForChangeAnalysisResponse(): EnrollRepositoryForChangeAnalysisResponse {
+  return { repo: undefined };
+}
+
+export const EnrollRepositoryForChangeAnalysisResponse: MessageFns<EnrollRepositoryForChangeAnalysisResponse> = {
+  encode(message: EnrollRepositoryForChangeAnalysisResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.repo !== undefined) {
+      GitHubRepository.encode(message.repo, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): EnrollRepositoryForChangeAnalysisResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEnrollRepositoryForChangeAnalysisResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.repo = GitHubRepository.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EnrollRepositoryForChangeAnalysisResponse {
+    return { repo: isSet(object.repo) ? GitHubRepository.fromJSON(object.repo) : undefined };
+  },
+
+  toJSON(message: EnrollRepositoryForChangeAnalysisResponse): unknown {
+    const obj: any = {};
+    if (message.repo !== undefined) {
+      obj.repo = GitHubRepository.toJSON(message.repo);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<EnrollRepositoryForChangeAnalysisResponse>): EnrollRepositoryForChangeAnalysisResponse {
+    return EnrollRepositoryForChangeAnalysisResponse.fromPartial(base ?? {});
+  },
+  fromPartial(
+    object: DeepPartial<EnrollRepositoryForChangeAnalysisResponse>,
+  ): EnrollRepositoryForChangeAnalysisResponse {
+    const message = createBaseEnrollRepositoryForChangeAnalysisResponse();
+    message.repo = (object.repo !== undefined && object.repo !== null)
+      ? GitHubRepository.fromPartial(object.repo)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseUnenrollRepositoryFromChangeAnalysisRequest(): UnenrollRepositoryFromChangeAnalysisRequest {
+  return { repoId: "" };
+}
+
+export const UnenrollRepositoryFromChangeAnalysisRequest: MessageFns<UnenrollRepositoryFromChangeAnalysisRequest> = {
+  encode(
+    message: UnenrollRepositoryFromChangeAnalysisRequest,
+    writer: BinaryWriter = new BinaryWriter(),
+  ): BinaryWriter {
+    if (message.repoId !== "") {
+      writer.uint32(10).string(message.repoId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UnenrollRepositoryFromChangeAnalysisRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUnenrollRepositoryFromChangeAnalysisRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.repoId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UnenrollRepositoryFromChangeAnalysisRequest {
+    return { repoId: isSet(object.repoId) ? gt.String(object.repoId) : "" };
+  },
+
+  toJSON(message: UnenrollRepositoryFromChangeAnalysisRequest): unknown {
+    const obj: any = {};
+    if (message.repoId !== "") {
+      obj.repoId = message.repoId;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<UnenrollRepositoryFromChangeAnalysisRequest>): UnenrollRepositoryFromChangeAnalysisRequest {
+    return UnenrollRepositoryFromChangeAnalysisRequest.fromPartial(base ?? {});
+  },
+  fromPartial(
+    object: DeepPartial<UnenrollRepositoryFromChangeAnalysisRequest>,
+  ): UnenrollRepositoryFromChangeAnalysisRequest {
+    const message = createBaseUnenrollRepositoryFromChangeAnalysisRequest();
+    message.repoId = object.repoId ?? "";
+    return message;
+  },
+};
+
+function createBaseUnenrollRepositoryFromChangeAnalysisResponse(): UnenrollRepositoryFromChangeAnalysisResponse {
+  return { repo: undefined };
+}
+
+export const UnenrollRepositoryFromChangeAnalysisResponse: MessageFns<UnenrollRepositoryFromChangeAnalysisResponse> = {
+  encode(
+    message: UnenrollRepositoryFromChangeAnalysisResponse,
+    writer: BinaryWriter = new BinaryWriter(),
+  ): BinaryWriter {
+    if (message.repo !== undefined) {
+      GitHubRepository.encode(message.repo, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UnenrollRepositoryFromChangeAnalysisResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUnenrollRepositoryFromChangeAnalysisResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.repo = GitHubRepository.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UnenrollRepositoryFromChangeAnalysisResponse {
+    return { repo: isSet(object.repo) ? GitHubRepository.fromJSON(object.repo) : undefined };
+  },
+
+  toJSON(message: UnenrollRepositoryFromChangeAnalysisResponse): unknown {
+    const obj: any = {};
+    if (message.repo !== undefined) {
+      obj.repo = GitHubRepository.toJSON(message.repo);
+    }
+    return obj;
+  },
+
+  create(
+    base?: DeepPartial<UnenrollRepositoryFromChangeAnalysisResponse>,
+  ): UnenrollRepositoryFromChangeAnalysisResponse {
+    return UnenrollRepositoryFromChangeAnalysisResponse.fromPartial(base ?? {});
+  },
+  fromPartial(
+    object: DeepPartial<UnenrollRepositoryFromChangeAnalysisResponse>,
+  ): UnenrollRepositoryFromChangeAnalysisResponse {
+    const message = createBaseUnenrollRepositoryFromChangeAnalysisResponse();
+    message.repo = (object.repo !== undefined && object.repo !== null)
+      ? GitHubRepository.fromPartial(object.repo)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseGetChangeAnalysesRequest(): GetChangeAnalysesRequest {
+  return { repoId: "", dateFrom: undefined, dateTo: undefined, status: undefined };
+}
+
+export const GetChangeAnalysesRequest: MessageFns<GetChangeAnalysesRequest> = {
+  encode(message: GetChangeAnalysesRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.repoId !== "") {
+      writer.uint32(10).string(message.repoId);
+    }
+    if (message.dateFrom !== undefined) {
+      writer.uint32(18).string(message.dateFrom);
+    }
+    if (message.dateTo !== undefined) {
+      writer.uint32(26).string(message.dateTo);
+    }
+    if (message.status !== undefined) {
+      writer.uint32(34).string(message.status);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetChangeAnalysesRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetChangeAnalysesRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.repoId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.dateFrom = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.dateTo = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.status = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetChangeAnalysesRequest {
+    return {
+      repoId: isSet(object.repoId) ? gt.String(object.repoId) : "",
+      dateFrom: isSet(object.dateFrom) ? gt.String(object.dateFrom) : undefined,
+      dateTo: isSet(object.dateTo) ? gt.String(object.dateTo) : undefined,
+      status: isSet(object.status) ? gt.String(object.status) : undefined,
+    };
+  },
+
+  toJSON(message: GetChangeAnalysesRequest): unknown {
+    const obj: any = {};
+    if (message.repoId !== "") {
+      obj.repoId = message.repoId;
+    }
+    if (message.dateFrom !== undefined) {
+      obj.dateFrom = message.dateFrom;
+    }
+    if (message.dateTo !== undefined) {
+      obj.dateTo = message.dateTo;
+    }
+    if (message.status !== undefined) {
+      obj.status = message.status;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GetChangeAnalysesRequest>): GetChangeAnalysesRequest {
+    return GetChangeAnalysesRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GetChangeAnalysesRequest>): GetChangeAnalysesRequest {
+    const message = createBaseGetChangeAnalysesRequest();
+    message.repoId = object.repoId ?? "";
+    message.dateFrom = object.dateFrom ?? undefined;
+    message.dateTo = object.dateTo ?? undefined;
+    message.status = object.status ?? undefined;
+    return message;
+  },
+};
+
+function createBaseGetChangeAnalysesResponse(): GetChangeAnalysesResponse {
+  return { analyses: [] };
+}
+
+export const GetChangeAnalysesResponse: MessageFns<GetChangeAnalysesResponse> = {
+  encode(message: GetChangeAnalysesResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.analyses) {
+      RepoChangeAnalysis.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetChangeAnalysesResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetChangeAnalysesResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.analyses.push(RepoChangeAnalysis.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetChangeAnalysesResponse {
+    return {
+      analyses: gt.Array.isArray(object?.analyses)
+        ? object.analyses.map((e: any) => RepoChangeAnalysis.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: GetChangeAnalysesResponse): unknown {
+    const obj: any = {};
+    if (message.analyses?.length) {
+      obj.analyses = message.analyses.map((e) => RepoChangeAnalysis.toJSON(e));
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GetChangeAnalysesResponse>): GetChangeAnalysesResponse {
+    return GetChangeAnalysesResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GetChangeAnalysesResponse>): GetChangeAnalysesResponse {
+    const message = createBaseGetChangeAnalysesResponse();
+    message.analyses = object.analyses?.map((e) => RepoChangeAnalysis.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseGetChangeAnalysisRequest(): GetChangeAnalysisRequest {
+  return { analysisId: "" };
+}
+
+export const GetChangeAnalysisRequest: MessageFns<GetChangeAnalysisRequest> = {
+  encode(message: GetChangeAnalysisRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.analysisId !== "") {
+      writer.uint32(10).string(message.analysisId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetChangeAnalysisRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetChangeAnalysisRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.analysisId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetChangeAnalysisRequest {
+    return { analysisId: isSet(object.analysisId) ? gt.String(object.analysisId) : "" };
+  },
+
+  toJSON(message: GetChangeAnalysisRequest): unknown {
+    const obj: any = {};
+    if (message.analysisId !== "") {
+      obj.analysisId = message.analysisId;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GetChangeAnalysisRequest>): GetChangeAnalysisRequest {
+    return GetChangeAnalysisRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GetChangeAnalysisRequest>): GetChangeAnalysisRequest {
+    const message = createBaseGetChangeAnalysisRequest();
+    message.analysisId = object.analysisId ?? "";
+    return message;
+  },
+};
+
+function createBaseGetChangeAnalysisResponse(): GetChangeAnalysisResponse {
+  return { analysis: undefined };
+}
+
+export const GetChangeAnalysisResponse: MessageFns<GetChangeAnalysisResponse> = {
+  encode(message: GetChangeAnalysisResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.analysis !== undefined) {
+      RepoChangeAnalysis.encode(message.analysis, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetChangeAnalysisResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetChangeAnalysisResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.analysis = RepoChangeAnalysis.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetChangeAnalysisResponse {
+    return { analysis: isSet(object.analysis) ? RepoChangeAnalysis.fromJSON(object.analysis) : undefined };
+  },
+
+  toJSON(message: GetChangeAnalysisResponse): unknown {
+    const obj: any = {};
+    if (message.analysis !== undefined) {
+      obj.analysis = RepoChangeAnalysis.toJSON(message.analysis);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GetChangeAnalysisResponse>): GetChangeAnalysisResponse {
+    return GetChangeAnalysisResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GetChangeAnalysisResponse>): GetChangeAnalysisResponse {
+    const message = createBaseGetChangeAnalysisResponse();
+    message.analysis = (object.analysis !== undefined && object.analysis !== null)
+      ? RepoChangeAnalysis.fromPartial(object.analysis)
+      : undefined;
     return message;
   },
 };

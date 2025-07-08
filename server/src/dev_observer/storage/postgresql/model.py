@@ -100,3 +100,32 @@ class WebsiteEntity(Base):
 
     def __repr__(self):
         return f"WebsiteEntity(id={self.id}, json_data={self.json_data})"
+
+
+class RepoChangeAnalysisEntity(Base):
+    __tablename__ = "repo_change_analysis"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    repo_id: Mapped[str] = mapped_column(index=True)
+    status: Mapped[str] = mapped_column(index=True)
+    observation_key: Mapped[Optional[str]]
+    error_message: Mapped[Optional[str]]
+    analyzed_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        DateTime(timezone=True), 
+        index=True
+    )
+    
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )
+
+    def __repr__(self):
+        return f"RepoChangeAnalysisEntity(id={self.id}, repo_id={self.repo_id}, status={self.status})"

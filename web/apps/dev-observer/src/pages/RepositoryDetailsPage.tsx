@@ -19,6 +19,8 @@ import {
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog.tsx";
 import {RepoAnalysisList} from "@/components/repos/RepoAnalysisList.tsx";
+import {ChangeAnalysisControls} from "@/components/repos/ChangeAnalysisControls.tsx";
+import {ChangeAnalysisTimeline} from "@/components/repos/ChangeAnalysisTimeline.tsx";
 
 const RepositoryDetailsPage: React.FC = () => {
   const {id} = useParams<{ id: string }>();
@@ -70,6 +72,14 @@ const RepositoryDetailsPage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+
+          <div className="mb-8">
+            <ChangeAnalysisControls repository={repository} />
+          </div>
+
+          <div className="mb-8">
+            <ChangeAnalysisTimeline repository={repository} />
+          </div>
 
           <RepoAnalysisList repo={repository}/>
         </div>

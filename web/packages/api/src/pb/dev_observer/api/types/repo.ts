@@ -22,6 +22,7 @@ export interface GitHubRepository {
 export interface GitProperties {
   appInfo?: GitAppInfo | undefined;
   meta?: GitMeta | undefined;
+  changeAnalysis?: ChangeAnalysisConfig | undefined;
 }
 
 export interface GitMeta {
@@ -33,6 +34,22 @@ export interface GitMeta {
 export interface GitAppInfo {
   lastRefresh: Date | undefined;
   installationId?: number | undefined;
+}
+
+export interface ChangeAnalysisConfig {
+  enrolled: boolean;
+  enrolledAt: Date | undefined;
+}
+
+export interface RepoChangeAnalysis {
+  id: string;
+  repoId: string;
+  status: string;
+  observationKey?: string | undefined;
+  errorMessage?: string | undefined;
+  analyzedAt?: Date | undefined;
+  createdAt: Date | undefined;
+  updatedAt: Date | undefined;
 }
 
 function createBaseGitHubRepository(): GitHubRepository {
@@ -178,7 +195,7 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
 };
 
 function createBaseGitProperties(): GitProperties {
-  return { appInfo: undefined, meta: undefined };
+  return { appInfo: undefined, meta: undefined, changeAnalysis: undefined };
 }
 
 export const GitProperties: MessageFns<GitProperties> = {
@@ -188,6 +205,9 @@ export const GitProperties: MessageFns<GitProperties> = {
     }
     if (message.meta !== undefined) {
       GitMeta.encode(message.meta, writer.uint32(18).fork()).join();
+    }
+    if (message.changeAnalysis !== undefined) {
+      ChangeAnalysisConfig.encode(message.changeAnalysis, writer.uint32(26).fork()).join();
     }
     return writer;
   },
@@ -215,6 +235,14 @@ export const GitProperties: MessageFns<GitProperties> = {
           message.meta = GitMeta.decode(reader, reader.uint32());
           continue;
         }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.changeAnalysis = ChangeAnalysisConfig.decode(reader, reader.uint32());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -228,6 +256,7 @@ export const GitProperties: MessageFns<GitProperties> = {
     return {
       appInfo: isSet(object.appInfo) ? GitAppInfo.fromJSON(object.appInfo) : undefined,
       meta: isSet(object.meta) ? GitMeta.fromJSON(object.meta) : undefined,
+      changeAnalysis: isSet(object.changeAnalysis) ? ChangeAnalysisConfig.fromJSON(object.changeAnalysis) : undefined,
     };
   },
 
@@ -238,6 +267,9 @@ export const GitProperties: MessageFns<GitProperties> = {
     }
     if (message.meta !== undefined) {
       obj.meta = GitMeta.toJSON(message.meta);
+    }
+    if (message.changeAnalysis !== undefined) {
+      obj.changeAnalysis = ChangeAnalysisConfig.toJSON(message.changeAnalysis);
     }
     return obj;
   },
@@ -251,6 +283,9 @@ export const GitProperties: MessageFns<GitProperties> = {
       ? GitAppInfo.fromPartial(object.appInfo)
       : undefined;
     message.meta = (object.meta !== undefined && object.meta !== null) ? GitMeta.fromPartial(object.meta) : undefined;
+    message.changeAnalysis = (object.changeAnalysis !== undefined && object.changeAnalysis !== null)
+      ? ChangeAnalysisConfig.fromPartial(object.changeAnalysis)
+      : undefined;
     return message;
   },
 };
@@ -419,6 +454,263 @@ export const GitAppInfo: MessageFns<GitAppInfo> = {
     const message = createBaseGitAppInfo();
     message.lastRefresh = object.lastRefresh ?? undefined;
     message.installationId = object.installationId ?? undefined;
+    return message;
+  },
+};
+
+function createBaseChangeAnalysisConfig(): ChangeAnalysisConfig {
+  return { enrolled: false, enrolledAt: undefined };
+}
+
+export const ChangeAnalysisConfig: MessageFns<ChangeAnalysisConfig> = {
+  encode(message: ChangeAnalysisConfig, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.enrolled !== false) {
+      writer.uint32(8).bool(message.enrolled);
+    }
+    if (message.enrolledAt !== undefined) {
+      Timestamp.encode(toTimestamp(message.enrolledAt), writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ChangeAnalysisConfig {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseChangeAnalysisConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.enrolled = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.enrolledAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ChangeAnalysisConfig {
+    return {
+      enrolled: isSet(object.enrolled) ? gt.Boolean(object.enrolled) : false,
+      enrolledAt: isSet(object.enrolledAt) ? fromJsonTimestamp(object.enrolledAt) : undefined,
+    };
+  },
+
+  toJSON(message: ChangeAnalysisConfig): unknown {
+    const obj: any = {};
+    if (message.enrolled !== false) {
+      obj.enrolled = message.enrolled;
+    }
+    if (message.enrolledAt !== undefined) {
+      obj.enrolledAt = message.enrolledAt.toISOString();
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<ChangeAnalysisConfig>): ChangeAnalysisConfig {
+    return ChangeAnalysisConfig.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<ChangeAnalysisConfig>): ChangeAnalysisConfig {
+    const message = createBaseChangeAnalysisConfig();
+    message.enrolled = object.enrolled ?? false;
+    message.enrolledAt = object.enrolledAt ?? undefined;
+    return message;
+  },
+};
+
+function createBaseRepoChangeAnalysis(): RepoChangeAnalysis {
+  return {
+    id: "",
+    repoId: "",
+    status: "",
+    observationKey: undefined,
+    errorMessage: undefined,
+    analyzedAt: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
+  };
+}
+
+export const RepoChangeAnalysis: MessageFns<RepoChangeAnalysis> = {
+  encode(message: RepoChangeAnalysis, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.repoId !== "") {
+      writer.uint32(18).string(message.repoId);
+    }
+    if (message.status !== "") {
+      writer.uint32(26).string(message.status);
+    }
+    if (message.observationKey !== undefined) {
+      writer.uint32(34).string(message.observationKey);
+    }
+    if (message.errorMessage !== undefined) {
+      writer.uint32(42).string(message.errorMessage);
+    }
+    if (message.analyzedAt !== undefined) {
+      Timestamp.encode(toTimestamp(message.analyzedAt), writer.uint32(50).fork()).join();
+    }
+    if (message.createdAt !== undefined) {
+      Timestamp.encode(toTimestamp(message.createdAt), writer.uint32(58).fork()).join();
+    }
+    if (message.updatedAt !== undefined) {
+      Timestamp.encode(toTimestamp(message.updatedAt), writer.uint32(66).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RepoChangeAnalysis {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRepoChangeAnalysis();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.repoId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.status = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.observationKey = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.errorMessage = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.analyzedAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.createdAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.updatedAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RepoChangeAnalysis {
+    return {
+      id: isSet(object.id) ? gt.String(object.id) : "",
+      repoId: isSet(object.repoId) ? gt.String(object.repoId) : "",
+      status: isSet(object.status) ? gt.String(object.status) : "",
+      observationKey: isSet(object.observationKey) ? gt.String(object.observationKey) : undefined,
+      errorMessage: isSet(object.errorMessage) ? gt.String(object.errorMessage) : undefined,
+      analyzedAt: isSet(object.analyzedAt) ? fromJsonTimestamp(object.analyzedAt) : undefined,
+      createdAt: isSet(object.createdAt) ? fromJsonTimestamp(object.createdAt) : undefined,
+      updatedAt: isSet(object.updatedAt) ? fromJsonTimestamp(object.updatedAt) : undefined,
+    };
+  },
+
+  toJSON(message: RepoChangeAnalysis): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.repoId !== "") {
+      obj.repoId = message.repoId;
+    }
+    if (message.status !== "") {
+      obj.status = message.status;
+    }
+    if (message.observationKey !== undefined) {
+      obj.observationKey = message.observationKey;
+    }
+    if (message.errorMessage !== undefined) {
+      obj.errorMessage = message.errorMessage;
+    }
+    if (message.analyzedAt !== undefined) {
+      obj.analyzedAt = message.analyzedAt.toISOString();
+    }
+    if (message.createdAt !== undefined) {
+      obj.createdAt = message.createdAt.toISOString();
+    }
+    if (message.updatedAt !== undefined) {
+      obj.updatedAt = message.updatedAt.toISOString();
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<RepoChangeAnalysis>): RepoChangeAnalysis {
+    return RepoChangeAnalysis.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<RepoChangeAnalysis>): RepoChangeAnalysis {
+    const message = createBaseRepoChangeAnalysis();
+    message.id = object.id ?? "";
+    message.repoId = object.repoId ?? "";
+    message.status = object.status ?? "";
+    message.observationKey = object.observationKey ?? undefined;
+    message.errorMessage = object.errorMessage ?? undefined;
+    message.analyzedAt = object.analyzedAt ?? undefined;
+    message.createdAt = object.createdAt ?? undefined;
+    message.updatedAt = object.updatedAt ?? undefined;
     return message;
   },
 };
