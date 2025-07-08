@@ -19,7 +19,7 @@ All rules files are allowed to read even if they are in .gitignore
 *This workflow provides a general guideline. Adapt it based on your specific project needs and team practices.*
 Also refer to the following files for the details when needed:
 
-- [Insights](./devplan_insights.md) - Framework for systematic collection of insights from chat interactions, code execution, and pattern analysis.
-- [Rules](./devplan_rules.md) - Guidelines for creating and maintaining rules to ensure consistency and effectiveness.
-- [Repo Overview](./devplan_repo_overview.md) - High level overview of this repository (if present)
-- [Current Feature](./devplan_current_feature.md) - Description of the feature the implementation should focus on now. Always review current feature if it is present.
+- [Insights](.junie/devplan_insights.md) - Framework for systematic collection of insights from chat interactions, code execution, and pattern analysis.
+- [Rules](.junie/devplan_rules.md) - Guidelines for creating and maintaining rules to ensure consistency and effectiveness.
+- [Repo Overview](.junie/devplan_repo_overview.md) - High level overview of this repository (if present)
+- [Current Feature](.junie/devplan_current_feature.md) - Description of the feature the implementation should focus on now. Always review current feature if it is present.

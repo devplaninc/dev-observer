@@ -1,11 +1,12 @@
 import dataclasses
 import datetime
-from typing import Protocol, Optional, MutableSequence
+from typing import Protocol, Optional, MutableSequence, List
 
 from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
 from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
 from dev_observer.api.types.sites_pb2 import WebSite
+from dev_observer.storage.postgresql.model import RepoChangeAnalysisEntity
 
 @dataclasses.dataclass
 class AddWebSiteData:
@@ -55,4 +56,20 @@ class StorageProvider(Protocol):
         ...
 
     async def set_global_config(self, config: GlobalConfig) -> GlobalConfig:
+        ...
+
+    # Change Analysis methods
+    async def create_change_analysis_record(self, record: RepoChangeAnalysisEntity) -> RepoChangeAnalysisEntity:
+        ...
+
+    async def update_change_analysis_record(self, record: RepoChangeAnalysisEntity) -> RepoChangeAnalysisEntity:
+        ...
+
+    async def get_change_analysis_records(self, repo_id: Optional[str] = None, status: Optional[str] = None, start_date: Optional[datetime.datetime] = None, end_date: Optional[datetime.datetime] = None) -> List[RepoChangeAnalysisEntity]:
+        ...
+
+    async def get_change_analysis_record(self, record_id: str) -> Optional[RepoChangeAnalysisEntity]:
+        ...
+
+    async def get_enrolled_repositories(self) -> List[GitHubRepository]:
         ...

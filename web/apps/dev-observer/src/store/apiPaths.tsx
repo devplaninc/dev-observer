@@ -32,6 +32,22 @@ export function observationAPI<K extends string, N extends string, C extends str
   return `${baseAPI()}/observation/${kind}/${encodeURIComponent(name)}/${enc(key)}` as const;
 }
 
+export function repoChangeAnalysisEnrollAPI<R extends string>(repoId: R) {
+  return `${repoAPI(repoId)}/change-analysis/enroll` as const;
+}
+
+export function repoChangeAnalysisUnenrollAPI<R extends string>(repoId: R) {
+  return `${repoAPI(repoId)}/change-analysis/unenroll` as const;
+}
+
+export function repoChangeAnalysisStatusAPI<R extends string>(repoId: R) {
+  return `${repoAPI(repoId)}/change-analysis/status` as const;
+}
+
+export function changeSummariesAPI() {
+  return `${baseAPI()}/change-summaries` as const;
+}
+
 // Encodes as base64
 function enc(v: string): string {
   // TODO: perform safe encoding

@@ -16,6 +16,7 @@ message GitHubRepository {
 message GitProperties {
   optional GitAppInfo app_info = 1;
   optional GitMeta meta = 2;
+  optional ChangeAnalysisConfig change_analysis = 3;
 }
 
 message GitMeta {
@@ -27,4 +28,9 @@ message GitMeta {
 message GitAppInfo {
   google.protobuf.Timestamp last_refresh = 1;
   optional int32 installation_id = 2;
+}
+
+message ChangeAnalysisConfig {
+  bool enrolled = 1;
+  google.protobuf.Timestamp last_analysis = 2;
 }

@@ -13,6 +13,7 @@ import dev_observer.log
 from dev_observer.env_detection import detect_server_env
 from dev_observer.server.env import ServerEnv
 from dev_observer.server.middleware.auth import AuthMiddleware
+from dev_observer.server.services.change_analysis import ChangeAnalysisService
 from dev_observer.server.services.config import ConfigService
 from dev_observer.server.services.observations import ObservationsService
 from dev_observer.server.services.repositories import RepositoriesService
@@ -59,6 +60,7 @@ config_service = ConfigService(env.storage, env.users)
 repos_service = RepositoriesService(env.storage)
 observations_service = ObservationsService(env.observations)
 websites_service = WebSitesService(env.storage)
+change_analysis_service = ChangeAnalysisService(env.storage, env.observations)
 
 # Include routers with authentication
 app.include_router(
@@ -78,6 +80,11 @@ app.include_router(
 )
 app.include_router(
     websites_service.router,
+    prefix="/api/v1",
+    dependencies=[Depends(auth_middleware.verify_token)]
+)
+app.include_router(
+    change_analysis_service.router,
     prefix="/api/v1",
     dependencies=[Depends(auth_middleware.verify_token)]
 )
