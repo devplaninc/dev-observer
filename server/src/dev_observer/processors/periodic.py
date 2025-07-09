@@ -8,6 +8,7 @@ from dev_observer.api.types.processing_pb2 import ProcessingItem
 from dev_observer.log import s_
 from dev_observer.processors.flattening import ObservationRequest
 from dev_observer.processors.repos import ReposProcessor
+from dev_observer.processors.changes_summary import ChangesSummaryProcessor
 from dev_observer.repository.types import ObservedRepo
 from dev_observer.processors.websites import WebsitesProcessor, ObservedWebsite
 from dev_observer.storage.provider import StorageProvider
@@ -19,17 +20,20 @@ _log = logging.getLogger(__name__)
 class PeriodicProcessor:
     _storage: StorageProvider
     _repos_processor: ReposProcessor
+    _changes_summary_processor: ChangesSummaryProcessor
     _websites_processor: Optional[WebsitesProcessor]
     _clock: Clock
 
     def __init__(self,
                  storage: StorageProvider,
                  repos_processor: ReposProcessor,
+                 changes_summary_processor: ChangesSummaryProcessor,
                  websites_processor: Optional[WebsitesProcessor] = None,
                  clock: Clock = RealClock(),
                  ):
         self._storage = storage
         self._repos_processor = repos_processor
+        self._changes_summary_processor = changes_summary_processor
         self._websites_processor = websites_processor
         self._clock = clock
 
@@ -89,6 +93,14 @@ class PeriodicProcessor:
             _log.debug(s_("No analyzers configured, skipping", repo=repo))
             return
         await self._repos_processor.process(ObservedRepo(url=repo.url, github_repo=repo), requests, config)
+        
+        # Check if changes summary is enabled for this repo
+        if repo.HasField("properties") and repo.properties.HasField("changes_summary_config"):
+            config = repo.properties.changes_summary_config
+            if config.enabled:
+                _log.debug(s_("Processing changes summary for repo", repo=repo))
+                await self._changes_summary_processor.create_changes_summary(repo, config.days_back)
+        
         _log.debug(s_("Github repo processed", repo=repo))
 
     async def _process_website(self, website_url: str):

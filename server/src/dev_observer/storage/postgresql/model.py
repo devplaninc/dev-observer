@@ -100,3 +100,27 @@ class WebsiteEntity(Base):
 
     def __repr__(self):
         return f"WebsiteEntity(id={self.id}, json_data={self.json_data})"
+
+
+class ChangesSummaryEntity(Base):
+    __tablename__ = "changes_summary"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    repo_id: Mapped[str] = mapped_column(index=True)
+    repo_full_name: Mapped[str] = mapped_column(index=True)
+    json_data: Mapped[str]
+
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )
+
+    def __repr__(self):
+        return f"ChangesSummaryEntity(id={self.id}, repo_id={self.repo_id}, json_data={self.json_data})"

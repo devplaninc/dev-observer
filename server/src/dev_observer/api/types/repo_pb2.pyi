@@ -22,12 +22,24 @@ class GitHubRepository(_message.Message):
     def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., full_name: _Optional[str] = ..., url: _Optional[str] = ..., description: _Optional[str] = ..., properties: _Optional[_Union[GitProperties, _Mapping]] = ...) -> None: ...
 
 class GitProperties(_message.Message):
-    __slots__ = ("app_info", "meta")
+    __slots__ = ("app_info", "meta", "changes_summary_config")
     APP_INFO_FIELD_NUMBER: _ClassVar[int]
     META_FIELD_NUMBER: _ClassVar[int]
+    CHANGES_SUMMARY_CONFIG_FIELD_NUMBER: _ClassVar[int]
     app_info: GitAppInfo
     meta: GitMeta
-    def __init__(self, app_info: _Optional[_Union[GitAppInfo, _Mapping]] = ..., meta: _Optional[_Union[GitMeta, _Mapping]] = ...) -> None: ...
+    changes_summary_config: ChangesSummaryConfig
+    def __init__(self, app_info: _Optional[_Union[GitAppInfo, _Mapping]] = ..., meta: _Optional[_Union[GitMeta, _Mapping]] = ..., changes_summary_config: _Optional[_Union[ChangesSummaryConfig, _Mapping]] = ...) -> None: ...
+
+class ChangesSummaryConfig(_message.Message):
+    __slots__ = ("enabled", "analysis_interval_hours", "days_back")
+    ENABLED_FIELD_NUMBER: _ClassVar[int]
+    ANALYSIS_INTERVAL_HOURS_FIELD_NUMBER: _ClassVar[int]
+    DAYS_BACK_FIELD_NUMBER: _ClassVar[int]
+    enabled: bool
+    analysis_interval_hours: int
+    days_back: int
+    def __init__(self, enabled: bool = ..., analysis_interval_hours: _Optional[int] = ..., days_back: _Optional[int] = ...) -> None: ...
 
 class GitMeta(_message.Message):
     __slots__ = ("last_refresh", "clone_url", "size_kb")

@@ -6,6 +6,18 @@ export {ProcessingItem, ProcessingItemKey} from './pb/dev_observer/api/types/pro
 export {GitHubRepository} from './pb/dev_observer/api/types/repo';
 export {WebSite} from './pb/dev_observer/api/types/sites';
 export {
+  GitHubChangesSummary,
+  ChangesSummaryContent,
+  CommitInfo,
+  FileChange,
+  PullRequestInfo,
+  IssueInfo,
+  ChangesStatistics,
+  LanguageStats,
+  ChangeType,
+  ChangesSummaryStatus
+} from './pb/dev_observer/api/types/changes';
+export {
   ListWebSitesResponse,
   GetWebSiteResponse,
   AddWebSiteResponse,
@@ -26,6 +38,16 @@ export {
   ListGithubRepositoriesResponse,
   RescanRepositoryResponse
 } from './pb/dev_observer/api/web/repositories';
+export {
+  ListChangesSummariesRequest,
+  ListChangesSummariesResponse,
+  GetChangesSummaryRequest,
+  GetChangesSummaryResponse,
+  CreateChangesSummaryRequest,
+  CreateChangesSummaryResponse,
+  DeleteChangesSummaryRequest,
+  DeleteChangesSummaryResponse
+} from './pb/dev_observer/api/web/changes';
 
 export {LocalStorageData} from './pb/dev_observer/api/storage/local';
 
@@ -36,4 +58,5 @@ export {S3ObservationsFetcherProps, FetchResult, S3ObservationsFetcher} from './
 export {ObservationsClient} from './client/observations';
 export {RepositoriesClient} from './client/repositories';
 export {WebsitesClient} from './client/websites';
+export {ChangesClient} from './client/changes';
 export {normalizeDomain, normalizeName} from './client/sitesUtils';

@@ -32,6 +32,14 @@ export function observationAPI<K extends string, N extends string, C extends str
   return `${baseAPI()}/observation/${kind}/${encodeURIComponent(name)}/${enc(key)}` as const;
 }
 
+export function changesSummariesAPI() {
+  return `${baseAPI()}/changes-summaries` as const;
+}
+
+export function changesSummaryAPI<S extends string>(summaryId: S) {
+  return `${changesSummariesAPI()}/${summaryId}` as const;
+}
+
 // Encodes as base64
 function enc(v: string): string {
   // TODO: perform safe encoding

@@ -16,6 +16,13 @@ message GitHubRepository {
 message GitProperties {
   optional GitAppInfo app_info = 1;
   optional GitMeta meta = 2;
+  optional ChangesSummaryConfig changes_summary_config = 3;
+}
+
+message ChangesSummaryConfig {
+  bool enabled = 1;
+  int32 analysis_interval_hours = 2;
+  int32 days_back = 3;
 }
 
 message GitMeta {

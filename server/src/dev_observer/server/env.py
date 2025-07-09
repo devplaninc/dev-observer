@@ -4,6 +4,7 @@ from typing import List
 from dev_observer.observations.provider import ObservationsProvider
 from dev_observer.processors.periodic import PeriodicProcessor
 from dev_observer.processors.repos import ReposProcessor
+from dev_observer.processors.changes_summary import ChangesSummaryProcessor
 from dev_observer.storage.provider import StorageProvider
 from dev_observer.users.provider import UsersProvider
 
@@ -13,6 +14,7 @@ class ServerEnv:
     observations: ObservationsProvider
     storage: StorageProvider
     repos_processor: ReposProcessor
+    changes_summary_processor: ChangesSummaryProcessor
     periodic_processor: PeriodicProcessor
     users: UsersProvider
     api_keys: List[str]

@@ -9,8 +9,9 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSessio
 from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
 from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
+from dev_observer.api.types.changes_pb2 import GitHubChangesSummary
 from dev_observer.api.types.sites_pb2 import WebSite
-from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity, WebsiteEntity
+from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity, WebsiteEntity, ChangesSummaryEntity
 from dev_observer.storage.provider import StorageProvider, AddWebSiteData
 from dev_observer.util import parse_json_pb, pb_to_json, Clock, RealClock
 
@@ -166,6 +167,46 @@ class PostgresqlStorageProvider(StorageProvider):
                 )
         return await self.get_global_config()
 
+    async def save_changes_summary(self, summary: GitHubChangesSummary) -> GitHubChangesSummary:
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                existing = await session.get(ChangesSummaryEntity, summary.id)
+                if existing is not None:
+                    await session.execute(
+                        update(ChangesSummaryEntity)
+                        .where(ChangesSummaryEntity.id == summary.id)
+                        .values(json_data=pb_to_json(summary))
+                    )
+                else:
+                    session.add(ChangesSummaryEntity(
+                        id=summary.id,
+                        repo_id=summary.repo_id,
+                        repo_full_name=summary.repo_full_name,
+                        json_data=pb_to_json(summary)
+                    ))
+        return await self.get_changes_summary(summary.id)
+
+    async def get_changes_summary(self, summary_id: str) -> Optional[GitHubChangesSummary]:
+        async with AsyncSession(self._engine) as session:
+            ent = await session.get(ChangesSummaryEntity, summary_id)
+            return _to_optional_changes_summary(ent)
+
+    async def list_changes_summaries(self, repo_id: str, limit: int = 50, offset: int = 0) -> MutableSequence[GitHubChangesSummary]:
+        async with AsyncSession(self._engine) as session:
+            entities = await session.execute(
+                select(ChangesSummaryEntity)
+                .where(ChangesSummaryEntity.repo_id == repo_id)
+                .order_by(ChangesSummaryEntity.created_at.desc())
+                .limit(limit)
+                .offset(offset)
+            )
+            return [_to_changes_summary(e[0]) for e in entities.all()]
+
+    async def delete_changes_summary(self, summary_id: str):
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                await session.execute(delete(ChangesSummaryEntity).where(ChangesSummaryEntity.id == summary_id))
+
 
 def _to_optional_repo(ent: Optional[GitRepoEntity]) -> Optional[GitHubRepository]:
     return None if ent is None else _to_repo(ent)
@@ -207,4 +248,16 @@ def _to_item(ent: ProcessingItemEntity) -> ProcessingItem:
     data.last_error = ent.last_error if ent.last_error else ""
     data.no_processing = ent.no_processing
     data.key.CopyFrom(parse_json_pb(ent.key, ProcessingItemKey()))
+    return data
+
+
+def _to_optional_changes_summary(ent: Optional[ChangesSummaryEntity]) -> Optional[GitHubChangesSummary]:
+    return None if ent is None else _to_changes_summary(ent)
+
+
+def _to_changes_summary(ent: ChangesSummaryEntity) -> GitHubChangesSummary:
+    data = parse_json_pb(ent.json_data, GitHubChangesSummary())
+    data.id = ent.id
+    data.repo_id = ent.repo_id
+    data.repo_full_name = ent.repo_full_name
     return data
