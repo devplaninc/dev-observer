@@ -24,7 +24,9 @@ export {
   AddGithubRepositoryResponse,
   AddGithubRepositoryRequest,
   ListGithubRepositoriesResponse,
-  RescanRepositoryResponse
+  RescanRepositoryResponse,
+  EnrollRepositoryResponse,
+  UnenrollRepositoryResponse
 } from './pb/dev_observer/api/web/repositories';
 
 export {LocalStorageData} from './pb/dev_observer/api/storage/local';

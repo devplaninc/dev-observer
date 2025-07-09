@@ -11,6 +11,10 @@ message GitHubRepository {
   string url = 4;
   string description = 5;
   optional GitProperties properties = 6;
+  // Indicates if this repo is enrolled for daily change analysis
+  optional bool change_analysis_enrolled = 7;
+  // Reserved for future config (e.g., schedule, notification)
+  // optional ChangeAnalysisConfig change_analysis_config = 8;
 }
 
 message GitProperties {

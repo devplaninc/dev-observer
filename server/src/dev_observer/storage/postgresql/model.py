@@ -1,7 +1,8 @@
 import datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, func
+from sqlalchemy import DateTime, func, String, Text, Enum
+import enum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -100,3 +101,24 @@ class WebsiteEntity(Base):
 
     def __repr__(self):
         return f"WebsiteEntity(id={self.id}, json_data={self.json_data})"
+
+
+class RepoChangeAnalysisStatus(enum.Enum):
+    pending = "pending"
+    completed = "completed"
+    failed = "failed"
+
+class RepoChangeAnalysisEntity(Base):
+    __tablename__ = "repo_change_analysis"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    repo_id: Mapped[str] = mapped_column(String, index=True)
+    status: Mapped[RepoChangeAnalysisStatus] = mapped_column(Enum(RepoChangeAnalysisStatus), index=True)
+    observation_key: Mapped[Optional[str]] = mapped_column(Text)
+    error_message: Mapped[Optional[str]] = mapped_column(Text)
+    analyzed_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(timezone=True), index=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    def __repr__(self):
+        return f"RepoChangeAnalysisEntity(id={self.id}, repo_id={self.repo_id}, status={self.status}, observation_key={self.observation_key}, error_message={self.error_message}, analyzed_at={self.analyzed_at})"

@@ -1,16 +1,16 @@
 import datetime
 import uuid
-from typing import Optional, MutableSequence
+from typing import Optional, MutableSequence, List
 
 from google.protobuf import json_format
-from sqlalchemy import select, delete, update
+from sqlalchemy import select, delete, update, and_
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSession
 
 from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
 from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
 from dev_observer.api.types.sites_pb2 import WebSite
-from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity, WebsiteEntity
+from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity, WebsiteEntity, RepoChangeAnalysisEntity, RepoChangeAnalysisStatus
 from dev_observer.storage.provider import StorageProvider, AddWebSiteData
 from dev_observer.util import parse_json_pb, pb_to_json, Clock, RealClock
 
@@ -165,6 +165,63 @@ class PostgresqlStorageProvider(StorageProvider):
                     .values(json_data=pb_to_json(config))
                 )
         return await self.get_global_config()
+
+    # Change Analysis methods
+    async def get_change_analysis_jobs(self, repo_id: Optional[str] = None, status: Optional[str] = None) -> List[RepoChangeAnalysisEntity]:
+        async with AsyncSession(self._engine) as session:
+            query = select(RepoChangeAnalysisEntity)
+            
+            conditions = []
+            if repo_id:
+                conditions.append(RepoChangeAnalysisEntity.repo_id == repo_id)
+            if status:
+                conditions.append(RepoChangeAnalysisEntity.status == RepoChangeAnalysisStatus(status))
+            
+            if conditions:
+                query = query.where(and_(*conditions))
+            
+            query = query.order_by(RepoChangeAnalysisEntity.analyzed_at.desc())
+            
+            result = await session.execute(query)
+            return [row[0] for row in result.all()]
+
+    async def get_change_analysis_job(self, job_id: str) -> Optional[RepoChangeAnalysisEntity]:
+        async with AsyncSession(self._engine) as session:
+            return await session.get(RepoChangeAnalysisEntity, job_id)
+
+    async def create_change_analysis_job(self, job: RepoChangeAnalysisEntity) -> RepoChangeAnalysisEntity:
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                session.add(job)
+                await session.flush()
+                return job
+
+    async def update_change_analysis_job(self, job: RepoChangeAnalysisEntity) -> RepoChangeAnalysisEntity:
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                await session.merge(job)
+                return job
+
+    async def get_today_analysis_job(self, repo_id: str, date: datetime.date) -> Optional[RepoChangeAnalysisEntity]:
+        async with AsyncSession(self._engine) as session:
+            start_date = datetime.datetime.combine(date, datetime.time.min)
+            end_date = datetime.datetime.combine(date, datetime.time.max)
+            
+            result = await session.execute(
+                select(RepoChangeAnalysisEntity)
+                .where(
+                    and_(
+                        RepoChangeAnalysisEntity.repo_id == repo_id,
+                        RepoChangeAnalysisEntity.analyzed_at >= start_date,
+                        RepoChangeAnalysisEntity.analyzed_at <= end_date
+                    )
+                )
+                .order_by(RepoChangeAnalysisEntity.created_at.desc())
+                .limit(1)
+            )
+            
+            row = result.first()
+            return row[0] if row else None
 
 
 def _to_optional_repo(ent: Optional[GitRepoEntity]) -> Optional[GitHubRepository]:

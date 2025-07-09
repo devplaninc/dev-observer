@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from dev_observer.api.types import observations_pb2 as dev__observer_dot_api_dot_types_dot_observations__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\'dev_observer/api/web/observations.proto\x12!dev_observer.api.web.observations\x1a)dev_observer/api/types/observations.proto\"\\\n\x17GetObservationsResponse\x12\x41\n\x04keys\x18\x01 \x03(\x0b\x32\x33.dev_observer.api.types.observations.ObservationKey\"_\n\x16GetObservationResponse\x12\x45\n\x0bobservation\x18\x01 \x01(\x0b\x32\x30.dev_observer.api.types.observations.Observationb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\'dev_observer/api/web/observations.proto\x12!dev_observer.api.web.observations\x1a)dev_observer/api/types/observations.proto\"\\\n\x17GetObservationsResponse\x12\x41\n\x04keys\x18\x01 \x03(\x0b\x32\x33.dev_observer.api.types.observations.ObservationKey\"_\n\x16GetObservationResponse\x12\x45\n\x0bobservation\x18\x01 \x01(\x0b\x32\x30.dev_observer.api.types.observations.Observation\"\xa5\x01\n\x19GetChangeSummariesRequest\x12\x14\n\x07repo_id\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x16\n\tdate_from\x18\x02 \x01(\tH\x01\x88\x01\x01\x12\x14\n\x07\x64\x61te_to\x18\x03 \x01(\tH\x02\x88\x01\x01\x12\x13\n\x06status\x18\x04 \x01(\tH\x03\x88\x01\x01\x42\n\n\x08_repo_idB\x0c\n\n_date_fromB\n\n\x08_date_toB\t\n\x07_status\"a\n\x1aGetChangeSummariesResponse\x12\x43\n\tsummaries\x18\x01 \x03(\x0b\x32\x30.dev_observer.api.web.observations.ChangeSummary\"\x8f\x02\n\rChangeSummary\x12\x0e\n\x06job_id\x18\x01 \x01(\t\x12\x0f\n\x07repo_id\x18\x02 \x01(\t\x12\x11\n\trepo_name\x18\x03 \x01(\t\x12\x0e\n\x06status\x18\x04 \x01(\t\x12\x1c\n\x0fobservation_key\x18\x05 \x01(\tH\x00\x88\x01\x01\x12\x1a\n\rerror_message\x18\x06 \x01(\tH\x01\x88\x01\x01\x12\x18\n\x0b\x61nalyzed_at\x18\x07 \x01(\tH\x02\x88\x01\x01\x12\x1c\n\x0fsummary_content\x18\x08 \x01(\tH\x03\x88\x01\x01\x42\x12\n\x10_observation_keyB\x10\n\x0e_error_messageB\x0e\n\x0c_analyzed_atB\x12\n\x10_summary_contentb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -36,4 +36,10 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GETOBSERVATIONSRESPONSE']._serialized_end=213
   _globals['_GETOBSERVATIONRESPONSE']._serialized_start=215
   _globals['_GETOBSERVATIONRESPONSE']._serialized_end=310
+  _globals['_GETCHANGESUMMARIESREQUEST']._serialized_start=313
+  _globals['_GETCHANGESUMMARIESREQUEST']._serialized_end=478
+  _globals['_GETCHANGESUMMARIESRESPONSE']._serialized_start=480
+  _globals['_GETCHANGESUMMARIESRESPONSE']._serialized_end=577
+  _globals['_CHANGESUMMARY']._serialized_start=580
+  _globals['_CHANGESUMMARY']._serialized_end=851
 # @@protoc_insertion_point(module_scope)

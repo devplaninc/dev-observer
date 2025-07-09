@@ -1,5 +1,5 @@
 import * as React from "react"
-import {ShieldUser, SquareTerminal, Globe} from "lucide-react"
+import {ShieldUser, SquareTerminal, Globe, Clock} from "lucide-react"
 
 import {NavSecondary} from "@/components/nav-secondary.tsx"
 import {
@@ -29,6 +29,11 @@ const data = {
       url: "/repositories",
       icon: SquareTerminal,
       isActive: true,
+    },
+    {
+      title: "Change Summaries",
+      url: "/change-summaries",
+      icon: Clock,
     },
     {
       title: "Websites",

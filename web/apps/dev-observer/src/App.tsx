@@ -4,6 +4,7 @@ import RepositoryListPage from './pages/RepositoryListPage.tsx';
 import RepositoryDetailsPage from './pages/RepositoryDetailsPage.tsx';
 import WebSitesListPage from './pages/WebSitesListPage.tsx';
 import WebSiteDetailsPage from './pages/WebSiteDetailsPage.tsx';
+import ChangeSummariesPage from './pages/ChangeSummariesPage.tsx';
 import GlobalConfigEditorPage from "@/pages/config/GlobalConfigEditorPage.tsx";
 import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar.tsx";
 import {SiteHeader} from "@/components/layout/SiteHeader.tsx";
@@ -67,6 +68,7 @@ function AppRoutes() {
     <Route path="/repositories/:id" element={<RepositoryDetailsPage/>}/>
     <Route path="/websites" element={<WebSitesListPage/>}/>
     <Route path="/websites/:id" element={<WebSiteDetailsPage/>}/>
+    <Route path="/change-summaries" element={<ChangeSummariesPage/>}/>
     <Route path="/admin/config-editor" element={<GlobalConfigEditorPage/>}/>
     <Route path="/" element={<Navigate to="/repositories" replace/>}/>
     <Route path="*" element={<Navigate to="/repositories" replace/>}/>

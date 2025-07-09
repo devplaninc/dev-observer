@@ -11,3 +11,25 @@ message GetObservationsResponse {
 message GetObservationResponse {
   dev_observer.api.types.observations.Observation observation = 1;
 }
+
+message GetChangeSummariesRequest {
+  optional string repo_id = 1;
+  optional string date_from = 2;  // ISO date string
+  optional string date_to = 3;    // ISO date string
+  optional string status = 4;     // pending, completed, failed
+}
+
+message GetChangeSummariesResponse {
+  repeated ChangeSummary summaries = 1;
+}
+
+message ChangeSummary {
+  string job_id = 1;
+  string repo_id = 2;
+  string repo_name = 3;
+  string status = 4;
+  optional string observation_key = 5;
+  optional string error_message = 6;
+  optional string analyzed_at = 7;  // ISO datetime string
+  optional string summary_content = 8;
+}

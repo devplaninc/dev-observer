@@ -1,11 +1,13 @@
 import type {StateCreator} from "zustand";
-import {repoAPI, repoRescanAPI, reposAPI} from "@/store/apiPaths.tsx";
+import {repoAPI, repoRescanAPI, reposAPI, repoEnrollAPI, repoUnenrollAPI} from "@/store/apiPaths.tsx";
 import {
   AddGithubRepositoryRequest,
   AddGithubRepositoryResponse,
   DeleteRepositoryResponse,
   GetRepositoryResponse,
-  ListGithubRepositoriesResponse
+  ListGithubRepositoriesResponse,
+  EnrollRepositoryResponse,
+  UnenrollRepositoryResponse
 } from "@devplan/observer-api";
 import type {GitHubRepository} from "@devplan/observer-api";
 import {fetchWithAuth, VoidParser} from "@/store/api.tsx";
@@ -18,6 +20,8 @@ export interface RepositoryState {
   addRepository: (url: string) => Promise<void>;
   deleteRepository: (id: string) => Promise<void>;
   rescanRepository: (id: string) => Promise<void>;
+  enrollRepository: (id: string) => Promise<void>;
+  unenrollRepository: (id: string) => Promise<void>;
 }
 
 export const createRepositoriesSlice: StateCreator<
@@ -60,4 +64,26 @@ export const createRepositoriesSlice: StateCreator<
       set(s => ({...s, repositories}))
     }),
   rescanRepository: async id => fetchWithAuth(repoRescanAPI(id), new VoidParser(), {method: "POST"}),
+
+  enrollRepository: async id => fetchWithAuth(
+    repoEnrollAPI(id),
+    EnrollRepositoryResponse,
+    {method: "POST"}
+  ).then(r => {
+    const {repo} = r
+    if (repo) {
+      set(s => ({...s, repositories: {...s.repositories, [repo.id]: repo}}))
+    }
+  }),
+
+  unenrollRepository: async id => fetchWithAuth(
+    repoUnenrollAPI(id),
+    UnenrollRepositoryResponse,
+    {method: "POST"}
+  ).then(r => {
+    const {repo} = r
+    if (repo) {
+      set(s => ({...s, repositories: {...s.repositories, [repo.id]: repo}}))
+    }
+  }),
 }));
