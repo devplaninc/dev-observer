@@ -1,5 +1,5 @@
 # dev-observer
-Observer of all the important stuff.
+Standalone context building application that performs in-depth github repository analysis and website crawl. Output is a summary that can be used for context in AI applications like Devplan or for input into other process (or simply for better understanding of code or website content).
 
 ## Setup:
 
