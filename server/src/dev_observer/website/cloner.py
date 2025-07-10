@@ -5,7 +5,9 @@ import os
 import re
 import tempfile
 import urllib.parse
+from typing import Optional
 
+from dev_observer.api.types.config_pb2 import WebsiteCrawlingConfig
 from dev_observer.log import s_
 from dev_observer.website.provider import WebsiteCrawlerProvider
 
@@ -48,15 +50,21 @@ class CrawlResult:
 async def crawl_website(
         url: str,
         provider: WebsiteCrawlerProvider,
-        timeout: float = 30.0,  # 30 seconds default timeout
+        crawling_config: Optional[WebsiteCrawlingConfig] = None,
 ) -> CrawlResult:
     name = normalize_name(url)
     domain = normalize_domain(url)
     temp_dir = tempfile.mkdtemp(prefix=f"website_{domain}_{name}_")
+    
+    timeout = 30
+    if crawling_config and crawling_config.website_scan_timeout_seconds:
+        timeout = crawling_config.website_scan_timeout_seconds
+    
     extra = {"url": url, "dest": temp_dir, "timeout": timeout}
     _log.debug(s_("Crawling website...", **extra))
     try:
-        await asyncio.wait_for(provider.crawl(url, temp_dir), timeout=timeout)
+        # The provider will handle its own timeout, but we add this as a safety net
+        await asyncio.wait_for(provider.crawl(url, temp_dir, crawling_config), timeout=timeout)
     except asyncio.TimeoutError:
         _log.error(s_("Website crawling timed out", **extra))
         raise

@@ -44,9 +44,17 @@ const repoAnalysisConfigSchema = z.object({
   disabled: z.boolean(),
 })
 
+const websiteCrawlingConfigSchema = z.object({
+  websiteScanTimeoutSeconds: z.coerce.number(),
+  scrapyResponseTimeoutSeconds: z.coerce.number(),
+  crawlDepth: z.coerce.number(),
+  timeoutWithoutDataSeconds: z.coerce.number(),
+})
+
 const globalConfigSchema = z.object({
   analysis: analysisConfigSchema,
   repoAnalysis: repoAnalysisConfigSchema,
+  websiteCrawling: websiteCrawlingConfigSchema.optional(),
 })
 
 export type globalConfigType = z.infer<typeof globalConfigSchema>
@@ -387,6 +395,72 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
                     checked={field.value}
                     onChange={field.onChange}
                   />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+
+      <Separator/>
+
+      <div className="space-y-4">
+        <h2 className="font-semibold text-lg">Website Crawling Configuration:</h2>
+
+        <div className="border rounded-md p-4 space-y-4">
+          <h3 className="font-medium">Crawling Parameters</h3>
+
+          <FormField
+            control={form.control}
+            name="websiteCrawling.websiteScanTimeoutSeconds"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Website Scan Timeout (seconds):</FormLabel>
+                <FormControl className="w-[200px]">
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))}/>
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="websiteCrawling.scrapyResponseTimeoutSeconds"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Response Timeout (seconds):</FormLabel>
+                <FormControl className="w-[200px]">
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))}/>
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="websiteCrawling.crawlDepth"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Crawl Depth:</FormLabel>
+                <FormControl className="w-[200px]">
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))}/>
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="websiteCrawling.timeoutWithoutDataSeconds"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Timeout Without Data (seconds):</FormLabel>
+                <FormControl className="w-[200px]">
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))}/>
                 </FormControl>
                 <FormMessage/>
               </FormItem>

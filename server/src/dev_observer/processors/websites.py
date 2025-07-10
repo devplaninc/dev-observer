@@ -35,5 +35,5 @@ class WebsitesProcessor(FlatteningProcessor[ObservedWebsite]):
         self.tokenizer = tokenizer
     
     async def get_flatten(self, website: ObservedWebsite, config: GlobalConfig):
-        result = await flatten_website(website.url, self.website_crawler, self.tokenizer)
+        result = await flatten_website(website.url, self.website_crawler, self.tokenizer, config.website_crawling)
         return result.flatten_result

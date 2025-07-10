@@ -13,6 +13,7 @@ export const protobufPackage = "dev_observer.api.types.config";
 export interface GlobalConfig {
   analysis: AnalysisConfig | undefined;
   repoAnalysis: RepoAnalysisConfig | undefined;
+  websiteCrawling: WebsiteCrawlingConfig | undefined;
 }
 
 export interface AnalysisConfig {
@@ -46,8 +47,15 @@ export interface RepoAnalysisConfig_Flatten {
   compressLarge: boolean;
 }
 
+export interface WebsiteCrawlingConfig {
+  websiteScanTimeoutSeconds: number;
+  scrapyResponseTimeoutSeconds: number;
+  crawlDepth: number;
+  timeoutWithoutDataSeconds: number;
+}
+
 function createBaseGlobalConfig(): GlobalConfig {
-  return { analysis: undefined, repoAnalysis: undefined };
+  return { analysis: undefined, repoAnalysis: undefined, websiteCrawling: undefined };
 }
 
 export const GlobalConfig: MessageFns<GlobalConfig> = {
@@ -57,6 +65,9 @@ export const GlobalConfig: MessageFns<GlobalConfig> = {
     }
     if (message.repoAnalysis !== undefined) {
       RepoAnalysisConfig.encode(message.repoAnalysis, writer.uint32(18).fork()).join();
+    }
+    if (message.websiteCrawling !== undefined) {
+      WebsiteCrawlingConfig.encode(message.websiteCrawling, writer.uint32(26).fork()).join();
     }
     return writer;
   },
@@ -84,6 +95,14 @@ export const GlobalConfig: MessageFns<GlobalConfig> = {
           message.repoAnalysis = RepoAnalysisConfig.decode(reader, reader.uint32());
           continue;
         }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.websiteCrawling = WebsiteCrawlingConfig.decode(reader, reader.uint32());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -97,6 +116,9 @@ export const GlobalConfig: MessageFns<GlobalConfig> = {
     return {
       analysis: isSet(object.analysis) ? AnalysisConfig.fromJSON(object.analysis) : undefined,
       repoAnalysis: isSet(object.repoAnalysis) ? RepoAnalysisConfig.fromJSON(object.repoAnalysis) : undefined,
+      websiteCrawling: isSet(object.websiteCrawling)
+        ? WebsiteCrawlingConfig.fromJSON(object.websiteCrawling)
+        : undefined,
     };
   },
 
@@ -107,6 +129,9 @@ export const GlobalConfig: MessageFns<GlobalConfig> = {
     }
     if (message.repoAnalysis !== undefined) {
       obj.repoAnalysis = RepoAnalysisConfig.toJSON(message.repoAnalysis);
+    }
+    if (message.websiteCrawling !== undefined) {
+      obj.websiteCrawling = WebsiteCrawlingConfig.toJSON(message.websiteCrawling);
     }
     return obj;
   },
@@ -121,6 +146,9 @@ export const GlobalConfig: MessageFns<GlobalConfig> = {
       : undefined;
     message.repoAnalysis = (object.repoAnalysis !== undefined && object.repoAnalysis !== null)
       ? RepoAnalysisConfig.fromPartial(object.repoAnalysis)
+      : undefined;
+    message.websiteCrawling = (object.websiteCrawling !== undefined && object.websiteCrawling !== null)
+      ? WebsiteCrawlingConfig.fromPartial(object.websiteCrawling)
       : undefined;
     return message;
   },
@@ -586,6 +614,120 @@ export const RepoAnalysisConfig_Flatten: MessageFns<RepoAnalysisConfig_Flatten> 
     message.largeRepoThresholdMb = object.largeRepoThresholdMb ?? 0;
     message.largeRepoIgnorePattern = object.largeRepoIgnorePattern ?? "";
     message.compressLarge = object.compressLarge ?? false;
+    return message;
+  },
+};
+
+function createBaseWebsiteCrawlingConfig(): WebsiteCrawlingConfig {
+  return { websiteScanTimeoutSeconds: 0, scrapyResponseTimeoutSeconds: 0, crawlDepth: 0, timeoutWithoutDataSeconds: 0 };
+}
+
+export const WebsiteCrawlingConfig: MessageFns<WebsiteCrawlingConfig> = {
+  encode(message: WebsiteCrawlingConfig, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.websiteScanTimeoutSeconds !== 0) {
+      writer.uint32(8).int32(message.websiteScanTimeoutSeconds);
+    }
+    if (message.scrapyResponseTimeoutSeconds !== 0) {
+      writer.uint32(16).int32(message.scrapyResponseTimeoutSeconds);
+    }
+    if (message.crawlDepth !== 0) {
+      writer.uint32(24).int32(message.crawlDepth);
+    }
+    if (message.timeoutWithoutDataSeconds !== 0) {
+      writer.uint32(32).int32(message.timeoutWithoutDataSeconds);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): WebsiteCrawlingConfig {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWebsiteCrawlingConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.websiteScanTimeoutSeconds = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.scrapyResponseTimeoutSeconds = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.crawlDepth = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.timeoutWithoutDataSeconds = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): WebsiteCrawlingConfig {
+    return {
+      websiteScanTimeoutSeconds: isSet(object.websiteScanTimeoutSeconds)
+        ? gt.Number(object.websiteScanTimeoutSeconds)
+        : 0,
+      scrapyResponseTimeoutSeconds: isSet(object.scrapyResponseTimeoutSeconds)
+        ? gt.Number(object.scrapyResponseTimeoutSeconds)
+        : 0,
+      crawlDepth: isSet(object.crawlDepth) ? gt.Number(object.crawlDepth) : 0,
+      timeoutWithoutDataSeconds: isSet(object.timeoutWithoutDataSeconds)
+        ? gt.Number(object.timeoutWithoutDataSeconds)
+        : 0,
+    };
+  },
+
+  toJSON(message: WebsiteCrawlingConfig): unknown {
+    const obj: any = {};
+    if (message.websiteScanTimeoutSeconds !== 0) {
+      obj.websiteScanTimeoutSeconds = Math.round(message.websiteScanTimeoutSeconds);
+    }
+    if (message.scrapyResponseTimeoutSeconds !== 0) {
+      obj.scrapyResponseTimeoutSeconds = Math.round(message.scrapyResponseTimeoutSeconds);
+    }
+    if (message.crawlDepth !== 0) {
+      obj.crawlDepth = Math.round(message.crawlDepth);
+    }
+    if (message.timeoutWithoutDataSeconds !== 0) {
+      obj.timeoutWithoutDataSeconds = Math.round(message.timeoutWithoutDataSeconds);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<WebsiteCrawlingConfig>): WebsiteCrawlingConfig {
+    return WebsiteCrawlingConfig.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<WebsiteCrawlingConfig>): WebsiteCrawlingConfig {
+    const message = createBaseWebsiteCrawlingConfig();
+    message.websiteScanTimeoutSeconds = object.websiteScanTimeoutSeconds ?? 0;
+    message.scrapyResponseTimeoutSeconds = object.scrapyResponseTimeoutSeconds ?? 0;
+    message.crawlDepth = object.crawlDepth ?? 0;
+    message.timeoutWithoutDataSeconds = object.timeoutWithoutDataSeconds ?? 0;
     return message;
   },
 };

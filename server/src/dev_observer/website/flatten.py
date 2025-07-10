@@ -6,6 +6,7 @@ import shutil
 import string
 from typing import Optional, List, Dict
 
+from dev_observer.api.types.config_pb2 import WebsiteCrawlingConfig
 from dev_observer.flatten.flatten import FlattenResult
 from dev_observer.log import s_
 from dev_observer.tokenizer.provider import TokenizerProvider
@@ -142,9 +143,10 @@ async def flatten_website(
         url: str,
         provider: WebsiteCrawlerProvider,
         tokenizer: TokenizerProvider,
+        crawling_config: Optional[WebsiteCrawlingConfig] = None,
         max_tokens_per_file: int = 100_000,
 ) -> FlattenWebsiteResult:
-    crawl_result = await crawl_website(url, provider)
+    crawl_result = await crawl_website(url, provider, crawling_config)
     website_path = crawl_result.path
     output_dir: Optional[str] = None
 
