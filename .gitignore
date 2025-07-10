@@ -13,3 +13,5 @@ server/.env.*
 /server/local_configs/
 **/*.tsbuildinfo
 **/.rollup.cache/
+**/devplan_current_feature*.md*
+!.windsurf/rules/devplan_current_feature*.md

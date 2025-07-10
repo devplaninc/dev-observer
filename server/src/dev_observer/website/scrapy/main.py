@@ -135,6 +135,9 @@ def main():
     parser.add_argument("--output-dir",
                         help="The directory to store the crawled data. If not provided, a temporary directory will be used.")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging.")
+    parser.add_argument("--response-timeout", type=int, help="Response timeout in seconds.")
+    parser.add_argument("--depth-limit", type=int, help="Maximum crawl depth.")
+    parser.add_argument("--timeout-no-item", type=int, help="Timeout when no items are scraped (seconds).")
     args = parser.parse_args()
 
     # if args.verbose == "true":
@@ -150,10 +153,10 @@ def main():
         'USER_AGENT': 'Mozilla/5.0 (compatible; DevObserverBot/1.0)',
         'ROBOTSTXT_OBEY': True,
         'CONCURRENT_REQUESTS': 3,
-        # 'DOWNLOAD_DELAY': 0.5,  # Be polite with requests
-        'DOWNLOAD_TIMEOUT': 10,
-        'CLOSESPIDER_TIMEOUT_NO_ITEM': 12,
-        'DEPTH_LIMIT': 2,
+        'DOWNLOAD_DELAY': 0.5,  # Be polite with requests
+        'CLOSESPIDER_TIMEOUT_NO_ITEM': args.timeout_no_item if args.timeout_no_item else 12,
+        'CLOSESPIDER_TIMEOUT': args.response_timeout if args.response_timeout else 14,
+        'DEPTH_LIMIT': args.depth_limit if args.depth_limit else 2,
         'CLOSESPIDER_PAGECOUNT': 20,
         'LOG_LEVEL': 'DEBUG' if args.verbose else 'DEBUG',
         'REDIRECT_ENABLED': True,

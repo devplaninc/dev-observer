@@ -7,12 +7,14 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class GlobalConfig(_message.Message):
-    __slots__ = ("analysis", "repo_analysis")
+    __slots__ = ("analysis", "repo_analysis", "website_crawling")
     ANALYSIS_FIELD_NUMBER: _ClassVar[int]
     REPO_ANALYSIS_FIELD_NUMBER: _ClassVar[int]
+    WEBSITE_CRAWLING_FIELD_NUMBER: _ClassVar[int]
     analysis: AnalysisConfig
     repo_analysis: RepoAnalysisConfig
-    def __init__(self, analysis: _Optional[_Union[AnalysisConfig, _Mapping]] = ..., repo_analysis: _Optional[_Union[RepoAnalysisConfig, _Mapping]] = ...) -> None: ...
+    website_crawling: WebsiteCrawlingConfig
+    def __init__(self, analysis: _Optional[_Union[AnalysisConfig, _Mapping]] = ..., repo_analysis: _Optional[_Union[RepoAnalysisConfig, _Mapping]] = ..., website_crawling: _Optional[_Union[WebsiteCrawlingConfig, _Mapping]] = ...) -> None: ...
 
 class AnalysisConfig(_message.Message):
     __slots__ = ("repo_analyzers", "site_analyzers", "disable_masking")
@@ -62,3 +64,15 @@ class RepoAnalysisConfig(_message.Message):
     processing_interval_sec: int
     disabled: bool
     def __init__(self, flatten: _Optional[_Union[RepoAnalysisConfig.Flatten, _Mapping]] = ..., processing_interval_sec: _Optional[int] = ..., disabled: bool = ...) -> None: ...
+
+class WebsiteCrawlingConfig(_message.Message):
+    __slots__ = ("website_scan_timeout_seconds", "scrapy_response_timeout_seconds", "crawl_depth", "timeout_without_data_seconds")
+    WEBSITE_SCAN_TIMEOUT_SECONDS_FIELD_NUMBER: _ClassVar[int]
+    SCRAPY_RESPONSE_TIMEOUT_SECONDS_FIELD_NUMBER: _ClassVar[int]
+    CRAWL_DEPTH_FIELD_NUMBER: _ClassVar[int]
+    TIMEOUT_WITHOUT_DATA_SECONDS_FIELD_NUMBER: _ClassVar[int]
+    website_scan_timeout_seconds: int
+    scrapy_response_timeout_seconds: int
+    crawl_depth: int
+    timeout_without_data_seconds: int
+    def __init__(self, website_scan_timeout_seconds: _Optional[int] = ..., scrapy_response_timeout_seconds: _Optional[int] = ..., crawl_depth: _Optional[int] = ..., timeout_without_data_seconds: _Optional[int] = ...) -> None: ...

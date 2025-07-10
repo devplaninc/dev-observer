@@ -7,6 +7,7 @@ import "dev_observer/api/types/observations.proto";
 message GlobalConfig {
   AnalysisConfig analysis = 1;
   RepoAnalysisConfig repo_analysis = 2;
+  WebsiteCrawlingConfig website_crawling = 3;
 }
 
 message AnalysisConfig {
@@ -38,4 +39,11 @@ message RepoAnalysisConfig {
     string large_repo_ignore_pattern = 8;
     bool compress_large = 9;
   }
+}
+
+message WebsiteCrawlingConfig {
+  int32 website_scan_timeout_seconds = 1;
+  int32 scrapy_response_timeout_seconds = 2;
+  int32 crawl_depth = 3;
+  int32 timeout_without_data_seconds = 4;
 }
