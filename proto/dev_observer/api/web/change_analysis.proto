@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package dev_observer.api.web.change_analysis;
+
+import "google/protobuf/timestamp.proto";
+import "dev_observer/api/types/observations.proto";
+
+message EnrollRepositoryRequest {
+  string repo_id = 1;
+}
+
+message EnrollRepositoryResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UnenrollRepositoryRequest {
+  string repo_id = 1;
+}
+
+message UnenrollRepositoryResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetChangeSummariesRequest {
+  optional string repo_id = 1;
+  optional google.protobuf.Timestamp start_date = 2;
+  optional google.protobuf.Timestamp end_date = 3;
+  optional string status = 4;  // pending/completed/failed
+}
+
+message ChangeSummary {
+  string id = 1;
+  string repo_id = 2;
+  string status = 3;
+  optional dev_observer.api.types.observations.Observation observation = 4;
+  optional string error_message = 5;
+  google.protobuf.Timestamp analyzed_at = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+message GetChangeSummariesResponse {
+  repeated ChangeSummary summaries = 1;
+}
+
+message GetRepositoryEnrollmentStatusRequest {
+  string repo_id = 1;
+}
+
+message GetRepositoryEnrollmentStatusResponse {
+  bool enrolled = 1;
+  optional google.protobuf.Timestamp last_analysis = 2;
+}

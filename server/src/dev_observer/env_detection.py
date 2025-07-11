@@ -209,7 +209,15 @@ def detect_server_env(settings: Settings) -> ServerEnv:
         observations=observations,
         storage=storage,
         repos_processor=bg_repos_processor,
-        periodic_processor=PeriodicProcessor(bg_storage, bg_repos_processor, websites_processor=bg_sites_processor),
+        periodic_processor=PeriodicProcessor(
+            bg_storage, 
+            bg_repos_processor, 
+            observations=observations, 
+            websites_processor=bg_sites_processor,
+            github_provider=bg_repository,
+            analysis_provider=bg_analysis,
+            prompts_provider=prompts
+        ),
         users=users,
         api_keys=api_keys or [],
     )

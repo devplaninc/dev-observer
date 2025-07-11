@@ -1,4 +1,4 @@
-import React, {type ReactNode, useCallback, useState} from "react";
+import React, {type ReactNode, useCallback, useState, useEffect} from "react";
 import {useNavigate, useParams} from "react-router";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Button} from "@/components/ui/button.tsx";
@@ -19,18 +19,67 @@ import {
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog.tsx";
 import {RepoAnalysisList} from "@/components/repos/RepoAnalysisList.tsx";
+import {ChangeAnalysisList} from "@/components/repos/ChangeAnalysisList.tsx";
+import type {GetRepositoryEnrollmentStatusResponse} from "@devplan/observer-api";
 
 const RepositoryDetailsPage: React.FC = () => {
   const {id} = useParams<{ id: string }>();
   const navigate = useNavigate();
   const {repository, loading, error} = useRepositoryQuery(id ?? '');
   const errorMessage = error instanceof Error ? error.message : 'An error occurred';
-  const {rescanRepository} = useBoundStore()
+  const {rescanRepository, enrollRepositoryForChangeAnalysis, unenrollRepositoryFromChangeAnalysis, getRepositoryEnrollmentStatus} = useBoundStore()
+  const [enrollmentStatus, setEnrollmentStatus] = useState<GetRepositoryEnrollmentStatusResponse | null>(null);
+  const [enrollmentLoading, setEnrollmentLoading] = useState(false);
+
   const rescan = useCallback(() => {
     rescanRepository(id!)
       .then(() => toast.success(`Rescan started`))
       .catch(e => toast.error(`Failed to initialize rescan: ${e}`))
   }, [id, rescanRepository])
+
+  const fetchEnrollmentStatus = useCallback(async () => {
+    if (!id) return;
+    try {
+      const status = await getRepositoryEnrollmentStatus(id);
+      setEnrollmentStatus(status);
+    } catch (e) {
+      console.error('Failed to fetch enrollment status:', e);
+    }
+  }, [id, getRepositoryEnrollmentStatus]);
+
+  const handleEnroll = useCallback(async () => {
+    if (!id) return;
+    setEnrollmentLoading(true);
+    try {
+      await enrollRepositoryForChangeAnalysis(id);
+      await fetchEnrollmentStatus();
+      toast.success('Repository enrolled for change analysis');
+    } catch (e) {
+      toast.error(`Failed to enroll repository: ${e}`);
+    } finally {
+      setEnrollmentLoading(false);
+    }
+  }, [id, enrollRepositoryForChangeAnalysis, fetchEnrollmentStatus]);
+
+  const handleUnenroll = useCallback(async () => {
+    if (!id) return;
+    setEnrollmentLoading(true);
+    try {
+      await unenrollRepositoryFromChangeAnalysis(id);
+      await fetchEnrollmentStatus();
+      toast.success('Repository unenrolled from change analysis');
+    } catch (e) {
+      toast.error(`Failed to unenroll repository: ${e}`);
+    } finally {
+      setEnrollmentLoading(false);
+    }
+  }, [id, unenrollRepositoryFromChangeAnalysis, fetchEnrollmentStatus]);
+
+  useEffect(() => {
+    if (id) {
+      fetchEnrollmentStatus();
+    }
+  }, [id, fetchEnrollmentStatus]);
 
   const handleBack = () => navigate("/repositories");
 
@@ -70,6 +119,68 @@ const RepositoryDetailsPage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Change Analysis</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex gap-2 items-center">
+                  <h3 className="text-sm font-medium text-muted-foreground">Status:</h3>
+                  {enrollmentStatus ? (
+                    <span className={`px-2 py-1 rounded text-sm ${
+                      enrollmentStatus.enrolled 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {enrollmentStatus.enrolled ? 'Enrolled' : 'Not Enrolled'}
+                    </span>
+                  ) : (
+                    <Loader />
+                  )}
+                </div>
+
+                {enrollmentStatus?.lastAnalysis && (
+                  <RepoProp 
+                    name="Last Analysis" 
+                    value={new Date(enrollmentStatus.lastAnalysis.seconds * 1000).toLocaleString()}
+                  />
+                )}
+
+                <div className="flex gap-2 items-center">
+                  {enrollmentStatus?.enrolled ? (
+                    <Button 
+                      variant="outline" 
+                      onClick={handleUnenroll}
+                      disabled={enrollmentLoading}
+                    >
+                      {enrollmentLoading && <Loader />}
+                      Unenroll from Change Analysis
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={handleEnroll}
+                      disabled={enrollmentLoading}
+                    >
+                      {enrollmentLoading && <Loader />}
+                      Enroll for Change Analysis
+                    </Button>
+                  )}
+                </div>
+
+                <div className="text-sm text-muted-foreground">
+                  {enrollmentStatus?.enrolled ? (
+                    <p>This repository is enrolled for daily change analysis. Summaries are generated automatically at 9:00 AM daily.</p>
+                  ) : (
+                    <p>Enroll this repository to receive daily AI-powered summaries of changes, including commits and merged pull requests.</p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <ChangeAnalysisList repo={repository}/>
 
           <RepoAnalysisList repo={repository}/>
         </div>

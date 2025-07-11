@@ -1,16 +1,16 @@
 import datetime
 import uuid
-from typing import Optional, MutableSequence
+from typing import Optional, MutableSequence, List
 
 from google.protobuf import json_format
-from sqlalchemy import select, delete, update
+from sqlalchemy import select, delete, update, and_
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSession
 
 from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
 from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
 from dev_observer.api.types.sites_pb2 import WebSite
-from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity, WebsiteEntity
+from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity, WebsiteEntity, RepoChangeAnalysisEntity
 from dev_observer.storage.provider import StorageProvider, AddWebSiteData
 from dev_observer.util import parse_json_pb, pb_to_json, Clock, RealClock
 
@@ -165,6 +165,74 @@ class PostgresqlStorageProvider(StorageProvider):
                     .values(json_data=pb_to_json(config))
                 )
         return await self.get_global_config()
+
+    # Change Analysis methods
+    async def create_change_analysis_record(self, record: RepoChangeAnalysisEntity) -> RepoChangeAnalysisEntity:
+        if not record.id:
+            record.id = str(uuid.uuid4())
+        record_id = record.id
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                session.add(record)
+                await session.flush()
+        # Return a fresh instance from the database
+        return await self.get_change_analysis_record(record_id)
+
+    async def update_change_analysis_record(self, record: RepoChangeAnalysisEntity) -> RepoChangeAnalysisEntity:
+        record_id = record.id
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                await session.execute(
+                    update(RepoChangeAnalysisEntity)
+                    .where(RepoChangeAnalysisEntity.id == record.id)
+                    .values(
+                        status=record.status,
+                        observation_key=record.observation_key,
+                        error_message=record.error_message,
+                        analyzed_at=record.analyzed_at,
+                        updated_at=self._clock.now()
+                    )
+                )
+        # Return a fresh instance from the database
+        return await self.get_change_analysis_record(record_id)
+
+    async def get_change_analysis_records(self, repo_id: Optional[str] = None, status: Optional[str] = None, start_date: Optional[datetime.datetime] = None, end_date: Optional[datetime.datetime] = None) -> List[RepoChangeAnalysisEntity]:
+        async with AsyncSession(self._engine) as session:
+            query = select(RepoChangeAnalysisEntity)
+            conditions = []
+
+            if repo_id:
+                conditions.append(RepoChangeAnalysisEntity.repo_id == repo_id)
+            if status:
+                conditions.append(RepoChangeAnalysisEntity.status == status)
+            if start_date:
+                conditions.append(RepoChangeAnalysisEntity.created_at >= start_date)
+            if end_date:
+                conditions.append(RepoChangeAnalysisEntity.created_at <= end_date)
+
+            if conditions:
+                query = query.where(and_(*conditions))
+
+            query = query.order_by(RepoChangeAnalysisEntity.created_at.desc())
+
+            result = await session.execute(query)
+            return [row[0] for row in result.all()]
+
+    async def get_change_analysis_record(self, record_id: str) -> Optional[RepoChangeAnalysisEntity]:
+        async with AsyncSession(self._engine) as session:
+            return await session.scalar(select(RepoChangeAnalysisEntity).where(RepoChangeAnalysisEntity.id == record_id))
+
+    async def get_enrolled_repositories(self) -> List[GitHubRepository]:
+        async with AsyncSession(self._engine) as session:
+            result = await session.execute(select(GitRepoEntity))
+            repos = []
+            for row in result.all():
+                repo = _to_repo(row[0])
+                if (repo.properties and 
+                    repo.properties.change_analysis and 
+                    repo.properties.change_analysis.enrolled):
+                    repos.append(repo)
+            return repos
 
 
 def _to_optional_repo(ent: Optional[GitRepoEntity]) -> Optional[GitHubRepository]:

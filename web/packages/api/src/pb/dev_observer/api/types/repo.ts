@@ -22,6 +22,7 @@ export interface GitHubRepository {
 export interface GitProperties {
   appInfo?: GitAppInfo | undefined;
   meta?: GitMeta | undefined;
+  changeAnalysis?: ChangeAnalysisConfig | undefined;
 }
 
 export interface GitMeta {
@@ -33,6 +34,11 @@ export interface GitMeta {
 export interface GitAppInfo {
   lastRefresh: Date | undefined;
   installationId?: number | undefined;
+}
+
+export interface ChangeAnalysisConfig {
+  enrolled: boolean;
+  lastAnalysis: Date | undefined;
 }
 
 function createBaseGitHubRepository(): GitHubRepository {
@@ -178,7 +184,7 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
 };
 
 function createBaseGitProperties(): GitProperties {
-  return { appInfo: undefined, meta: undefined };
+  return { appInfo: undefined, meta: undefined, changeAnalysis: undefined };
 }
 
 export const GitProperties: MessageFns<GitProperties> = {
@@ -188,6 +194,9 @@ export const GitProperties: MessageFns<GitProperties> = {
     }
     if (message.meta !== undefined) {
       GitMeta.encode(message.meta, writer.uint32(18).fork()).join();
+    }
+    if (message.changeAnalysis !== undefined) {
+      ChangeAnalysisConfig.encode(message.changeAnalysis, writer.uint32(26).fork()).join();
     }
     return writer;
   },
@@ -215,6 +224,14 @@ export const GitProperties: MessageFns<GitProperties> = {
           message.meta = GitMeta.decode(reader, reader.uint32());
           continue;
         }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.changeAnalysis = ChangeAnalysisConfig.decode(reader, reader.uint32());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -228,6 +245,7 @@ export const GitProperties: MessageFns<GitProperties> = {
     return {
       appInfo: isSet(object.appInfo) ? GitAppInfo.fromJSON(object.appInfo) : undefined,
       meta: isSet(object.meta) ? GitMeta.fromJSON(object.meta) : undefined,
+      changeAnalysis: isSet(object.changeAnalysis) ? ChangeAnalysisConfig.fromJSON(object.changeAnalysis) : undefined,
     };
   },
 
@@ -238,6 +256,9 @@ export const GitProperties: MessageFns<GitProperties> = {
     }
     if (message.meta !== undefined) {
       obj.meta = GitMeta.toJSON(message.meta);
+    }
+    if (message.changeAnalysis !== undefined) {
+      obj.changeAnalysis = ChangeAnalysisConfig.toJSON(message.changeAnalysis);
     }
     return obj;
   },
@@ -251,6 +272,9 @@ export const GitProperties: MessageFns<GitProperties> = {
       ? GitAppInfo.fromPartial(object.appInfo)
       : undefined;
     message.meta = (object.meta !== undefined && object.meta !== null) ? GitMeta.fromPartial(object.meta) : undefined;
+    message.changeAnalysis = (object.changeAnalysis !== undefined && object.changeAnalysis !== null)
+      ? ChangeAnalysisConfig.fromPartial(object.changeAnalysis)
+      : undefined;
     return message;
   },
 };
@@ -419,6 +443,82 @@ export const GitAppInfo: MessageFns<GitAppInfo> = {
     const message = createBaseGitAppInfo();
     message.lastRefresh = object.lastRefresh ?? undefined;
     message.installationId = object.installationId ?? undefined;
+    return message;
+  },
+};
+
+function createBaseChangeAnalysisConfig(): ChangeAnalysisConfig {
+  return { enrolled: false, lastAnalysis: undefined };
+}
+
+export const ChangeAnalysisConfig: MessageFns<ChangeAnalysisConfig> = {
+  encode(message: ChangeAnalysisConfig, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.enrolled !== false) {
+      writer.uint32(8).bool(message.enrolled);
+    }
+    if (message.lastAnalysis !== undefined) {
+      Timestamp.encode(toTimestamp(message.lastAnalysis), writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ChangeAnalysisConfig {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseChangeAnalysisConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.enrolled = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.lastAnalysis = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ChangeAnalysisConfig {
+    return {
+      enrolled: isSet(object.enrolled) ? gt.Boolean(object.enrolled) : false,
+      lastAnalysis: isSet(object.lastAnalysis) ? fromJsonTimestamp(object.lastAnalysis) : undefined,
+    };
+  },
+
+  toJSON(message: ChangeAnalysisConfig): unknown {
+    const obj: any = {};
+    if (message.enrolled !== false) {
+      obj.enrolled = message.enrolled;
+    }
+    if (message.lastAnalysis !== undefined) {
+      obj.lastAnalysis = message.lastAnalysis.toISOString();
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<ChangeAnalysisConfig>): ChangeAnalysisConfig {
+    return ChangeAnalysisConfig.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<ChangeAnalysisConfig>): ChangeAnalysisConfig {
+    const message = createBaseChangeAnalysisConfig();
+    message.enrolled = object.enrolled ?? false;
+    message.lastAnalysis = object.lastAnalysis ?? undefined;
     return message;
   },
 };
