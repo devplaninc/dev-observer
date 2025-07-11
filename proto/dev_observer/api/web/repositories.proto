@@ -25,3 +25,38 @@ message GetRepositoryResponse{
 message DeleteRepositoryResponse{
   repeated dev_observer.api.types.repo.GitHubRepository repos = 1;
 }
+
+message EnrollRepositoryForChangeAnalysisRequest {
+  string repo_id = 1;
+}
+
+message EnrollRepositoryForChangeAnalysisResponse {
+  dev_observer.api.types.repo.GitHubRepository repo = 1;
+}
+
+message UnenrollRepositoryFromChangeAnalysisRequest {
+  string repo_id = 1;
+}
+
+message UnenrollRepositoryFromChangeAnalysisResponse {
+  dev_observer.api.types.repo.GitHubRepository repo = 1;
+}
+
+message GetChangeAnalysesRequest {
+  string repo_id = 1;
+  optional string date_from = 2;
+  optional string date_to = 3;
+  optional string status = 4;
+}
+
+message GetChangeAnalysesResponse {
+  repeated dev_observer.api.types.repo.RepoChangeAnalysis analyses = 1;
+}
+
+message GetChangeAnalysisRequest {
+  string analysis_id = 1;
+}
+
+message GetChangeAnalysisResponse {
+  dev_observer.api.types.repo.RepoChangeAnalysis analysis = 1;
+}

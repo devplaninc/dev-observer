@@ -8,9 +8,9 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSessio
 
 from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
-from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
+from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties, RepoChangeAnalysis
 from dev_observer.api.types.sites_pb2 import WebSite
-from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity, WebsiteEntity
+from dev_observer.storage.postgresql.model import GitRepoEntity, ProcessingItemEntity, GlobalConfigEntity, WebsiteEntity, RepoChangeAnalysisEntity
 from dev_observer.storage.provider import StorageProvider, AddWebSiteData
 from dev_observer.util import parse_json_pb, pb_to_json, Clock, RealClock
 
@@ -80,6 +80,47 @@ class PostgresqlStorageProvider(StorageProvider):
                     .values(json_data=pb_to_json(updated))
                 )
         return await self.get_github_repo(repo_id)
+
+    async def enroll_repo_for_change_analysis(self, repo_id: str) -> GitHubRepository:
+        from dev_observer.api.types.repo_pb2 import ChangeAnalysisConfig
+        from google.protobuf.timestamp_pb2 import Timestamp
+        
+        repo = await self.get_github_repo(repo_id)
+        if repo is None:
+            raise ValueError(f"Repository with id {repo_id} not found")
+        
+        if not repo.HasField("properties"):
+            repo.properties.CopyFrom(GitProperties())
+        
+        if not repo.properties.HasField("change_analysis"):
+            config = ChangeAnalysisConfig()
+            config.enrolled = True
+            config.enrolled_at.FromDatetime(self._clock.now())
+            repo.properties.change_analysis.CopyFrom(config)
+        else:
+            repo.properties.change_analysis.enrolled = True
+            repo.properties.change_analysis.enrolled_at.FromDatetime(self._clock.now())
+        
+        return await self.update_repo_properties(repo_id, repo.properties)
+
+    async def unenroll_repo_from_change_analysis(self, repo_id: str) -> GitHubRepository:
+        repo = await self.get_github_repo(repo_id)
+        if repo is None:
+            raise ValueError(f"Repository with id {repo_id} not found")
+        
+        if repo.HasField("properties") and repo.properties.HasField("change_analysis"):
+            repo.properties.change_analysis.enrolled = False
+        
+        return await self.update_repo_properties(repo_id, repo.properties)
+
+    async def get_enrolled_repos_for_change_analysis(self) -> MutableSequence[GitHubRepository]:
+        repos = await self.get_github_repos()
+        return [
+            repo for repo in repos
+            if repo.HasField("properties") 
+            and repo.properties.HasField("change_analysis")
+            and repo.properties.change_analysis.enrolled
+        ]
 
     async def get_web_sites(self) -> MutableSequence[WebSite]:
         async with AsyncSession(self._engine) as session:
@@ -166,6 +207,58 @@ class PostgresqlStorageProvider(StorageProvider):
                 )
         return await self.get_global_config()
 
+    async def create_repo_change_analysis(self, analysis: RepoChangeAnalysis) -> RepoChangeAnalysis:
+        analysis_id = analysis.id
+        if not analysis_id or len(analysis_id) == 0:
+            analysis_id = f"{uuid.uuid4()}"
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                entity = RepoChangeAnalysisEntity(
+                    id=analysis_id,
+                    repo_id=analysis.repo_id,
+                    status=analysis.status,
+                    observation_key=analysis.observation_key if analysis.HasField("observation_key") else None,
+                    error_message=analysis.error_message if analysis.HasField("error_message") else None,
+                    analyzed_at=analysis.analyzed_at.ToDatetime() if analysis.HasField("analyzed_at") else None,
+                )
+                session.add(entity)
+                return _to_repo_change_analysis(await session.get(RepoChangeAnalysisEntity, analysis_id))
+
+    async def get_repo_change_analysis(self, analysis_id: str) -> Optional[RepoChangeAnalysis]:
+        async with AsyncSession(self._engine) as session:
+            entity = await session.get(RepoChangeAnalysisEntity, analysis_id)
+            return _to_optional_repo_change_analysis(entity)
+
+    async def get_repo_change_analyses_by_repo(self, repo_id: str) -> MutableSequence[RepoChangeAnalysis]:
+        async with AsyncSession(self._engine) as session:
+            entities = await session.execute(
+                select(RepoChangeAnalysisEntity)
+                .where(RepoChangeAnalysisEntity.repo_id == repo_id)
+                .order_by(RepoChangeAnalysisEntity.analyzed_at.desc())
+            )
+            return [_to_repo_change_analysis(e[0]) for e in entities.all()]
+
+    async def update_repo_change_analysis_status(self, analysis_id: str, status: str, error_message: Optional[str] = None):
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                values = {"status": status}
+                if error_message is not None:
+                    values["error_message"] = error_message
+                await session.execute(
+                    update(RepoChangeAnalysisEntity)
+                    .where(RepoChangeAnalysisEntity.id == analysis_id)
+                    .values(**values)
+                )
+
+    async def set_repo_change_analysis_observation(self, analysis_id: str, observation_key: str):
+        async with AsyncSession(self._engine) as session:
+            async with session.begin():
+                await session.execute(
+                    update(RepoChangeAnalysisEntity)
+                    .where(RepoChangeAnalysisEntity.id == analysis_id)
+                    .values(observation_key=observation_key, analyzed_at=self._clock.now())
+                )
+
 
 def _to_optional_repo(ent: Optional[GitRepoEntity]) -> Optional[GitHubRepository]:
     return None if ent is None else _to_repo(ent)
@@ -207,4 +300,31 @@ def _to_item(ent: ProcessingItemEntity) -> ProcessingItem:
     data.last_error = ent.last_error if ent.last_error else ""
     data.no_processing = ent.no_processing
     data.key.CopyFrom(parse_json_pb(ent.key, ProcessingItemKey()))
+    return data
+
+
+def _to_optional_repo_change_analysis(ent: Optional[RepoChangeAnalysisEntity]) -> Optional[RepoChangeAnalysis]:
+    return None if ent is None else _to_repo_change_analysis(ent)
+
+
+def _to_repo_change_analysis(ent: RepoChangeAnalysisEntity) -> RepoChangeAnalysis:
+    from google.protobuf.timestamp_pb2 import Timestamp
+    
+    data = RepoChangeAnalysis()
+    data.id = ent.id
+    data.repo_id = ent.repo_id
+    data.status = ent.status
+    
+    if ent.observation_key is not None:
+        data.observation_key = ent.observation_key
+    
+    if ent.error_message is not None:
+        data.error_message = ent.error_message
+    
+    if ent.analyzed_at is not None:
+        data.analyzed_at.FromDatetime(ent.analyzed_at)
+    
+    data.created_at.FromDatetime(ent.created_at)
+    data.updated_at.FromDatetime(ent.updated_at)
+    
     return data

@@ -39,3 +39,57 @@ class DeleteRepositoryResponse(_message.Message):
     REPOS_FIELD_NUMBER: _ClassVar[int]
     repos: _containers.RepeatedCompositeFieldContainer[_repo_pb2.GitHubRepository]
     def __init__(self, repos: _Optional[_Iterable[_Union[_repo_pb2.GitHubRepository, _Mapping]]] = ...) -> None: ...
+
+class EnrollRepositoryForChangeAnalysisRequest(_message.Message):
+    __slots__ = ("repo_id",)
+    REPO_ID_FIELD_NUMBER: _ClassVar[int]
+    repo_id: str
+    def __init__(self, repo_id: _Optional[str] = ...) -> None: ...
+
+class EnrollRepositoryForChangeAnalysisResponse(_message.Message):
+    __slots__ = ("repo",)
+    REPO_FIELD_NUMBER: _ClassVar[int]
+    repo: _repo_pb2.GitHubRepository
+    def __init__(self, repo: _Optional[_Union[_repo_pb2.GitHubRepository, _Mapping]] = ...) -> None: ...
+
+class UnenrollRepositoryFromChangeAnalysisRequest(_message.Message):
+    __slots__ = ("repo_id",)
+    REPO_ID_FIELD_NUMBER: _ClassVar[int]
+    repo_id: str
+    def __init__(self, repo_id: _Optional[str] = ...) -> None: ...
+
+class UnenrollRepositoryFromChangeAnalysisResponse(_message.Message):
+    __slots__ = ("repo",)
+    REPO_FIELD_NUMBER: _ClassVar[int]
+    repo: _repo_pb2.GitHubRepository
+    def __init__(self, repo: _Optional[_Union[_repo_pb2.GitHubRepository, _Mapping]] = ...) -> None: ...
+
+class GetChangeAnalysesRequest(_message.Message):
+    __slots__ = ("repo_id", "date_from", "date_to", "status")
+    REPO_ID_FIELD_NUMBER: _ClassVar[int]
+    DATE_FROM_FIELD_NUMBER: _ClassVar[int]
+    DATE_TO_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    repo_id: str
+    date_from: str
+    date_to: str
+    status: str
+    def __init__(self, repo_id: _Optional[str] = ..., date_from: _Optional[str] = ..., date_to: _Optional[str] = ..., status: _Optional[str] = ...) -> None: ...
+
+class GetChangeAnalysesResponse(_message.Message):
+    __slots__ = ("analyses",)
+    ANALYSES_FIELD_NUMBER: _ClassVar[int]
+    analyses: _containers.RepeatedCompositeFieldContainer[_repo_pb2.RepoChangeAnalysis]
+    def __init__(self, analyses: _Optional[_Iterable[_Union[_repo_pb2.RepoChangeAnalysis, _Mapping]]] = ...) -> None: ...
+
+class GetChangeAnalysisRequest(_message.Message):
+    __slots__ = ("analysis_id",)
+    ANALYSIS_ID_FIELD_NUMBER: _ClassVar[int]
+    analysis_id: str
+    def __init__(self, analysis_id: _Optional[str] = ...) -> None: ...
+
+class GetChangeAnalysisResponse(_message.Message):
+    __slots__ = ("analysis",)
+    ANALYSIS_FIELD_NUMBER: _ClassVar[int]
+    analysis: _repo_pb2.RepoChangeAnalysis
+    def __init__(self, analysis: _Optional[_Union[_repo_pb2.RepoChangeAnalysis, _Mapping]] = ...) -> None: ...

@@ -5,19 +5,29 @@ import {
   AddGithubRepositoryResponse,
   DeleteRepositoryResponse,
   GetRepositoryResponse,
-  ListGithubRepositoriesResponse
+  ListGithubRepositoriesResponse,
+  EnrollRepositoryForChangeAnalysisResponse,
+  UnenrollRepositoryFromChangeAnalysisResponse,
+  GetChangeAnalysesResponse,
+  GetChangeAnalysisResponse
 } from "@devplan/observer-api";
-import type {GitHubRepository} from "@devplan/observer-api";
+import type {GitHubRepository, RepoChangeAnalysis} from "@devplan/observer-api";
 import {fetchWithAuth, VoidParser} from "@/store/api.tsx";
 
 export interface RepositoryState {
   repositories: Record<string, GitHubRepository>;
+  changeAnalyses: Record<string, RepoChangeAnalysis[]>;
 
   fetchRepositories: () => Promise<void>;
   fetchRepositoryById: (id: string) => Promise<void>;
   addRepository: (url: string) => Promise<void>;
   deleteRepository: (id: string) => Promise<void>;
   rescanRepository: (id: string) => Promise<void>;
+  
+  enrollForChangeAnalysis: (repoId: string) => Promise<void>;
+  unenrollFromChangeAnalysis: (repoId: string) => Promise<void>;
+  fetchChangeAnalyses: (repoId: string, dateFrom?: string, dateTo?: string, status?: string) => Promise<void>;
+  fetchChangeAnalysis: (analysisId: string) => Promise<RepoChangeAnalysis | null>;
 }
 
 export const createRepositoriesSlice: StateCreator<
@@ -25,8 +35,9 @@ export const createRepositoriesSlice: StateCreator<
   [],
   [],
   RepositoryState
-> = ((set) => ({
+> = ((set, get) => ({
   repositories: {},
+  changeAnalyses: {},
 
   fetchRepositories: async () => fetchWithAuth(reposAPI(), ListGithubRepositoriesResponse)
     .then(res => {
@@ -60,4 +71,48 @@ export const createRepositoriesSlice: StateCreator<
       set(s => ({...s, repositories}))
     }),
   rescanRepository: async id => fetchWithAuth(repoRescanAPI(id), new VoidParser(), {method: "POST"}),
+
+  enrollForChangeAnalysis: async repoId => fetchWithAuth(
+    `/api/v1/repositories/${repoId}/change-analysis/enroll`,
+    EnrollRepositoryForChangeAnalysisResponse,
+    {method: "POST"}
+  ).then(r => {
+    const {repo} = r;
+    if (repo) {
+      set(s => ({...s, repositories: {...s.repositories, [repo.id]: repo}}));
+    }
+  }),
+
+  unenrollFromChangeAnalysis: async repoId => fetchWithAuth(
+    `/api/v1/repositories/${repoId}/change-analysis/unenroll`,
+    UnenrollRepositoryFromChangeAnalysisResponse,
+    {method: "POST"}
+  ).then(r => {
+    const {repo} = r;
+    if (repo) {
+      set(s => ({...s, repositories: {...s.repositories, [repo.id]: repo}}));
+    }
+  }),
+
+  fetchChangeAnalyses: async (repoId, dateFrom, dateTo, status) => {
+    const params = new URLSearchParams();
+    if (dateFrom) params.append('date_from', dateFrom);
+    if (dateTo) params.append('date_to', dateTo);
+    if (status) params.append('status', status);
+    
+    const url = `/api/v1/repositories/${repoId}/change-analyses${params.toString() ? `?${params.toString()}` : ''}`;
+    
+    return fetchWithAuth(url, GetChangeAnalysesResponse).then(res => {
+      const {analyses} = res;
+      set(s => ({...s, changeAnalyses: {...s.changeAnalyses, [repoId]: analyses}}));
+    });
+  },
+
+  fetchChangeAnalysis: async analysisId => fetchWithAuth(
+    `/api/v1/change-analyses/${analysisId}`,
+    GetChangeAnalysisResponse
+  ).then(r => {
+    const {analysis} = r;
+    return analysis || null;
+  }),
 }));
