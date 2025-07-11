@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package dev_observer.api.web.changes;
+
+import "dev_observer/api/types/changes.proto";
+
+message ListChangesSummariesRequest {
+  string repo_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message ListChangesSummariesResponse {
+  repeated dev_observer.api.types.changes.GitHubChangesSummary summaries = 1;
+  int32 total_count = 2;
+}
+
+message GetChangesSummaryRequest {
+  string summary_id = 1;
+}
+
+message GetChangesSummaryResponse {
+  dev_observer.api.types.changes.GitHubChangesSummary summary = 1;
+}
+
+message CreateChangesSummaryRequest {
+  string repo_id = 1;
+  int32 days_back = 2;
+}
+
+message CreateChangesSummaryResponse {
+  dev_observer.api.types.changes.GitHubChangesSummary summary = 1;
+}
+
+message DeleteChangesSummaryRequest {
+  string summary_id = 1;
+}
+
+message DeleteChangesSummaryResponse {
+  bool success = 1;
+} 

@@ -22,6 +22,13 @@ export interface GitHubRepository {
 export interface GitProperties {
   appInfo?: GitAppInfo | undefined;
   meta?: GitMeta | undefined;
+  changesSummaryConfig?: ChangesSummaryConfig | undefined;
+}
+
+export interface ChangesSummaryConfig {
+  enabled: boolean;
+  analysisIntervalHours: number;
+  daysBack: number;
 }
 
 export interface GitMeta {
@@ -178,7 +185,7 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
 };
 
 function createBaseGitProperties(): GitProperties {
-  return { appInfo: undefined, meta: undefined };
+  return { appInfo: undefined, meta: undefined, changesSummaryConfig: undefined };
 }
 
 export const GitProperties: MessageFns<GitProperties> = {
@@ -188,6 +195,9 @@ export const GitProperties: MessageFns<GitProperties> = {
     }
     if (message.meta !== undefined) {
       GitMeta.encode(message.meta, writer.uint32(18).fork()).join();
+    }
+    if (message.changesSummaryConfig !== undefined) {
+      ChangesSummaryConfig.encode(message.changesSummaryConfig, writer.uint32(26).fork()).join();
     }
     return writer;
   },
@@ -215,6 +225,14 @@ export const GitProperties: MessageFns<GitProperties> = {
           message.meta = GitMeta.decode(reader, reader.uint32());
           continue;
         }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.changesSummaryConfig = ChangesSummaryConfig.decode(reader, reader.uint32());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -228,6 +246,9 @@ export const GitProperties: MessageFns<GitProperties> = {
     return {
       appInfo: isSet(object.appInfo) ? GitAppInfo.fromJSON(object.appInfo) : undefined,
       meta: isSet(object.meta) ? GitMeta.fromJSON(object.meta) : undefined,
+      changesSummaryConfig: isSet(object.changesSummaryConfig)
+        ? ChangesSummaryConfig.fromJSON(object.changesSummaryConfig)
+        : undefined,
     };
   },
 
@@ -238,6 +259,9 @@ export const GitProperties: MessageFns<GitProperties> = {
     }
     if (message.meta !== undefined) {
       obj.meta = GitMeta.toJSON(message.meta);
+    }
+    if (message.changesSummaryConfig !== undefined) {
+      obj.changesSummaryConfig = ChangesSummaryConfig.toJSON(message.changesSummaryConfig);
     }
     return obj;
   },
@@ -251,6 +275,101 @@ export const GitProperties: MessageFns<GitProperties> = {
       ? GitAppInfo.fromPartial(object.appInfo)
       : undefined;
     message.meta = (object.meta !== undefined && object.meta !== null) ? GitMeta.fromPartial(object.meta) : undefined;
+    message.changesSummaryConfig = (object.changesSummaryConfig !== undefined && object.changesSummaryConfig !== null)
+      ? ChangesSummaryConfig.fromPartial(object.changesSummaryConfig)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseChangesSummaryConfig(): ChangesSummaryConfig {
+  return { enabled: false, analysisIntervalHours: 0, daysBack: 0 };
+}
+
+export const ChangesSummaryConfig: MessageFns<ChangesSummaryConfig> = {
+  encode(message: ChangesSummaryConfig, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.enabled !== false) {
+      writer.uint32(8).bool(message.enabled);
+    }
+    if (message.analysisIntervalHours !== 0) {
+      writer.uint32(16).int32(message.analysisIntervalHours);
+    }
+    if (message.daysBack !== 0) {
+      writer.uint32(24).int32(message.daysBack);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ChangesSummaryConfig {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseChangesSummaryConfig();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.enabled = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.analysisIntervalHours = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.daysBack = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ChangesSummaryConfig {
+    return {
+      enabled: isSet(object.enabled) ? gt.Boolean(object.enabled) : false,
+      analysisIntervalHours: isSet(object.analysisIntervalHours) ? gt.Number(object.analysisIntervalHours) : 0,
+      daysBack: isSet(object.daysBack) ? gt.Number(object.daysBack) : 0,
+    };
+  },
+
+  toJSON(message: ChangesSummaryConfig): unknown {
+    const obj: any = {};
+    if (message.enabled !== false) {
+      obj.enabled = message.enabled;
+    }
+    if (message.analysisIntervalHours !== 0) {
+      obj.analysisIntervalHours = Math.round(message.analysisIntervalHours);
+    }
+    if (message.daysBack !== 0) {
+      obj.daysBack = Math.round(message.daysBack);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<ChangesSummaryConfig>): ChangesSummaryConfig {
+    return ChangesSummaryConfig.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<ChangesSummaryConfig>): ChangesSummaryConfig {
+    const message = createBaseChangesSummaryConfig();
+    message.enabled = object.enabled ?? false;
+    message.analysisIntervalHours = object.analysisIntervalHours ?? 0;
+    message.daysBack = object.daysBack ?? 0;
     return message;
   },
 };

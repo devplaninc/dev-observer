@@ -2,6 +2,7 @@ import dataclasses
 import datetime
 from typing import Protocol, Optional, MutableSequence
 
+from dev_observer.api.types.changes_pb2 import GitHubChangesSummary
 from dev_observer.api.types.config_pb2 import GlobalConfig
 from dev_observer.api.types.processing_pb2 import ProcessingItem, ProcessingItemKey
 from dev_observer.api.types.repo_pb2 import GitHubRepository, GitProperties
@@ -55,4 +56,16 @@ class StorageProvider(Protocol):
         ...
 
     async def set_global_config(self, config: GlobalConfig) -> GlobalConfig:
+        ...
+
+    async def save_changes_summary(self, summary: GitHubChangesSummary) -> GitHubChangesSummary:
+        ...
+
+    async def get_changes_summary(self, summary_id: str) -> Optional[GitHubChangesSummary]:
+        ...
+
+    async def list_changes_summaries(self, repo_id: str, limit: int = 50, offset: int = 0) -> MutableSequence[GitHubChangesSummary]:
+        ...
+
+    async def delete_changes_summary(self, summary_id: str):
         ...

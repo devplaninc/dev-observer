@@ -10,6 +10,7 @@ from dev_observer.observations.provider import ObservationsProvider
 from dev_observer.observations.s3 import S3ObservationsProvider
 from dev_observer.processors.periodic import PeriodicProcessor
 from dev_observer.processors.repos import ReposProcessor
+from dev_observer.processors.changes_summary import ChangesSummaryProcessor
 from dev_observer.processors.websites import WebsitesProcessor
 from dev_observer.prompts.langfuse import LangfusePromptsProvider, LangfuseAuthProps
 from dev_observer.prompts.local import LocalPromptsProvider, PromptTemplateParser, TomlPromptTemplateParser, \
@@ -196,6 +197,13 @@ def detect_server_env(settings: Settings) -> ServerEnv:
     bg_repos_processor = ReposProcessor(bg_analysis, bg_repository, prompts, observations, tokenizer)
     bg_web_scraping = detect_web_scraping(settings)
     bg_sites_processor = WebsitesProcessor(bg_analysis, bg_web_scraping, prompts, observations, tokenizer)
+    
+    # Create changes summary processor
+    github_auth = detect_github_auth(settings.git.github if settings.git else None, bg_storage)
+    bg_changes_summary_processor = ChangesSummaryProcessor(
+        bg_storage, bg_analysis, prompts, github_auth
+    )
+    
     users = detect_users_provider(settings)
 
     # Extract API key from settings if available
@@ -209,7 +217,8 @@ def detect_server_env(settings: Settings) -> ServerEnv:
         observations=observations,
         storage=storage,
         repos_processor=bg_repos_processor,
-        periodic_processor=PeriodicProcessor(bg_storage, bg_repos_processor, websites_processor=bg_sites_processor),
+        changes_summary_processor=bg_changes_summary_processor,
+        periodic_processor=PeriodicProcessor(bg_storage, bg_repos_processor, bg_changes_summary_processor, websites_processor=bg_sites_processor),
         users=users,
         api_keys=api_keys or [],
     )

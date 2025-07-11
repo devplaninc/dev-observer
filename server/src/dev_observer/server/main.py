@@ -17,6 +17,7 @@ from dev_observer.server.services.config import ConfigService
 from dev_observer.server.services.observations import ObservationsService
 from dev_observer.server.services.repositories import RepositoriesService
 from dev_observer.server.services.sites import WebSitesService
+from dev_observer.server.services.changes import ChangesSummaryService
 from dev_observer.settings import Settings
 
 secrets_file = os.environ.get("DEV_OBSERVER_SECRETS_FILE", None)
@@ -59,6 +60,7 @@ config_service = ConfigService(env.storage, env.users)
 repos_service = RepositoriesService(env.storage)
 observations_service = ObservationsService(env.observations)
 websites_service = WebSitesService(env.storage)
+changes_service = ChangesSummaryService(env.storage, env.changes_summary_processor)
 
 # Include routers with authentication
 app.include_router(
@@ -78,6 +80,11 @@ app.include_router(
 )
 app.include_router(
     websites_service.router,
+    prefix="/api/v1",
+    dependencies=[Depends(auth_middleware.verify_token)]
+)
+app.include_router(
+    changes_service.router,
     prefix="/api/v1",
     dependencies=[Depends(auth_middleware.verify_token)]
 )

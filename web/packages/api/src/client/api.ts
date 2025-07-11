@@ -3,6 +3,7 @@ import {ConfigClient} from "./config";
 import {ObservationsClient} from "./observations";
 import {RepositoriesClient} from "./repositories";
 import {WebsitesClient} from "./websites";
+import {ChangesClient} from "./changes";
 import {AxiosRequestConfig} from "axios";
 
 /**
@@ -13,6 +14,7 @@ export class ApiClient extends BaseClient {
   readonly observations: ObservationsClient;
   readonly repositories: RepositoriesClient;
   readonly websites: WebsitesClient;
+  readonly changes: ChangesClient;
 
   /**
    * Create a new ApiClient
@@ -25,6 +27,7 @@ export class ApiClient extends BaseClient {
     this.observations = new ObservationsClient(baseUrl, config);
     this.repositories = new RepositoriesClient(baseUrl, config);
     this.websites = new WebsitesClient(baseUrl, config);
+    this.changes = new ChangesClient(baseUrl, config);
   }
 
   /**
@@ -37,6 +40,7 @@ export class ApiClient extends BaseClient {
     this.observations.setAuthToken(token);
     this.repositories.setAuthToken(token);
     this.websites.setAuthToken(token);
+    this.changes.setAuthToken(token);
   }
 
   /**
@@ -48,5 +52,6 @@ export class ApiClient extends BaseClient {
     this.observations.clearAuthToken();
     this.repositories.clearAuthToken();
     this.websites.clearAuthToken();
+    this.changes.clearAuthToken();
   }
 }
