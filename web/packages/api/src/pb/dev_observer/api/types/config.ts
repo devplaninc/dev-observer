@@ -45,6 +45,7 @@ export interface RepoAnalysisConfig_Flatten {
   /** Additional ignore pattern for large repo */
   largeRepoIgnorePattern: string;
   compressLarge: boolean;
+  maxFileSizeBytes: number;
 }
 
 export interface WebsiteCrawlingConfig {
@@ -431,6 +432,7 @@ function createBaseRepoAnalysisConfig_Flatten(): RepoAnalysisConfig_Flatten {
     largeRepoThresholdMb: 0,
     largeRepoIgnorePattern: "",
     compressLarge: false,
+    maxFileSizeBytes: 0,
   };
 }
 
@@ -462,6 +464,9 @@ export const RepoAnalysisConfig_Flatten: MessageFns<RepoAnalysisConfig_Flatten> 
     }
     if (message.compressLarge !== false) {
       writer.uint32(72).bool(message.compressLarge);
+    }
+    if (message.maxFileSizeBytes !== 0) {
+      writer.uint32(80).int32(message.maxFileSizeBytes);
     }
     return writer;
   },
@@ -545,6 +550,14 @@ export const RepoAnalysisConfig_Flatten: MessageFns<RepoAnalysisConfig_Flatten> 
           message.compressLarge = reader.bool();
           continue;
         }
+        case 10: {
+          if (tag !== 80) {
+            break;
+          }
+
+          message.maxFileSizeBytes = reader.int32();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -565,6 +578,7 @@ export const RepoAnalysisConfig_Flatten: MessageFns<RepoAnalysisConfig_Flatten> 
       largeRepoThresholdMb: isSet(object.largeRepoThresholdMb) ? gt.Number(object.largeRepoThresholdMb) : 0,
       largeRepoIgnorePattern: isSet(object.largeRepoIgnorePattern) ? gt.String(object.largeRepoIgnorePattern) : "",
       compressLarge: isSet(object.compressLarge) ? gt.Boolean(object.compressLarge) : false,
+      maxFileSizeBytes: isSet(object.maxFileSizeBytes) ? gt.Number(object.maxFileSizeBytes) : 0,
     };
   },
 
@@ -597,6 +611,9 @@ export const RepoAnalysisConfig_Flatten: MessageFns<RepoAnalysisConfig_Flatten> 
     if (message.compressLarge !== false) {
       obj.compressLarge = message.compressLarge;
     }
+    if (message.maxFileSizeBytes !== 0) {
+      obj.maxFileSizeBytes = Math.round(message.maxFileSizeBytes);
+    }
     return obj;
   },
 
@@ -614,6 +631,7 @@ export const RepoAnalysisConfig_Flatten: MessageFns<RepoAnalysisConfig_Flatten> 
     message.largeRepoThresholdMb = object.largeRepoThresholdMb ?? 0;
     message.largeRepoIgnorePattern = object.largeRepoIgnorePattern ?? "";
     message.compressLarge = object.compressLarge ?? false;
+    message.maxFileSizeBytes = object.maxFileSizeBytes ?? 0;
     return message;
   },
 };

@@ -7,6 +7,8 @@ import string
 import subprocess
 from typing import List, Callable, Optional
 
+from pydantic import BaseModel
+
 from dev_observer.api.types.config_pb2 import GlobalConfig, RepoAnalysisConfig
 from dev_observer.log import s_
 from dev_observer.repository.cloner import clone_repository
@@ -34,6 +36,58 @@ class FlattenResult:
     clean_up: Callable[[], bool]
 
 
+class RepomixInput(BaseModel):
+    maxFileSize: int = 50_000_000
+
+
+class RepomixGit(BaseModel):
+    sortByChanges: bool = True
+    sortByChangesMaxCommits: int = 100
+    includeDiffs: bool = False
+
+
+class RepomixOutput(BaseModel):
+    filePath: str
+    style: str = "markdown"
+    parsableStyle: bool = False
+    compress: bool = False
+    # headerText: Optional[str] = None
+    fileSummary: bool = True
+    directoryStructure: bool = True
+    files: bool = True
+    removeComments: bool = False
+    removeEmptyLines: bool = False
+    topFilesLength: int = 5
+    showLineNumbers: bool = False
+    copyToClipboard: bool = False
+    includeEmptyDirectories: bool = False
+    git: RepomixGit = RepomixGit()
+
+
+class RepomixIgnore(BaseModel):
+    customPatterns: List[str] = []
+    useGitignore: bool = True
+    useDefaultPatterns: bool = True
+
+
+class RepomixSecurity(BaseModel):
+    enableSecurityCheck: bool = True
+
+
+class RepomixTokenCount(BaseModel):
+    encoding: str = "o200k_base"
+
+
+class RepomixConfig(BaseModel):
+    input: RepomixInput
+    output: RepomixOutput
+    include: List[str] = ["**/*"]
+    ignore: RepomixIgnore = RepomixIgnore()
+    security: RepomixSecurity = RepomixSecurity()
+    tokenCount: RepomixTokenCount = RepomixTokenCount()
+
+
+
 def combine_repository(repo_path: str, info: RepositoryInfo, config: GlobalConfig) -> CombineResult:
     flatten_config = config.repo_analysis.flatten if config.repo_analysis.HasField("flatten") \
         else RepoAnalysisConfig.Flatten()
@@ -48,17 +102,26 @@ def combine_repository(repo_path: str, info: RepositoryInfo, config: GlobalConfi
 
     compress = flatten_config.compress or (is_large and flatten_config.compress_large)
     ignore = flatten_config.ignore_pattern
+    max_file_size = flatten_config.max_file_size_bytes or 50_000
     if is_large and len(flatten_config.large_repo_ignore_pattern) > 0:
         ignore = ",".join([ignore, flatten_config.large_repo_ignore_pattern])
+        
+    config = RepomixConfig(
+        input=RepomixInput(maxFileSize=max_file_size),
+        output=RepomixOutput(
+            filePath=output_file, 
+            compress=compress,
+            style=flatten_config.out_style if len(flatten_config.out_style) > 0 else "markdown",
+        ),
+        ignore=RepomixIgnore(customPatterns=[ignore]),
+    )
+
+    config_file = os.path.join(folder_path, "repomix.config.json")
+    with open(config_file, 'w') as f:
+        f.write(config.model_dump_json())
 
     # Run repomix to combine the repository into a single file
-    cmd = ["repomix",
-           "--output", output_file,
-           "--ignore", ignore,
-           "--style", flatten_config.out_style if len(flatten_config.out_style) > 0 else "markdown"]
-    if compress:
-        cmd.append("--compress")
-    cmd.append(repo_path)
+    cmd = ["repomix", "--config", config_file, repo_path]
 
     _log.debug(s_("Executing repomix...", output_file=output_file, cmd=cmd))
     result = subprocess.run(
@@ -73,6 +136,10 @@ def combine_repository(repo_path: str, info: RepositoryInfo, config: GlobalConfi
         raise RuntimeError(f"Failed to combine repository: {result.stderr}")
 
     _log.debug(s_("Done.", out=result.stdout))
+
+    # Clean up config file
+    if os.path.exists(config_file):
+        os.remove(config_file)
 
     # Get the size of the combined file
     size_bytes = os.path.getsize(output_file)

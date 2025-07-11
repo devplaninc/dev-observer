@@ -37,7 +37,7 @@ class UserManagementStatus(_message.Message):
 class RepoAnalysisConfig(_message.Message):
     __slots__ = ("flatten", "processing_interval_sec", "disabled")
     class Flatten(_message.Message):
-        __slots__ = ("compress", "remove_empty_lines", "out_style", "max_tokens_per_chunk", "max_repo_size_mb", "ignore_pattern", "large_repo_threshold_mb", "large_repo_ignore_pattern", "compress_large")
+        __slots__ = ("compress", "remove_empty_lines", "out_style", "max_tokens_per_chunk", "max_repo_size_mb", "ignore_pattern", "large_repo_threshold_mb", "large_repo_ignore_pattern", "compress_large", "max_file_size_bytes")
         COMPRESS_FIELD_NUMBER: _ClassVar[int]
         REMOVE_EMPTY_LINES_FIELD_NUMBER: _ClassVar[int]
         OUT_STYLE_FIELD_NUMBER: _ClassVar[int]
@@ -47,6 +47,7 @@ class RepoAnalysisConfig(_message.Message):
         LARGE_REPO_THRESHOLD_MB_FIELD_NUMBER: _ClassVar[int]
         LARGE_REPO_IGNORE_PATTERN_FIELD_NUMBER: _ClassVar[int]
         COMPRESS_LARGE_FIELD_NUMBER: _ClassVar[int]
+        MAX_FILE_SIZE_BYTES_FIELD_NUMBER: _ClassVar[int]
         compress: bool
         remove_empty_lines: bool
         out_style: str
@@ -56,7 +57,8 @@ class RepoAnalysisConfig(_message.Message):
         large_repo_threshold_mb: int
         large_repo_ignore_pattern: str
         compress_large: bool
-        def __init__(self, compress: bool = ..., remove_empty_lines: bool = ..., out_style: _Optional[str] = ..., max_tokens_per_chunk: _Optional[int] = ..., max_repo_size_mb: _Optional[int] = ..., ignore_pattern: _Optional[str] = ..., large_repo_threshold_mb: _Optional[int] = ..., large_repo_ignore_pattern: _Optional[str] = ..., compress_large: bool = ...) -> None: ...
+        max_file_size_bytes: int
+        def __init__(self, compress: bool = ..., remove_empty_lines: bool = ..., out_style: _Optional[str] = ..., max_tokens_per_chunk: _Optional[int] = ..., max_repo_size_mb: _Optional[int] = ..., ignore_pattern: _Optional[str] = ..., large_repo_threshold_mb: _Optional[int] = ..., large_repo_ignore_pattern: _Optional[str] = ..., compress_large: bool = ..., max_file_size_bytes: _Optional[int] = ...) -> None: ...
     FLATTEN_FIELD_NUMBER: _ClassVar[int]
     PROCESSING_INTERVAL_SEC_FIELD_NUMBER: _ClassVar[int]
     DISABLED_FIELD_NUMBER: _ClassVar[int]

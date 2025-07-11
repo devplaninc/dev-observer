@@ -36,6 +36,7 @@ const repoAnalysisConfigFlattenSchema = z.object({
   largeRepoThresholdMb: z.coerce.number(),
   largeRepoIgnorePattern: z.string(),
   compressLarge: z.boolean(),
+  maxFileSizeBytes: z.coerce.number(),
 })
 
 const repoAnalysisConfigSchema = z.object({
@@ -333,6 +334,20 @@ function GlobalConfigEditorForm({config}: { config: GlobalConfig }) {
             render={({field}) => (
               <FormItem className="flex items-center gap-4">
                 <FormLabel className="w-[200px]">Max Repo Size (MB):</FormLabel>
+                <FormControl className="w-[200px]">
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))}/>
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="repoAnalysis.flatten.maxFileSizeBytes"
+            render={({field}) => (
+              <FormItem className="flex items-center gap-4">
+                <FormLabel className="w-[200px]">Max File Size (B):</FormLabel>
                 <FormControl className="w-[200px]">
                   <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))}/>
                 </FormControl>

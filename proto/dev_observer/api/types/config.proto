@@ -38,6 +38,7 @@ message RepoAnalysisConfig {
     // Additional ignore pattern for large repo
     string large_repo_ignore_pattern = 8;
     bool compress_large = 9;
+    int32 max_file_size_bytes = 10;
   }
 }
 
