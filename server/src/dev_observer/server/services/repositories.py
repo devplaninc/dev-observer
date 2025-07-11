@@ -31,6 +31,8 @@ class RepositoriesService:
         self.router.add_api_route("/repositories/{repo_id}", self.get, methods=["GET"])
         self.router.add_api_route("/repositories/{repo_id}", self.delete, methods=["DELETE"])
         self.router.add_api_route("/repositories/{repo_id}/rescan", self.rescan, methods=["POST"])
+        self.router.add_api_route("/repositories/{repo_id}/enroll", self.enroll, methods=["POST"])
+        self.router.add_api_route("/repositories/{repo_id}/unenroll", self.unenroll, methods=["POST"])
 
     async def add_github_repo(self, req: Request):
         request = parse_dict_pb(await req.json(), AddGithubRepositoryRequest())
@@ -61,3 +63,31 @@ class RepositoriesService:
             ProcessingItemKey(github_repo_id=repo_id), self._clock.now(),
         )
         return pb_to_dict(RescanRepositoryResponse())
+
+    async def enroll(self, repo_id: str):
+        repo = await self._store.get_github_repo(repo_id)
+        if not repo:
+            return {"error": "Repository not found"}, 404
+        if getattr(repo, "change_analysis_enrolled", False):
+            return {"error": "Repository already enrolled"}, 400
+        repo.change_analysis_enrolled = True
+        updated = await self._store.update_github_repo(repo)
+        # Analytics logging
+        _log.info(s_("Repository enrolled for change analysis", 
+                    repo_id=repo_id, 
+                    repo_name=repo.full_name))
+        return pb_to_dict(GetRepositoryResponse(repo=updated))
+
+    async def unenroll(self, repo_id: str):
+        repo = await self._store.get_github_repo(repo_id)
+        if not repo:
+            return {"error": "Repository not found"}, 404
+        if not getattr(repo, "change_analysis_enrolled", False):
+            return {"error": "Repository not enrolled"}, 400
+        repo.change_analysis_enrolled = False
+        updated = await self._store.update_github_repo(repo)
+        # Analytics logging
+        _log.info(s_("Repository unenrolled from change analysis", 
+                    repo_id=repo_id, 
+                    repo_name=repo.full_name))
+        return pb_to_dict(GetRepositoryResponse(repo=updated))

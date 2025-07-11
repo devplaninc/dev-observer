@@ -6,9 +6,24 @@ import AddRepositoryForm from "@/components/AddRepositoryForm.tsx";
 import {useRepositories} from "@/hooks/useRepositoryQueries.ts";
 import {ErrorAlert} from "@/components/ErrorAlert.tsx";
 import {Loader} from "@/components/Loader.tsx";
+import {EnrollmentToggle} from "@/components/repos/EnrollmentToggle.tsx";
+import {useBoundStore} from "@/store/use-bound-store.tsx";
 
 const RepositoryListPage: React.FC = () => {
   const {repositories, error, reload} = useRepositories();
+  const {enrollRepository, unenrollRepository} = useBoundStore();
+
+  const handleEnrollmentToggle = async (repoId: string, enrolled: boolean) => {
+    try {
+      if (enrolled) {
+        await enrollRepository(repoId);
+      } else {
+        await unenrollRepository(repoId);
+      }
+    } catch (error) {
+      console.error('Failed to toggle enrollment:', error);
+    }
+  };
 
   if (repositories === undefined) {
     if (error) {
@@ -35,19 +50,25 @@ const RepositoryListPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {repositories.map(repo => (
-            <Link to={`/repositories/${repo.id}`} key={repo.id}>
-              <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
-                <CardHeader>
-                  <CardTitle>{repo.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground break-all">{repo.url}</p>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" size="sm">View Details</Button>
-                </CardFooter>
-              </Card>
-            </Link>
+            <Card key={repo.id} className="h-full hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle>{repo.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground break-all">{repo.url}</p>
+                <EnrollmentToggle
+                  repoId={repo.id}
+                  repoName={repo.fullName}
+                  isEnrolled={repo.changeAnalysisEnrolled || false}
+                  onToggle={(enrolled) => handleEnrollmentToggle(repo.id, enrolled)}
+                />
+              </CardContent>
+              <CardFooter>
+                <Link to={`/repositories/${repo.id}`} className="w-full">
+                  <Button variant="outline" size="sm" className="w-full">View Details</Button>
+                </Link>
+              </CardFooter>
+            </Card>
           ))}
         </div>
       )}

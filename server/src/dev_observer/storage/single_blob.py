@@ -67,6 +67,16 @@ class SingleBlobStorageProvider(abc.ABC, StorageProvider):
         await self._update(up)
         return repo
 
+    async def update_github_repo(self, repo: GitHubRepository) -> GitHubRepository:
+        def up(d: LocalStorageData):
+            for i, r in enumerate(d.github_repos):
+                if r.id == repo.id:
+                    d.github_repos[i].CopyFrom(repo)
+                    return
+            raise ValueError(f"Repository with id {repo.id} not found")
+        await self._update(up)
+        return await self.get_github_repo(repo.id)
+
     async def update_repo_properties(self, id: str, properties: GitProperties) -> GitHubRepository:
         def up(d: LocalStorageData):
             for r in d.github_repos:

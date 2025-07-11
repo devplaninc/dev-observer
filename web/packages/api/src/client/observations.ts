@@ -1,7 +1,9 @@
 import { BaseClient } from './base';
 import {
   GetObservationResponse,
-  GetObservationsResponse
+  GetObservationsResponse,
+  GetChangeSummariesRequest,
+  GetChangeSummariesResponse
 } from '../pb/dev_observer/api/web/observations';
 
 /**
@@ -16,5 +18,9 @@ export class ObservationsClient extends BaseClient {
     // The server replaces / with | in the key parameter
     const encodedKey = key.replace(/\//g, '|');
     return this._get(`/api/v1/observation/${kind}/${name}/${encodedKey}`, GetObservationResponse);
+  }
+
+  async getChangeSummaries(request: GetChangeSummariesRequest): Promise<GetChangeSummariesResponse> {
+    return this._post('/change-summaries', GetChangeSummariesResponse, request);
   }
 }

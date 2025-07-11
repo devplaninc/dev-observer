@@ -11,6 +11,7 @@ from dev_observer.observations.s3 import S3ObservationsProvider
 from dev_observer.processors.periodic import PeriodicProcessor
 from dev_observer.processors.repos import ReposProcessor
 from dev_observer.processors.websites import WebsitesProcessor
+from dev_observer.analysis.change_analysis_scheduler import ChangeAnalysisScheduler
 from dev_observer.prompts.langfuse import LangfusePromptsProvider, LangfuseAuthProps
 from dev_observer.prompts.local import LocalPromptsProvider, PromptTemplateParser, TomlPromptTemplateParser, \
     JSONPromptTemplateParser
@@ -210,6 +211,7 @@ def detect_server_env(settings: Settings) -> ServerEnv:
         storage=storage,
         repos_processor=bg_repos_processor,
         periodic_processor=PeriodicProcessor(bg_storage, bg_repos_processor, websites_processor=bg_sites_processor),
+        change_analysis_scheduler=ChangeAnalysisScheduler(bg_storage, bg_analysis, prompts, observations),
         users=users,
         api_keys=api_keys or [],
     )

@@ -39,3 +39,27 @@ class DeleteRepositoryResponse(_message.Message):
     REPOS_FIELD_NUMBER: _ClassVar[int]
     repos: _containers.RepeatedCompositeFieldContainer[_repo_pb2.GitHubRepository]
     def __init__(self, repos: _Optional[_Iterable[_Union[_repo_pb2.GitHubRepository, _Mapping]]] = ...) -> None: ...
+
+class EnrollRepositoryRequest(_message.Message):
+    __slots__ = ("repo_id",)
+    REPO_ID_FIELD_NUMBER: _ClassVar[int]
+    repo_id: str
+    def __init__(self, repo_id: _Optional[str] = ...) -> None: ...
+
+class EnrollRepositoryResponse(_message.Message):
+    __slots__ = ("repo",)
+    REPO_FIELD_NUMBER: _ClassVar[int]
+    repo: _repo_pb2.GitHubRepository
+    def __init__(self, repo: _Optional[_Union[_repo_pb2.GitHubRepository, _Mapping]] = ...) -> None: ...
+
+class UnenrollRepositoryRequest(_message.Message):
+    __slots__ = ("repo_id",)
+    REPO_ID_FIELD_NUMBER: _ClassVar[int]
+    repo_id: str
+    def __init__(self, repo_id: _Optional[str] = ...) -> None: ...
+
+class UnenrollRepositoryResponse(_message.Message):
+    __slots__ = ("repo",)
+    REPO_FIELD_NUMBER: _ClassVar[int]
+    repo: _repo_pb2.GitHubRepository
+    def __init__(self, repo: _Optional[_Union[_repo_pb2.GitHubRepository, _Mapping]] = ...) -> None: ...

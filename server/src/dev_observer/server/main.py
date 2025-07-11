@@ -42,10 +42,22 @@ def start_bg_processing():
     loop.run_until_complete(env.periodic_processor.run())
 
 
+def start_change_analysis_scheduler():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(env.change_analysis_scheduler.run())
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    thread = threading.Thread(target=start_bg_processing, daemon=True)
-    thread.start()
+    # Start periodic processor
+    periodic_thread = threading.Thread(target=start_bg_processing, daemon=True)
+    periodic_thread.start()
+    
+    # Start change analysis scheduler
+    scheduler_thread = threading.Thread(target=start_change_analysis_scheduler, daemon=True)
+    scheduler_thread.start()
+    
     yield
 
 
@@ -57,7 +69,7 @@ auth_middleware = AuthMiddleware(env.users, env.api_keys)
 # Create services
 config_service = ConfigService(env.storage, env.users)
 repos_service = RepositoriesService(env.storage)
-observations_service = ObservationsService(env.observations)
+observations_service = ObservationsService(env.observations, env.storage)
 websites_service = WebSitesService(env.storage)
 
 # Include routers with authentication

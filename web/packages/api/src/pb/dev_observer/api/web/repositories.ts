@@ -33,6 +33,22 @@ export interface DeleteRepositoryResponse {
   repos: GitHubRepository[];
 }
 
+export interface EnrollRepositoryRequest {
+  repoId: string;
+}
+
+export interface EnrollRepositoryResponse {
+  repo: GitHubRepository | undefined;
+}
+
+export interface UnenrollRepositoryRequest {
+  repoId: string;
+}
+
+export interface UnenrollRepositoryResponse {
+  repo: GitHubRepository | undefined;
+}
+
 function createBaseListGithubRepositoriesResponse(): ListGithubRepositoriesResponse {
   return { repos: [] };
 }
@@ -366,6 +382,242 @@ export const DeleteRepositoryResponse: MessageFns<DeleteRepositoryResponse> = {
   fromPartial(object: DeepPartial<DeleteRepositoryResponse>): DeleteRepositoryResponse {
     const message = createBaseDeleteRepositoryResponse();
     message.repos = object.repos?.map((e) => GitHubRepository.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseEnrollRepositoryRequest(): EnrollRepositoryRequest {
+  return { repoId: "" };
+}
+
+export const EnrollRepositoryRequest: MessageFns<EnrollRepositoryRequest> = {
+  encode(message: EnrollRepositoryRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.repoId !== "") {
+      writer.uint32(10).string(message.repoId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): EnrollRepositoryRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEnrollRepositoryRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.repoId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EnrollRepositoryRequest {
+    return { repoId: isSet(object.repoId) ? gt.String(object.repoId) : "" };
+  },
+
+  toJSON(message: EnrollRepositoryRequest): unknown {
+    const obj: any = {};
+    if (message.repoId !== "") {
+      obj.repoId = message.repoId;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<EnrollRepositoryRequest>): EnrollRepositoryRequest {
+    return EnrollRepositoryRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<EnrollRepositoryRequest>): EnrollRepositoryRequest {
+    const message = createBaseEnrollRepositoryRequest();
+    message.repoId = object.repoId ?? "";
+    return message;
+  },
+};
+
+function createBaseEnrollRepositoryResponse(): EnrollRepositoryResponse {
+  return { repo: undefined };
+}
+
+export const EnrollRepositoryResponse: MessageFns<EnrollRepositoryResponse> = {
+  encode(message: EnrollRepositoryResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.repo !== undefined) {
+      GitHubRepository.encode(message.repo, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): EnrollRepositoryResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEnrollRepositoryResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.repo = GitHubRepository.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EnrollRepositoryResponse {
+    return { repo: isSet(object.repo) ? GitHubRepository.fromJSON(object.repo) : undefined };
+  },
+
+  toJSON(message: EnrollRepositoryResponse): unknown {
+    const obj: any = {};
+    if (message.repo !== undefined) {
+      obj.repo = GitHubRepository.toJSON(message.repo);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<EnrollRepositoryResponse>): EnrollRepositoryResponse {
+    return EnrollRepositoryResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<EnrollRepositoryResponse>): EnrollRepositoryResponse {
+    const message = createBaseEnrollRepositoryResponse();
+    message.repo = (object.repo !== undefined && object.repo !== null)
+      ? GitHubRepository.fromPartial(object.repo)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseUnenrollRepositoryRequest(): UnenrollRepositoryRequest {
+  return { repoId: "" };
+}
+
+export const UnenrollRepositoryRequest: MessageFns<UnenrollRepositoryRequest> = {
+  encode(message: UnenrollRepositoryRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.repoId !== "") {
+      writer.uint32(10).string(message.repoId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UnenrollRepositoryRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUnenrollRepositoryRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.repoId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UnenrollRepositoryRequest {
+    return { repoId: isSet(object.repoId) ? gt.String(object.repoId) : "" };
+  },
+
+  toJSON(message: UnenrollRepositoryRequest): unknown {
+    const obj: any = {};
+    if (message.repoId !== "") {
+      obj.repoId = message.repoId;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<UnenrollRepositoryRequest>): UnenrollRepositoryRequest {
+    return UnenrollRepositoryRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<UnenrollRepositoryRequest>): UnenrollRepositoryRequest {
+    const message = createBaseUnenrollRepositoryRequest();
+    message.repoId = object.repoId ?? "";
+    return message;
+  },
+};
+
+function createBaseUnenrollRepositoryResponse(): UnenrollRepositoryResponse {
+  return { repo: undefined };
+}
+
+export const UnenrollRepositoryResponse: MessageFns<UnenrollRepositoryResponse> = {
+  encode(message: UnenrollRepositoryResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.repo !== undefined) {
+      GitHubRepository.encode(message.repo, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UnenrollRepositoryResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUnenrollRepositoryResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.repo = GitHubRepository.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UnenrollRepositoryResponse {
+    return { repo: isSet(object.repo) ? GitHubRepository.fromJSON(object.repo) : undefined };
+  },
+
+  toJSON(message: UnenrollRepositoryResponse): unknown {
+    const obj: any = {};
+    if (message.repo !== undefined) {
+      obj.repo = GitHubRepository.toJSON(message.repo);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<UnenrollRepositoryResponse>): UnenrollRepositoryResponse {
+    return UnenrollRepositoryResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<UnenrollRepositoryResponse>): UnenrollRepositoryResponse {
+    const message = createBaseUnenrollRepositoryResponse();
+    message.repo = (object.repo !== undefined && object.repo !== null)
+      ? GitHubRepository.fromPartial(object.repo)
+      : undefined;
     return message;
   },
 };

@@ -25,3 +25,19 @@ message GetRepositoryResponse{
 message DeleteRepositoryResponse{
   repeated dev_observer.api.types.repo.GitHubRepository repos = 1;
 }
+
+message EnrollRepositoryRequest {
+  string repo_id = 1;
+}
+
+message EnrollRepositoryResponse {
+  dev_observer.api.types.repo.GitHubRepository repo = 1;
+}
+
+message UnenrollRepositoryRequest {
+  string repo_id = 1;
+}
+
+message UnenrollRepositoryResponse {
+  dev_observer.api.types.repo.GitHubRepository repo = 1;
+}

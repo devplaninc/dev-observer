@@ -16,7 +16,11 @@ export interface GitHubRepository {
   fullName: string;
   url: string;
   description: string;
-  properties?: GitProperties | undefined;
+  properties?:
+    | GitProperties
+    | undefined;
+  /** Indicates if this repo is enrolled for daily change analysis */
+  changeAnalysisEnrolled?: boolean | undefined;
 }
 
 export interface GitProperties {
@@ -36,7 +40,15 @@ export interface GitAppInfo {
 }
 
 function createBaseGitHubRepository(): GitHubRepository {
-  return { id: "", name: "", fullName: "", url: "", description: "", properties: undefined };
+  return {
+    id: "",
+    name: "",
+    fullName: "",
+    url: "",
+    description: "",
+    properties: undefined,
+    changeAnalysisEnrolled: undefined,
+  };
 }
 
 export const GitHubRepository: MessageFns<GitHubRepository> = {
@@ -58,6 +70,9 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
     }
     if (message.properties !== undefined) {
       GitProperties.encode(message.properties, writer.uint32(50).fork()).join();
+    }
+    if (message.changeAnalysisEnrolled !== undefined) {
+      writer.uint32(56).bool(message.changeAnalysisEnrolled);
     }
     return writer;
   },
@@ -117,6 +132,14 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
           message.properties = GitProperties.decode(reader, reader.uint32());
           continue;
         }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.changeAnalysisEnrolled = reader.bool();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -134,6 +157,9 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
       url: isSet(object.url) ? gt.String(object.url) : "",
       description: isSet(object.description) ? gt.String(object.description) : "",
       properties: isSet(object.properties) ? GitProperties.fromJSON(object.properties) : undefined,
+      changeAnalysisEnrolled: isSet(object.changeAnalysisEnrolled)
+        ? gt.Boolean(object.changeAnalysisEnrolled)
+        : undefined,
     };
   },
 
@@ -157,6 +183,9 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
     if (message.properties !== undefined) {
       obj.properties = GitProperties.toJSON(message.properties);
     }
+    if (message.changeAnalysisEnrolled !== undefined) {
+      obj.changeAnalysisEnrolled = message.changeAnalysisEnrolled;
+    }
     return obj;
   },
 
@@ -173,6 +202,7 @@ export const GitHubRepository: MessageFns<GitHubRepository> = {
     message.properties = (object.properties !== undefined && object.properties !== null)
       ? GitProperties.fromPartial(object.properties)
       : undefined;
+    message.changeAnalysisEnrolled = object.changeAnalysisEnrolled ?? undefined;
     return message;
   },
 };

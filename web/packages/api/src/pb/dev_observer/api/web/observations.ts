@@ -18,6 +18,40 @@ export interface GetObservationResponse {
   observation: Observation | undefined;
 }
 
+export interface GetChangeSummariesRequest {
+  repoId?:
+    | string
+    | undefined;
+  /** ISO date string */
+  dateFrom?:
+    | string
+    | undefined;
+  /** ISO date string */
+  dateTo?:
+    | string
+    | undefined;
+  /** pending, completed, failed */
+  status?: string | undefined;
+}
+
+export interface GetChangeSummariesResponse {
+  summaries: ChangeSummary[];
+}
+
+export interface ChangeSummary {
+  jobId: string;
+  repoId: string;
+  repoName: string;
+  status: string;
+  observationKey?: string | undefined;
+  errorMessage?:
+    | string
+    | undefined;
+  /** ISO datetime string */
+  analyzedAt?: string | undefined;
+  summaryContent?: string | undefined;
+}
+
 function createBaseGetObservationsResponse(): GetObservationsResponse {
   return { keys: [] };
 }
@@ -132,6 +166,355 @@ export const GetObservationResponse: MessageFns<GetObservationResponse> = {
     message.observation = (object.observation !== undefined && object.observation !== null)
       ? Observation.fromPartial(object.observation)
       : undefined;
+    return message;
+  },
+};
+
+function createBaseGetChangeSummariesRequest(): GetChangeSummariesRequest {
+  return { repoId: undefined, dateFrom: undefined, dateTo: undefined, status: undefined };
+}
+
+export const GetChangeSummariesRequest: MessageFns<GetChangeSummariesRequest> = {
+  encode(message: GetChangeSummariesRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.repoId !== undefined) {
+      writer.uint32(10).string(message.repoId);
+    }
+    if (message.dateFrom !== undefined) {
+      writer.uint32(18).string(message.dateFrom);
+    }
+    if (message.dateTo !== undefined) {
+      writer.uint32(26).string(message.dateTo);
+    }
+    if (message.status !== undefined) {
+      writer.uint32(34).string(message.status);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetChangeSummariesRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetChangeSummariesRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.repoId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.dateFrom = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.dateTo = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.status = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetChangeSummariesRequest {
+    return {
+      repoId: isSet(object.repoId) ? gt.String(object.repoId) : undefined,
+      dateFrom: isSet(object.dateFrom) ? gt.String(object.dateFrom) : undefined,
+      dateTo: isSet(object.dateTo) ? gt.String(object.dateTo) : undefined,
+      status: isSet(object.status) ? gt.String(object.status) : undefined,
+    };
+  },
+
+  toJSON(message: GetChangeSummariesRequest): unknown {
+    const obj: any = {};
+    if (message.repoId !== undefined) {
+      obj.repoId = message.repoId;
+    }
+    if (message.dateFrom !== undefined) {
+      obj.dateFrom = message.dateFrom;
+    }
+    if (message.dateTo !== undefined) {
+      obj.dateTo = message.dateTo;
+    }
+    if (message.status !== undefined) {
+      obj.status = message.status;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GetChangeSummariesRequest>): GetChangeSummariesRequest {
+    return GetChangeSummariesRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GetChangeSummariesRequest>): GetChangeSummariesRequest {
+    const message = createBaseGetChangeSummariesRequest();
+    message.repoId = object.repoId ?? undefined;
+    message.dateFrom = object.dateFrom ?? undefined;
+    message.dateTo = object.dateTo ?? undefined;
+    message.status = object.status ?? undefined;
+    return message;
+  },
+};
+
+function createBaseGetChangeSummariesResponse(): GetChangeSummariesResponse {
+  return { summaries: [] };
+}
+
+export const GetChangeSummariesResponse: MessageFns<GetChangeSummariesResponse> = {
+  encode(message: GetChangeSummariesResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.summaries) {
+      ChangeSummary.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetChangeSummariesResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetChangeSummariesResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.summaries.push(ChangeSummary.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetChangeSummariesResponse {
+    return {
+      summaries: gt.Array.isArray(object?.summaries) ? object.summaries.map((e: any) => ChangeSummary.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: GetChangeSummariesResponse): unknown {
+    const obj: any = {};
+    if (message.summaries?.length) {
+      obj.summaries = message.summaries.map((e) => ChangeSummary.toJSON(e));
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GetChangeSummariesResponse>): GetChangeSummariesResponse {
+    return GetChangeSummariesResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GetChangeSummariesResponse>): GetChangeSummariesResponse {
+    const message = createBaseGetChangeSummariesResponse();
+    message.summaries = object.summaries?.map((e) => ChangeSummary.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseChangeSummary(): ChangeSummary {
+  return {
+    jobId: "",
+    repoId: "",
+    repoName: "",
+    status: "",
+    observationKey: undefined,
+    errorMessage: undefined,
+    analyzedAt: undefined,
+    summaryContent: undefined,
+  };
+}
+
+export const ChangeSummary: MessageFns<ChangeSummary> = {
+  encode(message: ChangeSummary, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.jobId !== "") {
+      writer.uint32(10).string(message.jobId);
+    }
+    if (message.repoId !== "") {
+      writer.uint32(18).string(message.repoId);
+    }
+    if (message.repoName !== "") {
+      writer.uint32(26).string(message.repoName);
+    }
+    if (message.status !== "") {
+      writer.uint32(34).string(message.status);
+    }
+    if (message.observationKey !== undefined) {
+      writer.uint32(42).string(message.observationKey);
+    }
+    if (message.errorMessage !== undefined) {
+      writer.uint32(50).string(message.errorMessage);
+    }
+    if (message.analyzedAt !== undefined) {
+      writer.uint32(58).string(message.analyzedAt);
+    }
+    if (message.summaryContent !== undefined) {
+      writer.uint32(66).string(message.summaryContent);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ChangeSummary {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseChangeSummary();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.jobId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.repoId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.repoName = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.status = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.observationKey = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.errorMessage = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.analyzedAt = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.summaryContent = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ChangeSummary {
+    return {
+      jobId: isSet(object.jobId) ? gt.String(object.jobId) : "",
+      repoId: isSet(object.repoId) ? gt.String(object.repoId) : "",
+      repoName: isSet(object.repoName) ? gt.String(object.repoName) : "",
+      status: isSet(object.status) ? gt.String(object.status) : "",
+      observationKey: isSet(object.observationKey) ? gt.String(object.observationKey) : undefined,
+      errorMessage: isSet(object.errorMessage) ? gt.String(object.errorMessage) : undefined,
+      analyzedAt: isSet(object.analyzedAt) ? gt.String(object.analyzedAt) : undefined,
+      summaryContent: isSet(object.summaryContent) ? gt.String(object.summaryContent) : undefined,
+    };
+  },
+
+  toJSON(message: ChangeSummary): unknown {
+    const obj: any = {};
+    if (message.jobId !== "") {
+      obj.jobId = message.jobId;
+    }
+    if (message.repoId !== "") {
+      obj.repoId = message.repoId;
+    }
+    if (message.repoName !== "") {
+      obj.repoName = message.repoName;
+    }
+    if (message.status !== "") {
+      obj.status = message.status;
+    }
+    if (message.observationKey !== undefined) {
+      obj.observationKey = message.observationKey;
+    }
+    if (message.errorMessage !== undefined) {
+      obj.errorMessage = message.errorMessage;
+    }
+    if (message.analyzedAt !== undefined) {
+      obj.analyzedAt = message.analyzedAt;
+    }
+    if (message.summaryContent !== undefined) {
+      obj.summaryContent = message.summaryContent;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<ChangeSummary>): ChangeSummary {
+    return ChangeSummary.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<ChangeSummary>): ChangeSummary {
+    const message = createBaseChangeSummary();
+    message.jobId = object.jobId ?? "";
+    message.repoId = object.repoId ?? "";
+    message.repoName = object.repoName ?? "";
+    message.status = object.status ?? "";
+    message.observationKey = object.observationKey ?? undefined;
+    message.errorMessage = object.errorMessage ?? undefined;
+    message.analyzedAt = object.analyzedAt ?? undefined;
+    message.summaryContent = object.summaryContent ?? undefined;
     return message;
   },
 };
