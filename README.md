@@ -8,38 +8,15 @@ code or website content).
 # Quick Start:
 
 ## Pre-requisites
+To run quick start you need **Python 3.12+**, **uv** and **Node.js 18+**.
 
-### System Requirements
-- **Python 3.12+** - Required for the server backend
-- **Node.js 18+** - Required for the web frontend
-
-### Installation Instructions
-
-#### 1. Python 3.12+
-**macOS (using Homebrew):**
+On Mac, install them using:
 ```bash
-brew install python
+brew install python node
 ```
-
-#### 2. uv (Python Package Manager)
-**All platforms:**
+then for uv (if you don't have it yet):
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-#### 3. Node.js 18+ and npm
-**macOS (using Homebrew):**
-```bash
-brew install node
-```
-
-### Verification
-After installation, verify all tools are available:
-```bash
-python --version      # Should show python version
-uv --version          # Should show uv version
-node --version        # Should show Node.js 18+
-npm --version         # Should show npm version
 ```
 
 ## Get your Google API Key:
