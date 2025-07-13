@@ -1,39 +1,23 @@
 import asyncio
 import logging
-import os
 import subprocess
 import threading
 from contextlib import asynccontextmanager
 
-from dotenv import load_dotenv
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-import dev_observer.log
-from dev_observer.env_detection import detect_server_env
-from dev_observer.server.env import ServerEnv
+from dev_observer.log import s_
+from dev_observer.server import detect
 from dev_observer.server.middleware.auth import AuthMiddleware
 from dev_observer.server.services.config import ConfigService
 from dev_observer.server.services.observations import ObservationsService
 from dev_observer.server.services.repositories import RepositoriesService
 from dev_observer.server.services.sites import WebSitesService
-from dev_observer.settings import Settings
-
-secrets_file = os.environ.get("DEV_OBSERVER_SECRETS_FILE", None)
-if secrets_file is not None and len(secrets_file.strip()) > 0 and os.path.exists(secrets_file) and os.path.isfile(secrets_file):
-    load_dotenv(secrets_file)
-
-env_file = os.environ.get("DEV_OBSERVER_ENV_FILE", None)
-if env_file is not None and len(env_file.strip()) > 0 and os.path.exists(env_file) and os.path.isfile(env_file):
-    load_dotenv(env_file)
-
-dev_observer.log.encoder = dev_observer.log.PlainTextEncoder()
-logging.basicConfig(level=logging.DEBUG)
-from dev_observer.log import s_
 
 _log = logging.getLogger(__name__)
-Settings.model_config["toml_file"] = os.environ.get("DEV_OBSERVER_CONFIG_FILE", None)
-env: ServerEnv = detect_server_env(Settings())
+
+env = detect.env
 
 
 def start_bg_processing():
@@ -103,6 +87,7 @@ async def start_fastapi_server():
     uvicorn_server = uvicorn.Server(uvicorn_config)
     _log.info(s_("Starting FastAPI server...", port=port))
     await uvicorn_server.serve()
+
 
 def start_all():
     async def start():

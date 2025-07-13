@@ -13,6 +13,7 @@ class FormattedPrompt:
     system: Optional[SystemMessage]
     user: Optional[UserMessage]
     langfuse_prompt: Optional[ChatPromptClient] = None
+    prompt_name: Optional[str] = None
 
 
 class PromptsProvider(Protocol):

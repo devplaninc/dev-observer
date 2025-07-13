@@ -17,6 +17,7 @@ from dev_observer.prompts.local import LocalPromptsProvider, PromptTemplateParse
 from dev_observer.prompts.provider import PromptsProvider
 from dev_observer.repository.auth.github_token import GithubTokenAuthProvider
 from dev_observer.repository.copying import CopyingGitRepositoryProvider
+from dev_observer.repository.delegating import DelegatingGitRepositoryProvider
 from dev_observer.repository.github import GithubProvider, GithubAuthProvider
 from dev_observer.repository.provider import GitRepositoryProvider
 from dev_observer.server.env import ServerEnv
@@ -46,6 +47,8 @@ def detect_git_provider(settings: Settings, storage: StorageProvider) -> GitRepo
             return GithubProvider(detect_github_auth(git_sett.github, storage), storage)
         case "copying":
             return CopyingGitRepositoryProvider()
+        case "delegating":
+            return DelegatingGitRepositoryProvider()
     raise ValueError(f"Unsupported git provider: {git_sett.provider}")
 
 

@@ -69,7 +69,7 @@ The summary should be organized with clear headings and bullet points to ensure 
 [user]
 text = '''Here is a full repo description:
 
-{content}
+{{content}}
 '''
 [config.model]
 provider="google_genai"

@@ -16,7 +16,7 @@ class Github(BaseModel):
 
 
 class Git(BaseModel):
-    provider: Literal["github", "copying"] = "github"
+    provider: Literal["github", "copying", "delegating"] = "github"
 
     github: Optional[Github] = None
 

@@ -1,0 +1,30 @@
+[system]
+text ='''
+You will be given cleaned up html content of different pages of a website. Based on that representation of the web site, extract all the useful information you can find about goals of the business.
+
+Follow these guidelines while extracting information from the website.
+
+- Extract only valuable specific information related to the business of the company owning website.
+- Do not try to capture the structure of the website, only important content.
+- Do not capture privacy policy and user agreement.
+- Try to capture:
+  - main objectives of the business
+  - competitors if there is any information
+  - main provided features
+  - positioning
+  - names of the products and their purposes
+  - main use cases or scenarios targeted by the company
+  - any other information relevant how the operation of the organization owning the website.
+
+
+Reply with that information but avoid any conversation attempts.
+'''
+[user]
+text = '''Here is a full website description:
+
+{{content}}
+'''
+[config.model]
+provider="google_genai"
+model_name="gemini-2.0-flash-lite"
+temperature=0.1

@@ -1,35 +1,5 @@
 [system]
-text ='''Based on this flatten representation of the git repository, provide a high level architectural overview.
-
-You are a repository summarization expert. Your task is to summaries flatten git repository into a comprehensive, structured description.
-
-**Important**: Make sure that each section doesn't go too long and keep the entire summary under 3500 words.
-**Important**: Do not wrap the entire report in markdown tags, just output valid markdown.
-
----
-The report should start with following:
-
-# High Level Overview of the Repository
-
-<Then goes an overview>
-
----
-
-Do not start the report with makdown backticks , e.g. "```". Start directly with a first header:
-
-Bad beginning of the output:
-```markdown
-# High Level Overview of the Repository
-....
-
----
-
-Good beginning of the output:
-# High Level Overview of the Repository
-....
-
----
-
+text ='''You will be given one part of the flatten git repository. Based on that flatten representation of the repository, provide a high level architectural overview. Note, provided description is just one of the chunks, not the whole repository. Summaries of the chunks will later be combined. So focus onlu on extracting the data you actually notice in the chunk, do not imagine things, but be very thorough.
 
 Follow these steps to generate repository description
 # Steps
@@ -57,6 +27,11 @@ Follow these steps to generate repository description
    - Important insights or peculiarities observed in the codebase.
    - If repository is using multiple programming languages, mention how each of them is used.
 
+7. **User experience flows**: in case of a web app, extract the flows you can detect from the codebase.
+   - List the screens/pages that exist in the application
+   - List all of the elements users can interact on each screen/page
+   - List the step-by-step user flows within the application.
+
 # Output Format
 
 The summary should be organized with clear headings and bullet points to ensure readability and coherence. Present a comprehensive overview, prioritizing actionable insights.
@@ -67,11 +42,11 @@ The summary should be organized with clear headings and bullet points to ensure 
 - Preserve technical specificity and detail throughout the summary.
 '''
 [user]
-text = '''Here is a full repo description:
+text = '''Here is current chunk:
 
 {{content}}
 '''
 [config.model]
 provider="google_genai"
-model_name="gemini-1.5-flash-8b"
+model_name="gemini-2.0-flash-lite"
 temperature=0.1

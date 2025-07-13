@@ -48,8 +48,10 @@ class AnalysisInfo:
             raise ValueError("No analysis info in metadata")
         return info
 
+
 def _masking_function(data):
     return "[REDACTED]"
+
 
 class LanggraphAnalysisProvider(AnalysisProvider):
     _lf_auth: Optional[LangfuseAuthProps] = None
@@ -126,9 +128,7 @@ class AnalysisNodes:
         if prompt_config is None or prompt_config.model is None:
             raise ValueError("Missing model in prompt config")
 
-        prompt_name: Optional[str] = None
-        if prompt.langfuse_prompt is not None:
-            prompt_name = prompt.langfuse_prompt.name
+        prompt_name = prompt.prompt_name
 
         messages: List[BaseMessage] = []
         if prompt.system is not None:
@@ -144,14 +144,19 @@ class AnalysisNodes:
             messages.append(HumanMessage(content=contents))
 
         model = _model_from_config(prompt_config.model)
-        _log.debug(s_("Calling model", prompt_config=prompt_config, prompt_name=prompt_name))
-        pt = ChatPromptTemplate.from_messages(messages)
-        if prompt.langfuse_prompt is not None:
-            pt.metadata = {"langfuse_prompt": prompt.langfuse_prompt}
-        pv = await pt.ainvoke({}, config=config)
-        response = await model.ainvoke(pv, config=config)
-        _log.debug(s_("Model replied", prompt_config=prompt_config, prompt_name=prompt_name))
-        return {"response": f"{response.content}"}
+        try:
+            _log.debug(s_("Creating prompt", prompt_config=prompt_config, prompt_name=prompt_name))
+            pt = ChatPromptTemplate.from_messages(messages)
+            if prompt.langfuse_prompt is not None:
+                pt.metadata = {"langfuse_prompt": prompt.langfuse_prompt}
+            pv = await pt.ainvoke({}, config=config)
+            _log.debug(s_("Invoking model", prompt_config=prompt_config, prompt_name=prompt_name))
+            response = await model.ainvoke(pv, config=config)
+            _log.debug(s_("Model replied", prompt_config=prompt_config, prompt_name=prompt_name))
+            return {"response": f"{response.content}"}
+        except BaseException as e:
+            _log.exception(s_("Model failed", prompt_config=prompt_config, prompt_name=prompt_name, error=e))
+            raise
 
 
 def _model_from_config(config: ModelConfig) -> BaseChatModel:

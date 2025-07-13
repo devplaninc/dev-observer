@@ -1,0 +1,36 @@
+[git]
+provider = "delegating"
+
+[analysis]
+provider = "langgraph"
+
+[tokenizer]
+provider = "tiktoken"
+
+[tokenizer.tiktoken]
+encoding = "cl100k_base"
+
+[prompts]
+provider = "local"
+
+[prompts.local]
+#dir = "/app/prompts"
+parser = "toml"
+
+[storage]
+provider = "local"
+
+[storage.local]
+#dir = "/app/storage"
+
+[users_management]
+provider = "none"
+
+[api_keys]
+keys = []
+
+[observations]
+provider = "local"
+
+[observations.local]
+#dir = "/app/observations"

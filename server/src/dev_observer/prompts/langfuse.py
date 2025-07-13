@@ -47,6 +47,7 @@ class LangfusePromptsProvider(PromptsProvider):
             user=UserMessage(text=user),
             config=config,
             langfuse_prompt=prompt,
+            prompt_name=prompt.name,
         )
 
     def _fetch_prompt(self, name: str) -> ChatPromptClient:
