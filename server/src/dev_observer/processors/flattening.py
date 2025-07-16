@@ -39,7 +39,7 @@ class FlatteningProcessor(abc.ABC, Generic[E]):
         self.prompts = prompts
         self.observations = observations
 
-    async def process(self, entity: E, requests: List[ObservationRequest], config: GlobalConfig):
+    async def process(self, entity: E, requests: List[ObservationRequest], config: GlobalConfig, clean: bool = True):
         res = await self.get_flatten(entity, config)
         _log.debug(s_("Got flatten result", result=res))
         try:
@@ -53,7 +53,8 @@ class FlatteningProcessor(abc.ABC, Generic[E]):
                 except Exception as e:
                     _log.exception(s_("Analysis failed.", request=request), exc_info=e)
         finally:
-            res.clean_up()
+            if clean:
+                res.clean_up()
 
     @abstractmethod
     async def get_flatten(self, entity: E, config: GlobalConfig) -> FlattenResult:

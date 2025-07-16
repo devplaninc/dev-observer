@@ -101,7 +101,7 @@ async def main():
 
     # Process the website
     _log.info(f"Crawling website: {args.url}")
-    await processor.process(ObservedWebsite(url=args.url), requests, GlobalConfig())
+    await processor.process(ObservedWebsite(url=args.url), requests, GlobalConfig(), clean=False)
 
     # Verify that observations were created
     observation_keys = await observations.list(kind="websites")
